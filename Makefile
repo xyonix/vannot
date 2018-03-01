@@ -1,5 +1,6 @@
 default: build
 
+CODE = $(shell find src -type f -name '*.js' | sort)
 ASSETS_SRC = $(shell find src/assets -type f | sort)
 ASSETS_LIB = $(ASSETS_SRC:src/assets/%=lib/assets/%)
 
@@ -9,7 +10,7 @@ node_modules:
 lib:
 	@mkdir -p lib/
 
-lib/app.js: src/app.js lib node_modules
+lib/app.js: src/app.js lib node_modules $(CODE)
 	node node_modules/browserify/bin/cmd.js -e $< -o $@ --im
 
 lib/styles.css: src/styles.sass lib node_modules
