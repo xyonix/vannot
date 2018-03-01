@@ -1,0 +1,161 @@
+////////////////////////////////////////////////////////////////////////////////
+// CONSTANTS
+
+$background: #333
+$background-panel: #4a4a4a
+$text-light: #eee
+$text-light-fade: #aaa
+
+$font-sans: "helvetica neue", helvetica, arial, sans-serif
+$font-mono: consolas, monaco, courier new, monospace
+
+$icon-plus: "\f055"
+$icon-minus: "\f056"
+$icon-doubleleft: "\f100"
+$icon-doubleright: "\f101"
+$icon-left: "\f104"
+$icon-right: "\f105"
+$icon-play: "\f144"
+$icon-pause: "\f28b"
+
+////////////////////////////////////////////////////////////////////////////////
+// UTIL
+
+@mixin fill($margin: 0)
+  bottom: $margin
+  left: $margin
+  position: absolute
+  right: $margin
+  top: $margin
+
+@mixin icon
+  font-family: vannot !important
+  font-style: normal
+  font-variant: normal
+  font-weight: normal
+  line-height: 1
+  speak: none
+  text-transform: none
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+
+////////////////////////////////////////////////////////////////////////////////
+// RESET
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em,
+font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var,
+b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td
+  background: transparent
+  border: 0
+  margin: 0
+  outline: 0
+  padding: 0
+  vertical-align: baseline
+
+html, body
+  background-color: $background
+  font-family: $font-sans
+
+////////////////////////////////////////////////////////////////////////////////
+// GLOBAL
+
+@font-face
+  font-family: vannot
+  font-stile: normal
+  font-weight: normal
+  src: url('assets/vannot.ttf?2qcz1p') format('truetype'), url('assets/vannot.woff?2qcz1p') format('woff'), url('assets/vannot.svg?2qcz1p#icomoon') format('svg')
+
+////////////////////////////////////////////////////////////////////////////////
+// LAYOUT
+
+#vannot
+  @include fill
+
+$controls-height: 60px
+$timeline-height: 250px // TODO: eventually drag-resizable
+
+.vannot-player
+  @include fill
+  bottom: $controls-height + $timeline-height
+
+.vannot-controls
+  @include fill
+  background: $background-panel
+  bottom: $timeline-height
+  height: $controls-height
+  top: auto
+
+.vannot-timeline
+  @include fill
+  height: $timeline-height
+  top: auto
+
+////////////////////////////////////////////////////////////////////////////////
+// SECTION: Controls
+
+$control-button-size: 60px
+
+.vannot-controls-buttons
+  margin: 0 auto
+  width: $control-button-size * 5
+
+  button
+    background: none
+    border: none
+    color: #fff
+    float: left
+    font-size: 30px
+    height: $control-button-size
+    outline: none
+    width: $control-button-size
+
+    &:hover
+      font-size: 33px
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.6)
+
+.vannot-leapback
+  @include icon
+  &:before
+    content: $icon-doubleleft
+
+.vannot-skipback
+  @include icon
+  &:before
+    content: $icon-left
+
+.vannot-playpause
+  @include icon
+  &:before
+    content: $icon-play
+
+.vannot-skipforward
+  @include icon
+  &:before
+    content: $icon-right
+
+.vannot-leapforward
+  @include icon
+  &:before
+    content: $icon-doubleright
+
+.vannot-timecode
+  background: $background
+  border-radius: 2px
+  color: $text-light-fade
+  font-size: 10px
+  padding: 6px 9px
+  position: absolute
+  right: 15px
+  top: 15px
+
+  span
+    color: $text-light
+    font-family: $font-mono
+    font-size: 16px
+    line-height: 1
+
+  .vannot-timecode-fr
+    color: $text-light-fade
+

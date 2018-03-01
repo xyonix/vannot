@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <title>vannot</title>
+    <link rel="stylesheet" href="styles.css"/>
+  </head>
+  <body>
+    <div id="vannot">
+      <div class="vannot-player">
+        <div class="vannot-player-left">
+          <div class="vannot-video"><video/></div>
+          <div class="vannot-canvas"><svg/></div>
+        </div>
+        <div class="vannot-player-right">
+          <div class="vannot-aaaa"></div>
+        </div>
+      </div>
+      <div class="vannot-controls">
+        <div class="vannot-controls-buttons">
+          <button class="vannot-leapback" title="Rewind 5 frames"></button>
+          <button class="vannot-skipback" title="Rewind 1 frame"></button>
+          <button class="vannot-playpause" title="Play/Pause"></button>
+          <button class="vannot-skipforward" title="Advance 1 frame"></button>
+          <button class="vannot-leapforward" title="Advance 5 frames"></button>
+        </div>
+        <div class="vannot-timecode">
+          <span class="vannot-timecode-hh">00</span>
+          :
+          <span class="vannot-timecode-mm">00</span>
+          :
+          <span class="vannot-timecode-ss">00</span>
+          .
+          <span class="vannot-timecode-fr">00</span>
+        </div>
+      </div>
+      <div class="vannot-timeline">
+        <div class="vannot-playhead"></div>
+        <div class="vannot-timeline-zoomer">
+          <div class="vannot-ranger"></div>
+          <div class="vannot-timeline-ticks"></div>
+        </div>
+        <div class="vannot-track vannot-primary-track">
+          <div class="vannot-track-header">
+            <div class="vannot-track-header-title"></div>
+          </div>
+          <div class="vannot-track-data"></div>
+        </div>
+        <div class="vannot-objects"></div>
+        <div class="vannot-ranges"></div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
+
