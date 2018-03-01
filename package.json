@@ -1,0 +1,12 @@
+{
+  "name": "vannot",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "d3": "~4"
+  },
+  "devDependencies": {
+    "browserify": "~16",
+    "node-sass": "~4"
+  }
+}
