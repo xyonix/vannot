@@ -7,7 +7,7 @@ node_modules:
 	npm install
 
 lib:
-	mkdir lib/
+	@mkdir -p lib/
 
 lib/app.js: src/app.js lib node_modules
 	node node_modules/browserify/bin/cmd.js -e $< -o $@ --im
@@ -19,7 +19,7 @@ lib/index.html: src/index.html lib
 	cp $< $@
 
 lib/assets: lib
-	mkdir lib/assets
+	@mkdir -p lib/assets
 
 lib/assets/%: src/assets/% lib/assets
 	cp $< $@
