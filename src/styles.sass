@@ -9,6 +9,10 @@ $text-light-fade: #aaa
 $font-sans: "helvetica neue", helvetica, arial, sans-serif
 $font-mono: consolas, monaco, courier new, monospace
 
+$controls-height: 60px
+$timeline-height: 300px // TODO: eventually drag-resizable
+$timeline-header-width: 350px
+
 $icon-plus: "\f055"
 $icon-minus: "\f056"
 $icon-doubleleft: "\f100"
@@ -56,7 +60,6 @@ table, caption, tbody, tfoot, thead, tr, th, td
 
 html, body
   background-color: $background
-  font-family: $font-sans
 
 ////////////////////////////////////////////////////////////////////////////////
 // GLOBAL
@@ -75,11 +78,10 @@ html, body
 
 #vannot
   @include fill
-
-$controls-height: 60px
-$timeline-height: 250px // TODO: eventually drag-resizable
-$timeline-header-width: 350px
-
+  font-family: $font-sans
+  user-select: none
+  -webkit-user-select: none
+  -moz-user-select: none
 
 .vannot-player
   @include fill
@@ -166,6 +168,45 @@ $control-button-size: 60px
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Timeline
+
+////////////////////////////////////////
+// > Scale
+
+.vannot-timeline-scale
+  height: 40px
+  position: relative
+
+.vannot-ticks
+  @include fill
+  left: $timeline-header-width
+  pointer-events: none
+
+  .vannot-tick
+    $color: #777
+    border-right: 1px solid $color
+    bottom: 0
+    height: 5px
+    position: absolute
+
+    span
+      $width: 60px
+      bottom: 13px
+      color: $color
+      display: none
+      font-size: 10px
+      left: $width / -2
+      position: absolute
+      text-align: center
+      width: $width
+
+    &.vannot-tick-major
+      height: 10px
+
+      span
+        display: block
+
+////////////////////////////////////////
+// > Tracks
 
 $track-height: 25px
 $track-vpadding: 5px

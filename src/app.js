@@ -1,9 +1,12 @@
-const { select, scale } = require('d3');
+window.tap = (x) => { console.log(x); return x; }; // for quick debug
 
-const { drawTracks } = require('./timeline');
+const { select, scale } = require('d3');
+const $ = require('jquery');
+
+const { generateTicks, drawTicks, drawTracks } = require('./timeline');
 
 const data = {
-  video: { duration: 14400, fps: 24, height: 720, width: 1280 },
+  video: { duration: 182970, fps: 30, height: 720, width: 1280 },
   objects: [{
     title: 'object a',
     color: '#07e4ff',
@@ -35,6 +38,13 @@ const wrapper = select('#vannot');
 
 const pctScale = (x) => (x / data.video.duration * 100) + '%';
 
+const player = { playing: false, frame: 3000, range: { start: 100, ende: 90000 } };
+
+const $tickWrapper = $('#vannot .vannot-ticks');
+const tickTemplate = select('#vannot-templates .vannot-tick');
+const ticks = generateTicks(0, data.video.duration, data.video.fps, $tickWrapper.width());
+drawTicks(ticks, pctScale, data.video.fps, select($tickWrapper.get(0)), tickTemplate);
+
 const trackTemplate = select('#vannot-templates .vannot-track');
-drawTracks(data.objects, pctScale, wrapper.selectAll('.vannot-objects'), trackTemplate);
+drawTracks(data.objects, pctScale, wrapper.select('.vannot-objects'), trackTemplate);
 

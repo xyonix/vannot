@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "d3": "~4"
+    "d3": "~4",
+    "jquery": "~3"
   },
   "devDependencies": {
     "browserify": "~16",
