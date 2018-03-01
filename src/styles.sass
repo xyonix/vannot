@@ -67,6 +67,9 @@ html, body
   font-weight: normal
   src: url('assets/vannot.ttf?2qcz1p') format('truetype'), url('assets/vannot.woff?2qcz1p') format('woff'), url('assets/vannot.svg?2qcz1p#icomoon') format('svg')
 
+#vannot-templates
+  display: none
+
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
 
@@ -75,6 +78,8 @@ html, body
 
 $controls-height: 60px
 $timeline-height: 250px // TODO: eventually drag-resizable
+$timeline-header-width: 350px
+
 
 .vannot-player
   @include fill
@@ -158,4 +163,56 @@ $control-button-size: 60px
 
   .vannot-timecode-fr
     color: $text-light-fade
+
+////////////////////////////////////////////////////////////////////////////////
+// SECTION: Timeline
+
+$track-height: 25px
+$track-vpadding: 5px
+$track-outerheight: $track-height + (2 * $track-vpadding)
+.vannot-track
+  height: $track-outerheight
+
+  .vannot-track-header
+    $hpadding: 12px
+    box-shadow: 0 1px 0 #3a3a3a inset, 0 -1px 0 #222 inset
+    height: $track-height
+    margin-bottom: -1 * $track-outerheight
+    padding: $track-vpadding $hpadding
+    width: $timeline-header-width - (2 * $hpadding)
+
+  .vannot-track-title
+    color: $text-light
+    font-size: 12px
+    font-weight: bold
+    line-height: $track-height
+
+  .vannot-track-color
+    border: 1px solid #222
+    float: left
+    height: 15px
+    margin-right: 10px
+    margin-top: 4px
+    width: 18px
+
+  .vannot-track-points
+    background: #111
+    box-shadow: 0 -1px 0 #1b1b1b inset
+    height: $track-outerheight
+    margin-left: $timeline-header-width
+    position: relative
+
+    .vannot-track-point
+      $size: 12px
+      border: 1px solid #000
+      box-shadow: 1px -1px 0 rgba(255, 255, 255, 0.3) inset
+      height: $size
+      position: absolute
+      top: 10px
+      transform: rotate(45deg)
+      width: $size
+
+.vannot-tracks
+  overflow-x: hidden
+  overflow-y: auto
 
