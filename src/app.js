@@ -1,9 +1,9 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
 
-const { select, scale } = require('d3');
+const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
 
-const { generateTicks, drawTicks, drawTracks } = require('./timeline');
+const { drawTicks, drawPlayhead, drawTracks } = require('./timeline');
 
 const data = {
   video: { duration: 182970, fps: 30, height: 720, width: 1280 },
@@ -36,11 +36,21 @@ const data = {
 
 const wrapper = select('#vannot');
 
-const pctScale = (x) => (x / data.video.duration * 100) + '%';
+const player = { playing: false, frame: 3000, range: [ 0, 182970 ], video: data.video };
 
-const player = { playing: false, frame: 3000, range: { start: 0, end: 182970 }, video: data.video };
+const tickWrapper = wrapper.select('.vannot-ticks');
+const objectWrapper = wrapper.select('.vannot-objects');
+const playhead = wrapper.select('.vannot-playhead');
 
-const tickWrapper = $('#vannot .vannot-ticks').get(0);
-drawTicks(player, tickWrapper);
-drawTracks(data.objects, pctScale, wrapper.select('.vannot-objects'));
+const updateModel = () => {
+  player.scale = scaleLinear().domain(player.range).range([ 0, 100 ]);
+};
+
+const updateView = () => {
+  drawTicks(player, tickWrapper);
+  drawTracks(player, data.objects, objectWrapper);
+  drawPlayhead(player, playhead);
+};
+updateModel();
+updateView();
 

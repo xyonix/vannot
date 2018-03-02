@@ -1,6 +1,6 @@
 const { ceil } = Math;
-const { select, scaleLinear } = require('d3');
-const { getTemplate, instantiateTemplates, instantiateDivs, timecodePretty } = require('./util');
+const { select } = require('d3');
+const { getTemplate, instantiateTemplates, instantiateDivs, pct, timecodePretty } = require('./util');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@ const tickScales = [
   60, 2 * 60, 5 * 60, 15 * 60, 30 * 60, // second scales
   60 * 60, 2 * 60 * 60, 5 * 60 * 60, 15 * 60 * 60, 30 * 60 * 60 // minute scales
 ];
-const generateTicks = (start, end, fps, width) => {
+const generateTicks = ([ start, end ], fps, width) => {
   const duration = (end - start);
 
   // fallback to progressively larger scales. determine our first tick.
@@ -38,18 +38,23 @@ const generateTicks = (start, end, fps, width) => {
 
 const tickTemplate = getTemplate('tick');
 const drawTicks = (player, target) => {
-  const ticksData = generateTicks(player.range.start, player.range.end, player.video.fps, target.clientWidth);
-  const ticks = instantiateTemplates(select(target).selectAll('.vannot-tick').data(ticksData), tickTemplate);
+  const ticksData = generateTicks(player.range, player.video.fps, target.node().clientWidth);
+  const ticks = instantiateTemplates(target.selectAll('.vannot-tick').data(ticksData), tickTemplate);
 
-  // TODO: centralize:
-  const timescale = scaleLinear().domain([ player.range.start, player.range.end ]).range([ 0, 100 ]);
-  
-  ticks.style('left', (tick) => timescale(tick.frame) + '%');
+  ticks.style('left', (tick) => pct(player.scale(tick.frame)));
   ticks.classed('vannot-tick-major', (tick) => tick.major);
   ticks.filter((tick) => tick.major).select('span')
     .text((tick) => timecodePretty(tick.frame, player.video.fps));
 
   ticks.exit().remove();
+};
+
+const drawPlayhead = (player, target) => {
+  // TODO: centralize:
+  const scaled = player.scale(player.frame);
+  const inRange = (scaled >= 0) && (scaled <= 100);
+  target.classed('hide', !inRange);
+  if (inRange === true) target.style('left', pct(scaled));
 };
 
 
@@ -58,12 +63,12 @@ const drawTicks = (player, target) => {
 
 // draws the collection of data-driven timeline row at the bottom of the screen.
 const trackTemplate = getTemplate('track');
-const drawTracks = (tracksData, timescale, target) => {
+const drawTracks = (player, tracksData, target) => {
   const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(tracksData), trackTemplate);
 
   tracks.select('.vannot-track-title').text((track) => track.title);
   tracks.select('.vannot-track-color').style('background-color', (track) => track.color);
-  tracks.select('.vannot-track-points').each(subdrawTrackpoints(timescale));
+  tracks.select('.vannot-track-points').each(subdrawTrackpoints(player.scale));
 
   tracks.exit().remove();
 };
@@ -72,7 +77,7 @@ const drawTracks = (tracksData, timescale, target) => {
 const drawTrackpoints = (track, pointsData, timescale, target) => {
   const points = instantiateDivs(target.selectAll('.vannot-track-point').data(pointsData), 'vannot-track-point');
 
-  points.style('left', (point) => timescale(point.frame));
+  points.style('left', (point) => pct(timescale(point.frame)));
   points.style('background-color', track.color);
 
   points.exit().remove();
@@ -82,5 +87,6 @@ const subdrawTrackpoints = (timescale) => function(track) {
   return drawTrackpoints(track, track.trackpoints, timescale, select(this));
 };
 
-module.exports = { generateTicks, drawTicks, drawTracks, drawTrackpoints };
+
+module.exports = { drawTicks, drawPlayhead, drawTracks, drawTrackpoints };
 

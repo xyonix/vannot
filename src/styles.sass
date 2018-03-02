@@ -32,6 +32,10 @@ $icon-pause: "\f28b"
   right: $margin
   top: $margin
 
+@mixin reify
+  content: ''
+  display: block
+
 @mixin icon
   font-family: vannot !important
   font-style: normal
@@ -169,16 +173,48 @@ $control-button-size: 60px
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Timeline
 
-////////////////////////////////////////
-// > Scale
+$timeline-ticks-height: 40px
+$timeline-ranger-height: 20px
 
-.vannot-timeline-scale
-  height: 40px
+////////////////////////////////////////
+// > Scale + Playhead
+
+.vannot-scale
+  height: $timeline-ticks-height
+  margin-left: $timeline-header-width
   position: relative
+
+$playhead-color: #6cf
+.vannot-playhead
+  border-right: 1px solid $playhead-color
+  height: $timeline-height - $timeline-ticks-height
+  position: absolute
+  top: 100%
+  width: 0
+  z-index: 2
+
+  $size: 9px
+  $halfsize: $size / 2
+  &:before
+    @include reify
+    background: $playhead-color
+    border-radius: 2px 2px 0 0
+    bottom: calc(100% + #{$halfsize})
+    height: $size
+    left: -$halfsize
+    position: absolute
+    width: $size
+  &:after
+    @include reify
+    border: $halfsize solid transparent
+      bottom-width: 0
+      top-color: $playhead-color
+    bottom: 100%
+    left: -$halfsize
+    position: absolute
 
 .vannot-ticks
   @include fill
-  left: $timeline-header-width
   pointer-events: none
 
   .vannot-tick

@@ -20,6 +20,8 @@ const instantiateDivs = (selection, className) => {
   return selection.merge(created);
 };
 
+const pct = (x) => `${x}%`;
+
 ////////////////////////////////////////////////////////////////////////////////
 // TIMECODE CONVERSIONS
 const duration = {
@@ -43,5 +45,8 @@ const timecodePretty = (frame, fps, showFrames = false) => {
   return result;
 };
 
-module.exports = { getTemplate, instantiateTemplates, instantiateDivs, timecodePretty };
+module.exports = {
+  getTemplate, instantiateTemplates, instantiateDivs, pct,
+  timecodePretty
+};
 
