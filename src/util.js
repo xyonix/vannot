@@ -1,7 +1,11 @@
+const { select } = require('d3');
 const { floor } = Math;
 
 ////////////////////////////////////////////////////////////////////////////////
 // D3 HELPERS
+
+// fetch a template from the DOM.
+const getTemplate = (name) => select(`#vannot-templates .vannot-${name}`);
 
 // boilerplate reduction: instantiates missing selection data elements with the
 // given template, returns the merged selection.
@@ -39,5 +43,5 @@ const timecodePretty = (frame, fps, showFrames = false) => {
   return result;
 };
 
-module.exports = { instantiateTemplates, instantiateDivs, timecodePretty };
+module.exports = { getTemplate, instantiateTemplates, instantiateDivs, timecodePretty };
 

@@ -1,6 +1,10 @@
 const { ceil } = Math;
-const { select } = require('d3');
-const { instantiateTemplates, instantiateDivs, timecodePretty } = require('./util');
+const { select, scaleLinear } = require('d3');
+const { getTemplate, instantiateTemplates, instantiateDivs, timecodePretty } = require('./util');
+
+
+////////////////////////////////////////////////////////////////////////////////
+// TICK SCALE
 
 // given start, end in frames, fps, and width in pixels, creates an array of
 // frame datapoints { frame: #, major: bool } to presented as ticks. 
@@ -32,19 +36,30 @@ const generateTicks = (start, end, fps, width) => {
   return result;
 };
 
-const drawTicks = (ticksData, timescale, fps, target, template) => {
-  const ticks = instantiateTemplates(target.selectAll('.vannot-tick').data(ticksData), template);
+const tickTemplate = getTemplate('tick');
+const drawTicks = (player, target) => {
+  const ticksData = generateTicks(player.range.start, player.range.end, player.video.fps, target.clientWidth);
+  const ticks = instantiateTemplates(select(target).selectAll('.vannot-tick').data(ticksData), tickTemplate);
+
+  // TODO: centralize:
+  const timescale = scaleLinear().domain([ player.range.start, player.range.end ]).range([ 0, 100 ]);
   
-  ticks.style('left', (tick) => timescale(tick.frame));
+  ticks.style('left', (tick) => timescale(tick.frame) + '%');
   ticks.classed('vannot-tick-major', (tick) => tick.major);
-  ticks.select('span').text((tick) => timecodePretty(tick.frame, fps)); // TODO/PERF: don't bother w/ minor ticks.
+  ticks.filter((tick) => tick.major).select('span')
+    .text((tick) => timecodePretty(tick.frame, player.video.fps));
 
   ticks.exit().remove();
 };
 
+
+////////////////////////////////////////////////////////////////////////////////
+// DATA TRACKS
+
 // draws the collection of data-driven timeline row at the bottom of the screen.
-const drawTracks = (tracksData, timescale, target, template) => {
-  const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(tracksData), template);
+const trackTemplate = getTemplate('track');
+const drawTracks = (tracksData, timescale, target) => {
+  const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(tracksData), trackTemplate);
 
   tracks.select('.vannot-track-title').text((track) => track.title);
   tracks.select('.vannot-track-color').style('background-color', (track) => track.color);

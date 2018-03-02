@@ -38,13 +38,9 @@ const wrapper = select('#vannot');
 
 const pctScale = (x) => (x / data.video.duration * 100) + '%';
 
-const player = { playing: false, frame: 3000, range: { start: 100, ende: 90000 } };
+const player = { playing: false, frame: 3000, range: { start: 0, end: 182970 }, video: data.video };
 
-const $tickWrapper = $('#vannot .vannot-ticks');
-const tickTemplate = select('#vannot-templates .vannot-tick');
-const ticks = generateTicks(0, data.video.duration, data.video.fps, $tickWrapper.width());
-drawTicks(ticks, pctScale, data.video.fps, select($tickWrapper.get(0)), tickTemplate);
-
-const trackTemplate = select('#vannot-templates .vannot-track');
-drawTracks(data.objects, pctScale, wrapper.select('.vannot-objects'), trackTemplate);
+const tickWrapper = $('#vannot .vannot-ticks').get(0);
+drawTicks(player, tickWrapper);
+drawTracks(data.objects, pctScale, wrapper.select('.vannot-objects'));
 
