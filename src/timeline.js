@@ -1,5 +1,5 @@
 const { ceil } = Math;
-const { select } = require('d3');
+const { select, scaleLinear } = require('d3');
 const { getTemplate, instantiateTemplates, instantiateDivs, pct, pad, timecode, timecodePretty } = require('./util');
 
 
@@ -68,6 +68,25 @@ const drawPlayhead = (player, target) => {
   if (inRange === true) target.style('left', pct(scaled));
 };
 
+const minThumb = 100; // the smallest pxwidth the scrollthumb can get
+const drawRanger = (player, target) => {
+  // account for deadzone due to minThumb:
+  const deadzone = minThumb / player.width / 2;
+  const wholeScale = scaleLinear().domain([ 0, player.video.duration ]).range([ deadzone, 1 - deadzone ]);
+  const thumbCenter = wholeScale(player.frame);
+
+  const leftScale = scaleLinear().domain([ 0, player.frame ]).range([ 0, thumbCenter - deadzone ]);
+  const leftPos = leftScale(player.range[0]) * 100; // unit => pct
+
+  const rightScale = scaleLinear().domain([ player.frame, player.video.duration ]).range([ thumbCenter + deadzone, 1 ]);
+  const rightPos = (1 - rightScale(player.range[1])) * 100; // unit => pct
+
+  target.select('.vannot-ranger-start').style('left', pct(leftPos));
+  target.select('.vannot-ranger-fill').style('left', pct(leftPos));
+  target.select('.vannot-ranger-fill').style('right', pct(rightPos));
+  target.select('.vannot-ranger-end').style('right', pct(rightPos));
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // DATA TRACKS
@@ -99,5 +118,5 @@ const subdrawTrackpoints = (timescale) => function(track) {
 };
 
 
-module.exports = { drawTimecode, drawTicks, drawPlayhead, drawTracks, drawTrackpoints };
+module.exports = { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawTracks, drawTrackpoints };
 

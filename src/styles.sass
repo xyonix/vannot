@@ -175,7 +175,7 @@ $control-button-size: 60px
 // SECTION: Timeline
 
 $timeline-ticks-height: 40px
-$timeline-ranger-height: 20px
+$timeline-ranger-height: 16px
 
 .vannot-timeline
   &:before
@@ -261,11 +261,14 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
 
   .vannot-track-header
     $hpadding: 12px
+    background: $background
     box-shadow: 0 1px 0 #3a3a3a inset, 0 -1px 0 #222 inset
     height: $track-height
     margin-bottom: -1 * $track-outerheight
     padding: $track-vpadding $hpadding
+    position: relative
     width: $timeline-header-width - (2 * $hpadding)
+    z-index: 1
 
   .vannot-track-title
     color: $text-light
@@ -297,4 +300,51 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       top: 10px
       transform: rotate(45deg)
       width: $size
+
+////////////////////////////////////////
+// > Ranger
+
+.vannot-ranger
+  background: #1f1f1f
+  bottom: 0
+  left: $timeline-header-width
+  height: $timeline-ranger-height
+  position: absolute
+  right: 0
+  z-index: 3
+
+  .vannot-ranger-fill
+    background-color: #195979
+    border: 1px solid #000
+    bottom: 0
+    cursor: -webkit-grab
+    cursor: grab
+    position: absolute
+    top: 0
+
+  &:hover .vannot-ranger-fill
+    background-color: #1371a0
+
+  .vannot-ranger-start, .vannot-ranger-end
+    background-color: #1d89bf
+    bottom: 1px
+    cursor: ew-resize
+    position: absolute
+    top: 1px
+    width: 20px
+
+    &:before
+      @include reify
+      border-left: 1px solid #000
+      border-right: 1px solid #000
+      bottom: 3px
+      position: absolute
+      top: 3px
+      width: 2px
+
+  $handle-distance: 4px
+  .vannot-ranger-start:before
+    left: $handle-distance
+  .vannot-ranger-end:before
+    right: $handle-distance
 

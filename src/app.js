@@ -3,8 +3,9 @@ window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const { round } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
-const { drawTimecode, drawTicks, drawPlayhead, drawTracks } = require('./timeline');
+const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawTracks } = require('./timeline');
 const { draggable, clamp } = require('./util');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // DUMMY DATA
@@ -38,6 +39,7 @@ const data = {
   }]
 };
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // BASIC SETUP
 
@@ -47,6 +49,7 @@ const tickWrapper = wrapper.select('.vannot-ticks');
 const objectWrapper = wrapper.select('.vannot-objects');
 const playhead = wrapper.select('.vannot-playhead');
 const timecode = wrapper.select('.vannot-timecode');
+const ranger = wrapper.select('.vannot-ranger');
 
 const player = {
   video: data.video, playing: false, frame: 3000, range: [ 0, 182970 ],
@@ -61,12 +64,17 @@ const updateView = () => {
   drawTracks(player, data.objects, objectWrapper);
   drawPlayhead(player, playhead);
   drawTimecode(player, timecode);
+  drawRanger(player, ranger);
 };
 updateModel();
 updateView();
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // INTERACTIVITY (eventually probably to be broken out into its own file)
+
+////////////////////////////////////////
+// > Playhead dragging
 
 draggable(playhead.node(), (dx) => {
   const delta = (dx / player.width) * (player.range[1] - player.range[0]);
@@ -74,4 +82,36 @@ draggable(playhead.node(), (dx) => {
   drawPlayhead(player, playhead);
   drawTimecode(player, timecode);
 });
+
+////////////////////////////////////////
+// > Ranger zooming
+
+const minZoom = 1.5; // in seconds, on either side of the playhead.
+const zoom = (frames) => {
+  // by default assume equidistant adjustment:
+  let leftk = 0.5, rightk = 0.5;
+
+  // but if the playhead is in-view, zoom around it proportionally:
+  const deadzone = minZoom * player.video.fps;
+  if ((player.range[0] < (player.frame - deadzone)) && ((player.frame + deadzone) < player.range[1])) {
+    const rangeDuration = player.range[1] - player.range[0];
+    leftk = (player.frame - deadzone - player.range[0]) / rangeDuration;
+    rightk = (player.range[1] - deadzone - player.frame) / rangeDuration;
+    console.log(leftk, rightk);
+  }
+
+  // we know our proportions; apply.
+  player.range[0] = clamp(0, player.range[0] + round(leftk * frames), player.frame - deadzone);
+  player.range[1] = clamp(player.frame + deadzone, player.range[1] - round(rightk * frames), player.video.duration);
+
+  // render things.
+  updateModel();
+  updateView();
+};
+
+const factorAdjust = 1.5;
+draggable(wrapper.select('.vannot-ranger-start').node(), (dx) =>
+  zoom(dx / player.width * factorAdjust * player.video.duration));
+draggable(wrapper.select('.vannot-ranger-end').node(), (dx) =>
+  zoom(-dx / player.width * factorAdjust * player.video.duration));
 
