@@ -88,21 +88,28 @@ draggable(playhead.node(), (dx) => {
 
 const minZoom = 1.5; // in seconds, on either side of the playhead.
 const zoom = (dframes) => {
-  // by default assume equidistant adjustment:
-  let leftk = 0.5, rightk = 0.5;
-
-  // but if the playhead is in-view, zoom around it proportionally:
   const deadzone = minZoom * player.video.fps;
   if ((player.range[0] < (player.frame - deadzone)) && ((player.frame + deadzone) < player.range[1])) {
+    // if the playhead is in-view, zoom around it proportionally:
     const rangeDuration = player.range[1] - player.range[0];
-    leftk = (player.frame - deadzone - player.range[0]) / rangeDuration;
-    rightk = (player.range[1] - deadzone - player.frame) / rangeDuration;
-    console.log(leftk, rightk);
-  }
+    let leftk = (player.frame - deadzone - player.range[0]) / rangeDuration;
+    let rightk = (player.range[1] - deadzone - player.frame) / rangeDuration;
 
-  // we know our proportions; apply.
-  player.range[0] = clamp(0, player.range[0] + round(leftk * dframes), player.frame - deadzone);
-  player.range[1] = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.duration);
+    // if zooming out and one side is clamped, put everything on the other side.
+    if (dframes < 0) {
+      if (player.range[0] === 0) rightk = 1;
+      if (player.range[1] === player.video.duration) leftk = 1;
+    }
+
+    // we know our proportions; apply.
+    player.range[0] = clamp(0, player.range[0] + round(leftk * dframes), player.frame - deadzone);
+    player.range[1] = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.duration);
+  } else {
+    // apply scaling equidistantly.
+    const edgeDeadzone = deadzone * 2; // double here: both sides of "playhead"
+    player.range[0] = clamp(0, player.range[0] + round(0.5 * dframes), player.range[1] - edgeDeadzone);
+    player.range[1] = clamp(player.range[0] + edgeDeadzone, player.range[1] - round(0.5 * dframes), player.video.duration);
+  }
 
   // render things.
   updateModel();
