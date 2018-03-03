@@ -77,8 +77,8 @@ updateView();
 // > Playhead dragging
 
 draggable(playhead.node(), (dx) => {
-  const delta = (dx / player.width) * (player.range[1] - player.range[0]);
-  player.frame = clamp(0, round(player.frame + delta), player.video.duration);
+  const dframes = (dx / player.width) * (player.range[1] - player.range[0]);
+  player.frame = clamp(0, round(player.frame + dframes), player.video.duration);
   drawPlayhead(player, playhead);
   drawTimecode(player, timecode);
 });
@@ -87,7 +87,7 @@ draggable(playhead.node(), (dx) => {
 // > Ranger zooming
 
 const minZoom = 1.5; // in seconds, on either side of the playhead.
-const zoom = (frames) => {
+const zoom = (dframes) => {
   // by default assume equidistant adjustment:
   let leftk = 0.5, rightk = 0.5;
 
@@ -101,8 +101,8 @@ const zoom = (frames) => {
   }
 
   // we know our proportions; apply.
-  player.range[0] = clamp(0, player.range[0] + round(leftk * frames), player.frame - deadzone);
-  player.range[1] = clamp(player.frame + deadzone, player.range[1] - round(rightk * frames), player.video.duration);
+  player.range[0] = clamp(0, player.range[0] + round(leftk * dframes), player.frame - deadzone);
+  player.range[1] = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.duration);
 
   // render things.
   updateModel();
@@ -114,4 +114,22 @@ draggable(wrapper.select('.vannot-ranger-start').node(), (dx) =>
   zoom(dx / player.width * factorAdjust * player.video.duration));
 draggable(wrapper.select('.vannot-ranger-end').node(), (dx) =>
   zoom(-dx / player.width * factorAdjust * player.video.duration));
+
+////////////////////////////////////////
+// > Ranger panning
+
+draggable(wrapper.select('.vannot-ranger-fill').node(), (dx) => {
+  let dframes = round(dx / player.width * player.video.duration);
+  if ((player.range[1] + dframes) >= player.video.duration)
+    dframes = player.video.duration - player.range[1];
+  else if ((player.range[0] + dframes) <= 0)
+    dframes = -player.range[0];
+
+  player.range[0] += dframes;
+  player.range[1] += dframes;
+
+  // render things.
+  updateModel();
+  updateView();
+});
 
