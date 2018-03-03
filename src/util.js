@@ -77,6 +77,7 @@ const timecodePretty = (frame, fps, showFrames = false) => {
 const $document = $(document);
 const draggable = (target, callback) => {
   $(target).on('mousedown', (event) => {
+    if (event.isDefaultPrevented()) return; // someone already handled this.
     if (event.button !== 0) return; // ignore right-click.
 
     event.preventDefault();

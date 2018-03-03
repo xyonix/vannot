@@ -76,11 +76,22 @@ updateView();
 ////////////////////////////////////////
 // > Playhead dragging
 
-draggable(playhead.node(), (dx) => {
+const scale = wrapper.select('.vannot-scale');
+draggable(scale.node(), (dx) => {
   const dframes = trunc((dx / player.width) * (player.range[1] - player.range[0]));
   if (abs(dframes) < 1) return false; // if the delta was too small to move, don't swallow it.
 
   player.frame = clamp(0, player.frame + dframes, player.video.duration);
+  drawPlayhead(player, playhead);
+  drawTimecode(player, timecode);
+});
+$(scale.node()).on('mousedown', (event) => {
+  const $target = $(event.target);
+  if ($target.is(playhead.node()) || ($target.closest('.vannot-playhead').length > 0))
+    return; // do nothing if the playhead is directly clicked on (prevent microshifts).
+
+  const frame = round(player.scale.invert(event.offsetX / player.width) * 100);
+  player.frame = clamp(0, frame, player.video.duration);
   drawPlayhead(player, playhead);
   drawTimecode(player, timecode);
 });
