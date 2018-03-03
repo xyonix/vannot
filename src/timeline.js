@@ -56,12 +56,9 @@ const drawTicks = (player, target) => {
   ticks.classed('vannot-tick-major', (tick) => tick.major);
   ticks.filter((tick) => tick.major).select('span')
     .text((tick) => timecodePretty(tick.frame, player.video.fps));
-
-  ticks.exit().remove();
 };
 
 const drawPlayhead = (player, target) => {
-  // TODO: centralize:
   const scaled = player.scale(player.frame);
   const inRange = (scaled >= 0) && (scaled <= 100);
   target.classed('hide', !inRange);
@@ -99,8 +96,6 @@ const drawTracks = (player, tracksData, target) => {
   tracks.select('.vannot-track-title').text((track) => track.title);
   tracks.select('.vannot-track-color').style('background-color', (track) => track.color);
   tracks.select('.vannot-track-points').each(subdrawTrackpoints(player.scale));
-
-  tracks.exit().remove();
 };
 
 // draws the collection of trackpoints within a timeline.
@@ -109,8 +104,6 @@ const drawTrackpoints = (track, pointsData, timescale, target) => {
 
   points.style('left', (point) => pct(timescale(point.frame)));
   points.style('background-color', track.color);
-
-  points.exit().remove();
 };
 // convenience function to currying+pulling apart an each call into the standard draw call:
 const subdrawTrackpoints = (timescale) => function(track) {

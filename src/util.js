@@ -18,12 +18,14 @@ const getTemplate = (name) => select(`#vannot-templates .vannot-${name}`);
 // boilerplate reduction: instantiates missing selection data elements with the
 // given template, returns the merged selection.
 const instantiateTemplates = (selection, template) => {
+  selection.exit().remove();
   const created = selection.enter().append(() => template.clone(true).node());
   return selection.merge(created);
 };
 
 // same thing, but initiates divs of a given class.
 const instantiateDivs = (selection, className) => {
+  selection.exit().remove();
   const created = selection.enter().append('div').classed(className, true);
   return selection.merge(created);
 };
