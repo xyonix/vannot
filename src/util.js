@@ -70,6 +70,10 @@ const timecodePretty = (frame, fps, showFrames = false) => {
 
 // assists with dragging tasks. does not actually manipulate the element; provides
 // basic event tracking and maths for updating the model which then sets position.
+//
+// the callback is given (dx, dy) in pixels from the last reported position. it
+// may return false if the interval was too small to react to, in which case the
+// following deltas will still be from the last known anchor.
 const $document = $(document);
 const draggable = (target, callback) => {
   $(target).on('mousedown', (event) => {
@@ -80,9 +84,10 @@ const draggable = (target, callback) => {
     let lastY = event.pageY;
 
     $document.on('mousemove.draggable', (event) => {
-      callback(event.pageX - lastX, event.pageY - lastY)
-      lastX = event.pageX;
-      lastY = event.pageY;
+      if (callback(event.pageX - lastX, event.pageY - lastY) !== false) {
+        lastX = event.pageX;
+        lastY = event.pageY;
+      }
     });
     $document.one('mouseup', () => $document.off('mousemove.draggable'));
   });

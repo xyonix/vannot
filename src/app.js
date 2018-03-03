@@ -1,6 +1,6 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
 
-const { round } = Math;
+const { round, trunc, abs } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawTracks } = require('./timeline');
@@ -77,8 +77,10 @@ updateView();
 // > Playhead dragging
 
 draggable(playhead.node(), (dx) => {
-  const dframes = (dx / player.width) * (player.range[1] - player.range[0]);
-  player.frame = clamp(0, round(player.frame + dframes), player.video.duration);
+  const dframes = trunc((dx / player.width) * (player.range[1] - player.range[0]));
+  if (abs(dframes) < 1) return false; // if the delta was too small to move, don't swallow it.
+
+  player.frame = clamp(0, player.frame + dframes, player.video.duration);
   drawPlayhead(player, playhead);
   drawTimecode(player, timecode);
 });
