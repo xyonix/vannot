@@ -64,6 +64,7 @@ table, caption, tbody, tfoot, thead, tr, th, td
 
 html, body
   background-color: $background
+  overflow: hidden
 
 ////////////////////////////////////////////////////////////////////////////////
 // GLOBAL
@@ -175,6 +176,14 @@ $control-button-size: 60px
 
 $timeline-ticks-height: 40px
 $timeline-ranger-height: 20px
+
+.vannot-timeline
+  &:before
+    @include reify
+    @include fill
+    background: #222
+    left: $timeline-header-width
+    top: $timeline-ticks-height
 
 ////////////////////////////////////////
 // > Scale + Playhead
@@ -288,8 +297,4 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       top: 10px
       transform: rotate(45deg)
       width: $size
-
-.vannot-tracks
-  overflow-x: hidden
-  overflow-y: auto
 

@@ -1,9 +1,13 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
 
+const { round } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
+const { drawTimecode, drawTicks, drawPlayhead, drawTracks } = require('./timeline');
+const { draggable, clamp } = require('./util');
 
-const { drawTicks, drawPlayhead, drawTracks } = require('./timeline');
+////////////////////////////////////////////////////////////////////////////////
+// DUMMY DATA
 
 const data = {
   video: { duration: 182970, fps: 30, height: 720, width: 1280 },
@@ -34,14 +38,20 @@ const data = {
   }]
 };
 
-const wrapper = select('#vannot');
+////////////////////////////////////////////////////////////////////////////////
+// BASIC SETUP
 
-const player = { playing: false, frame: 3000, range: [ 0, 182970 ], video: data.video };
+const wrapper = select('#vannot');
 
 const tickWrapper = wrapper.select('.vannot-ticks');
 const objectWrapper = wrapper.select('.vannot-objects');
 const playhead = wrapper.select('.vannot-playhead');
+const timecode = wrapper.select('.vannot-timecode');
 
+const player = {
+  video: data.video, playing: false, frame: 3000, range: [ 0, 182970 ],
+  width: tickWrapper.node().clientWidth
+};
 const updateModel = () => {
   player.scale = scaleLinear().domain(player.range).range([ 0, 100 ]);
 };
@@ -50,7 +60,18 @@ const updateView = () => {
   drawTicks(player, tickWrapper);
   drawTracks(player, data.objects, objectWrapper);
   drawPlayhead(player, playhead);
+  drawTimecode(player, timecode);
 };
 updateModel();
 updateView();
+
+////////////////////////////////////////////////////////////////////////////////
+// INTERACTIVITY (eventually probably to be broken out into its own file)
+
+draggable(playhead.node(), (dx) => {
+  const delta = (dx / player.width) * (player.range[1] - player.range[0]);
+  player.frame = clamp(0, round(player.frame + delta), player.video.duration);
+  drawPlayhead(player, playhead);
+  drawTimecode(player, timecode);
+});
 

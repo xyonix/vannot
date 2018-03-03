@@ -1,7 +1,18 @@
 const { ceil } = Math;
 const { select } = require('d3');
-const { getTemplate, instantiateTemplates, instantiateDivs, pct, timecodePretty } = require('./util');
+const { getTemplate, instantiateTemplates, instantiateDivs, pct, pad, timecode, timecodePretty } = require('./util');
 
+
+////////////////////////////////////////////////////////////////////////////////
+// TIMECODE
+
+const drawTimecode = (player, target) => {
+  const parts = timecode(player.frame, player.video.fps);
+  target.select('.vannot-timecode-hh').text(pad(parts.hh));
+  target.select('.vannot-timecode-mm').text(pad(parts.mm));
+  target.select('.vannot-timecode-ss').text(pad(parts.ss));
+  target.select('.vannot-timecode-fr').text(pad(parts.frame));
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // TICK SCALE
@@ -88,5 +99,5 @@ const subdrawTrackpoints = (timescale) => function(track) {
 };
 
 
-module.exports = { drawTicks, drawPlayhead, drawTracks, drawTrackpoints };
+module.exports = { drawTimecode, drawTicks, drawPlayhead, drawTracks, drawTrackpoints };
 
