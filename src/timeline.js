@@ -22,7 +22,7 @@ const drawTimecode = (player, target) => {
 const minorThreshold = 4; // smallest pixel distance between minor ticks.
 const majorThreshold = 80; // smallest pixel distance between major ticks.
 const tickScales = [
-  1, // framescale
+  1, 5, // framescale
   60, 2 * 60, 5 * 60, 15 * 60, 30 * 60, // second scales
   60 * 60, 2 * 60 * 60, 5 * 60 * 60, 15 * 60 * 60, 30 * 60 * 60 // minute scales
 ];
@@ -36,6 +36,7 @@ const generateTicks = ([ start, end ], fps, width) => {
   // determine major tick spacing.
   let majorInterval = minorInterval;
   while ((width / duration * majorInterval) < majorThreshold) majorInterval += minorInterval;
+  if (majorInterval < fps) majorInterval = fps;
 
   // generate ticks.
   let frame = first;
