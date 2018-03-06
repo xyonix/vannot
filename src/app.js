@@ -90,7 +90,7 @@ $(scale.node()).on('mousedown', (event) => {
   if ($target.is(playhead.node()) || ($target.closest('.vannot-playhead').length > 0))
     return; // do nothing if the playhead is directly clicked on (prevent microshifts).
 
-  const frame = round(player.scale.invert(event.offsetX / player.width) * 100);
+  const frame = round(player.scale.invert(event.offsetX / player.width * 100));
   player.frame = clamp(0, frame, player.video.duration);
   drawPlayhead(player, playhead);
   drawTimecode(player, timecode);
