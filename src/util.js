@@ -30,7 +30,7 @@ const instantiateDivs = (selection, className) => {
   return selection.merge(created);
 };
 
-const pct = (x) => `${x}%`;
+const pct = (x) => `${x * 100}%`;
 
 
 ////////////////////////////////////////////////////////////////////////////////

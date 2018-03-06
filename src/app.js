@@ -11,7 +11,7 @@ const { draggable, clamp } = require('./util');
 // DUMMY DATA
 
 const data = {
-  video: { duration: 182970, fps: 30, height: 720, width: 1280 },
+  video: { duration: 182970, fps: 30, height: 720, width: 1280, source: '/assets/lttp.mp4' },
   objects: [{
     title: 'object a',
     color: '#07e4ff',
@@ -41,7 +41,7 @@ const data = {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// BASIC SETUP
+// PLAYER MODEL
 
 const wrapper = select('#vannot');
 
@@ -51,23 +51,50 @@ const playhead = wrapper.select('.vannot-playhead');
 const timecode = wrapper.select('.vannot-timecode');
 const ranger = wrapper.select('.vannot-ranger');
 
-const player = {
-  video: data.video, playing: false, frame: 3000, range: [ 0, 182970 ],
-  width: tickWrapper.node().clientWidth
-};
-const updateModel = () => {
-  player.scale = scaleLinear().domain(player.range).range([ 0, 100 ]);
-};
+class Player {
+  constructor(video) {
+    this.video = video;
+    this.range = [ 0, this.video.duration ];
+    this.frame = 0;
+    this.playing = false;
 
-const updateView = () => {
-  drawTicks(player, tickWrapper);
-  drawTracks(player, data.objects, objectWrapper);
-  drawPlayhead(player, playhead);
-  drawTimecode(player, timecode);
-  drawRanger(player, ranger);
-};
-updateModel();
-updateView();
+    this._initialize();
+  }
+
+  _initialize() {
+    const updateWidth = () => (this.width = tickWrapper.node().clientWidth);
+    $(window).on('resize', updateWidth);
+    updateWidth();
+  }
+
+  get width() { return this._width; }
+  set width(value) {
+    if (value === this._width) return;
+    this._width = value;
+    drawTicks(this, tickWrapper);
+    drawRanger(this, ranger);
+  }
+
+  get frame() { return this._frame; }
+  set frame(value) {
+    if (value === this._frame) return;
+    this._frame = value;
+    drawPlayhead(this, playhead);
+    drawTimecode(this, timecode);
+  }
+
+  get range() { return this._range; }
+  set range(value) {
+    if (this._range && (value[0] === this._range[0]) && (value[1] === this._range[1])) return;
+    this._range = value;
+    this.scale = scaleLinear().domain(this.range).range([ 0, 1 ]);
+    drawTicks(this, tickWrapper);
+    drawTracks(this, data.objects, objectWrapper);
+    drawPlayhead(this, playhead);
+    drawRanger(this, ranger);
+  }
+}
+const player = new Player(data.video);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,18 +109,14 @@ draggable(scale.node(), (dx) => {
   if (abs(dframes) < 1) return false; // if the delta was too small to move, don't swallow it.
 
   player.frame = clamp(0, player.frame + dframes, player.video.duration);
-  drawPlayhead(player, playhead);
-  drawTimecode(player, timecode);
 });
 $(scale.node()).on('mousedown', (event) => {
   const $target = $(event.target);
   if ($target.is(playhead.node()) || ($target.closest('.vannot-playhead').length > 0))
     return; // do nothing if the playhead is directly clicked on (prevent microshifts).
 
-  const frame = round(player.scale.invert(event.offsetX / player.width * 100));
+  const frame = round(player.scale.invert(event.offsetX / player.width));
   player.frame = clamp(0, frame, player.video.duration);
-  drawPlayhead(player, playhead);
-  drawTimecode(player, timecode);
 });
 
 ////////////////////////////////////////
@@ -115,18 +138,16 @@ const zoom = (dframes) => {
     }
 
     // we know our proportions; apply.
-    player.range[0] = clamp(0, player.range[0] + round(leftk * dframes), player.frame - deadzone);
-    player.range[1] = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.duration);
+    const left = clamp(0, player.range[0] + round(leftk * dframes), player.frame - deadzone);
+    const right = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.duration);
+    player.range = [ left, right ];
   } else {
-    // apply scaling equidistantly.
+    // apply scaling equidistantly. compute one then the other to ensure clamping range.
     const edgeDeadzone = deadzone * 2; // double here: both sides of "playhead"
-    player.range[0] = clamp(0, player.range[0] + round(0.5 * dframes), player.range[1] - edgeDeadzone);
-    player.range[1] = clamp(player.range[0] + edgeDeadzone, player.range[1] - round(0.5 * dframes), player.video.duration);
+    const left = clamp(0, player.range[0] + round(0.5 * dframes), player.range[1] - edgeDeadzone);
+    const right = clamp(left + edgeDeadzone, player.range[1] - round(0.5 * dframes), player.video.duration);
+    player.range = [ left, right ];
   }
-
-  // render things.
-  updateModel();
-  updateView();
 };
 
 const factorAdjust = 1.5;
@@ -145,11 +166,6 @@ draggable(wrapper.select('.vannot-ranger-fill').node(), (dx) => {
   else if ((player.range[0] + dframes) <= 0)
     dframes = -player.range[0];
 
-  player.range[0] += dframes;
-  player.range[1] += dframes;
-
-  // render things.
-  updateModel();
-  updateView();
+  player.range = [ player.range[0] + dframes, player.range[1] + dframes ];
 });
 

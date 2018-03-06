@@ -69,15 +69,16 @@ const drawPlayhead = (player, target) => {
 const minThumb = 100; // the smallest pxwidth the scrollthumb can get
 const drawRanger = (player, target) => {
   // account for deadzone due to minThumb:
-  const deadzone = minThumb / player.width / 2;
+  const deadzone = minThumb / player.width / 2; // px/px => unit
   const wholeScale = scaleLinear().domain([ 0, player.video.duration ]).range([ deadzone, 1 - deadzone ]);
-  const thumbCenter = wholeScale(player.frame);
+  const centerFrame = (player.range[1] - player.range[0]) / 2 + player.range[0];
+  const thumbCenter = wholeScale(centerFrame);
 
-  const leftScale = scaleLinear().domain([ 0, player.frame ]).range([ 0, thumbCenter - deadzone ]);
-  const leftPos = leftScale(player.range[0]) * 100; // unit => pct
+  const leftScale = scaleLinear().domain([ 0, centerFrame ]).range([ 0, thumbCenter - deadzone ]);
+  const leftPos = leftScale(player.range[0]);
 
-  const rightScale = scaleLinear().domain([ player.frame, player.video.duration ]).range([ thumbCenter + deadzone, 1 ]);
-  const rightPos = (1 - rightScale(player.range[1])) * 100; // unit => pct
+  const rightScale = scaleLinear().domain([ centerFrame, player.video.duration ]).range([ thumbCenter + deadzone, 1 ]);
+  const rightPos = (1 - rightScale(player.range[1]));
 
   target.select('.vannot-ranger-start').style('left', pct(leftPos));
   target.select('.vannot-ranger-fill').style('left', pct(leftPos));
