@@ -11,8 +11,10 @@ $font-mono: consolas, monaco, courier new, monospace
 
 $controls-height: 60px
 $timeline-height: 300px // TODO: eventually drag-resizable
-$timeline-header-width: 350px
+$left-pane-width: 350px // TODO: eventually drag-resizable
 
+$icon-zoomplus: "\f00e"
+$icon-zoomminus: "\f010"
 $icon-plus: "\f055"
 $icon-minus: "\f056"
 $icon-doubleleft: "\f100"
@@ -109,6 +111,28 @@ html, body
   top: auto
 
 ////////////////////////////////////////////////////////////////////////////////
+// SECTION: Video
+
+.vannot-player-left
+  @include fill
+  right: auto
+  width: $left-pane-width
+
+.vannot-player-right
+  @include fill
+  left: $left-pane-width
+
+  .vannot-video
+    @include fill(20px)
+
+    video
+      max-height: 100%
+      position: relative
+      top: 50%
+      transform: translateY(-50%)
+      width: 100%
+
+////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls
 
 $control-button-size: 60px
@@ -145,6 +169,9 @@ $control-button-size: 60px
   @include icon
   &:before
     content: $icon-play
+
+    #vannot.playing &
+      content: $icon-pause
 
 .vannot-skipforward
   @include icon
@@ -186,7 +213,7 @@ $timeline-ranger-height: 16px
     @include reify
     @include fill
     background: #222
-    left: $timeline-header-width
+    left: $left-pane-width
     top: $timeline-ticks-height
 
 ////////////////////////////////////////
@@ -194,7 +221,7 @@ $timeline-ranger-height: 16px
 
 .vannot-scale
   height: $timeline-ticks-height
-  margin-left: $timeline-header-width
+  margin-left: $left-pane-width
   position: relative
 
 $playhead-color: #6cf
@@ -271,7 +298,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     margin-bottom: -1 * $track-outerheight
     padding: $track-vpadding $hpadding
     position: relative
-    width: $timeline-header-width - (2 * $hpadding)
+    width: $left-pane-width - (2 * $hpadding)
     z-index: 1
 
   .vannot-track-title
@@ -292,7 +319,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     background: #111
     box-shadow: 0 -1px 0 #1b1b1b inset
     height: $track-outerheight
-    margin-left: $timeline-header-width
+    margin-left: $left-pane-width
     position: relative
 
     .vannot-track-point
@@ -311,7 +338,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
 .vannot-ranger
   background: #1f1f1f
   bottom: 0
-  left: $timeline-header-width
+  left: $left-pane-width
   height: $timeline-ranger-height
   position: absolute
   right: 0

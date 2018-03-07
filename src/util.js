@@ -94,10 +94,12 @@ const draggable = (target, callback) => {
   });
 };
 
+const defer = (f) => setTimeout(f, 0);
+
 module.exports = {
   clamp,
   getTemplate, instantiateTemplates, instantiateDivs, pct,
   pad, timecode, timecodePretty,
-  draggable
+  draggable, defer
 };
 

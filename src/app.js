@@ -1,10 +1,10 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
 
-const { round, trunc, abs } = Math;
+const { round, trunc, abs, ceil } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawTracks } = require('./timeline');
-const { draggable, clamp } = require('./util');
+const { draggable, clamp, defer } = require('./util');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +44,8 @@ const data = {
 // PLAYER MODEL
 
 const wrapper = select('#vannot');
+const $video = $('#vannot video');
+const videoObj = $video.get(0);
 
 const tickWrapper = wrapper.select('.vannot-ticks');
 const objectWrapper = wrapper.select('.vannot-objects');
@@ -62,9 +64,37 @@ class Player {
   }
 
   _initialize() {
+    // browser width.
     const updateWidth = () => (this.width = tickWrapper.node().clientWidth);
     $(window).on('resize', updateWidth);
     updateWidth();
+
+    // video.
+    $video.attr('src', data.video.source);
+    $video.on('playing', () => this.playing = true);
+    $video.on('pause', () => this.playing = false);
+
+    let lastTimecode = 0;
+    $video.on('timeupdate', () => {
+      if (videoObj.currentTime !== lastTimecode) {
+        lastTimecode = videoObj.currentTime;
+        this.frame = ceil(lastTimecode * this.video.fps);
+      }
+    });
+  }
+
+  seek(frame) {
+    videoObj.pause();
+    this.frame = frame;
+    videoObj.currentTime = this.frame / this.video.fps;
+  }
+
+  get playing() { return this._playing; }
+  set playing(value) {
+    if (value === this._playing) return;
+    videoObj.currentTime = this.frame / this.video.fps; // ensure quantized frozen frame;
+    this._playing = value;
+    wrapper.classed('playing', value);
   }
 
   get width() { return this._width; }
@@ -79,8 +109,10 @@ class Player {
   set frame(value) {
     if (value === this._frame) return;
     this._frame = value;
-    drawPlayhead(this, playhead);
-    drawTimecode(this, timecode);
+    defer(() => { // defer work to get as many updates as possible.
+      drawTimecode(this, timecode);
+      drawPlayhead(this, playhead);
+    });
   }
 
   get range() { return this._range; }
@@ -101,6 +133,16 @@ const player = new Player(data.video);
 // INTERACTIVITY (eventually probably to be broken out into its own file)
 
 ////////////////////////////////////////
+// > Controls
+
+const relseek = (x) => () => player.seek(player.frame + x);
+$('#vannot .vannot-leapback').on('click', relseek(-5));
+$('#vannot .vannot-skipback').on('click', relseek(-1));
+$('#vannot .vannot-playpause').on('click', () => (player.playing ? videoObj.pause() : videoObj.play()));
+$('#vannot .vannot-skipforward').on('click', relseek(1));
+$('#vannot .vannot-leapforward').on('click', relseek(5));
+
+////////////////////////////////////////
 // > Playhead dragging
 
 const scale = wrapper.select('.vannot-scale');
@@ -108,7 +150,7 @@ draggable(scale.node(), (dx) => {
   const dframes = trunc((dx / player.width) * (player.range[1] - player.range[0]));
   if (abs(dframes) < 1) return false; // if the delta was too small to move, don't swallow it.
 
-  player.frame = clamp(0, player.frame + dframes, player.video.duration);
+  player.seek(clamp(0, player.frame + dframes, player.video.duration));
 });
 $(scale.node()).on('mousedown', (event) => {
   const $target = $(event.target);
@@ -116,7 +158,7 @@ $(scale.node()).on('mousedown', (event) => {
     return; // do nothing if the playhead is directly clicked on (prevent microshifts).
 
   const frame = round(player.scale.invert(event.offsetX / player.width));
-  player.frame = clamp(0, frame, player.video.duration);
+  player.seek(clamp(0, frame, player.video.duration));
 });
 
 ////////////////////////////////////////
