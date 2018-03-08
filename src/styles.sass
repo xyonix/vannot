@@ -5,6 +5,10 @@ $background: #333
 $background-panel: #4a4a4a
 $text-light: #eee
 $text-light-fade: #aaa
+$action: #1d89bf
+$action-highlight: #0071a9
+$subaction: #195979
+$subaction-highlight: #1371a0
 
 $font-sans: "helvetica neue", helvetica, arial, sans-serif
 $font-mono: consolas, monaco, courier new, monospace
@@ -49,6 +53,11 @@ $icon-pause: "\f28b"
   -webkit-font-smoothing: antialiased
   -moz-osx-font-smoothing: grayscale
 
+@mixin center-vert
+  position: relative
+  top: 50%
+  transform: translateY(-50%)
+
 ////////////////////////////////////////////////////////////////////////////////
 // RESET
 
@@ -83,6 +92,33 @@ html, body
 #vannot
   .hide
     display: none !important
+
+.vannot-button
+  background: none
+  background-color: $action
+  border: none
+  border-radius: 4px
+  color: #fff
+  font-weight: bold
+  letter-spacing: -0.2px
+  outline: none
+  padding: 7px 10px 8px
+
+  &:before
+    @include icon
+    font-size: 14px
+    line-height: 1px
+    margin-right: 5px
+    position: relative
+    top: 2px
+
+  &:hover
+    background-color: $action-highlight
+
+.vannot-button-warn
+  background-color: #b44
+  &:hover
+    background-color: #a22020
 
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
@@ -126,11 +162,51 @@ html, body
     @include fill(20px)
 
     video
+      @include center-vert
       max-height: 100%
-      position: relative
-      top: 50%
-      transform: translateY(-50%)
       width: 100%
+
+////////////////////////////////////////////////////////////////////////////////
+// SECTION: Shapelist
+
+.vannot-player-left.has-frame
+  .vannot-frame-untracked
+    display: none
+  .vannot-frame-tracked
+    display: block
+
+.vannot-frame-untracked
+  @include center-vert
+  text-align: center
+
+  p
+    color: #fff
+    font-size: 14px
+    padding-bottom: 8px
+
+  button:before
+    content: $icon-plus
+
+.vannot-frame-tracked
+  display: none
+  padding: 25px 15px
+  p
+    color: #fff
+    font-size: 14px
+    padding-bottom: 8px
+
+.vannot-frame-shape-count
+  font-weight: bold
+
+.vannot-shape-list
+  background: #222
+  height: calc(100vh - #{$timeline-height} - 170px)
+  margin-bottom: 10px
+
+.vannot-shape-add:before
+  content: $icon-plus
+.vannot-frame-untrack:before
+  content: $icon-minus
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls
@@ -329,7 +405,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       height: $size
       position: absolute
       top: 10px
-      transform: rotate(45deg)
+      transform: translateX(-6px) rotate(45deg)
       width: $size
 
 ////////////////////////////////////////
@@ -345,7 +421,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
   z-index: 3
 
   .vannot-ranger-fill
-    background-color: #195979
+    background-color: $subaction
     border: 1px solid #000
     bottom: 0
     cursor: -webkit-grab
@@ -354,10 +430,10 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     top: 0
 
   &:hover .vannot-ranger-fill
-    background-color: #1371a0
+    background-color: $subaction-highlight
 
   .vannot-ranger-start, .vannot-ranger-end
-    background-color: #1d89bf
+    background-color: $action
     bottom: 1px
     cursor: ew-resize
     position: absolute

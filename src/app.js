@@ -3,6 +3,7 @@ window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const { round, trunc, abs, ceil } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
+const { drawShapeList } = require('./shape-list');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
 const { draggable, clamp, defer } = require('./util');
 
@@ -37,6 +38,8 @@ const data = {
 // PLAYER MODEL
 
 const wrapper = select('#vannot');
+
+const leftWrapper = wrapper.select('.vannot-player-left');
 const $video = $('#vannot video');
 const videoObj = $video.get(0);
 
@@ -105,6 +108,7 @@ class Player {
     defer(() => { // defer work to get as many updates as possible.
       drawTimecode(this, timecode);
       drawPlayhead(this, playhead);
+      drawShapeList(data, this, leftWrapper);
     });
   }
 

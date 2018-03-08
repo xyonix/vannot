@@ -8,7 +8,18 @@
     <div id="vannot">
       <div class="vannot-player">
         <div class="vannot-player-left">
-          <div class="vannot-aaaa"></div>
+          <div class="vannot-frame-untracked">
+            <p>This frame contains no tracking shapes.</p>
+            <button class="vannot-button vannot-frame-track">Track this frame</button>
+          </div>
+          <div class="vannot-frame-tracked">
+            <p>This frame contains <span class="vannot-frame-shape-count">0</span> tracked objects:</p>
+            <div class="vannot-shape-list">
+            </div>
+            <button class="vannot-button vannot-shape-add">Draw new shape</button>
+            <!--button class="vannot-button vannot-shape-copy">Copy shapes from previous tracking frame</button-->
+            <button class="vannot-button vannot-button-warn vannot-frame-untrack">Clear this tracked frame</button>
+          </div>
         </div>
         <div class="vannot-player-right">
           <div class="vannot-video"><video/></div>

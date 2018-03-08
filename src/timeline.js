@@ -97,20 +97,22 @@ const drawObjectTracks = (player, data, target) => {
 
   tracks.select('.vannot-track-title').text((object) => object.title);
   tracks.select('.vannot-track-color').style('background-color', (object) => object.color);
-  tracks.select('.vannot-track-points').each(subdrawTrackpoints(data.frames, player.scale));
+  tracks.select('.vannot-track-points').each(subdrawTrackpoints(data.frames, player));
 };
 
 // draws the collection of trackpoints within a timeline.
-const drawTrackpoints = (object, objectFrames, timescale, target) => {
+const drawTrackpoints = (object, objectFrames, player, target) => {
   const points = instantiateDivs(target.selectAll('.vannot-track-point').data(objectFrames), 'vannot-track-point');
 
-  points.style('left', (point) => pct(timescale(point.frame)));
-  points.style('background-color', object.color);
+  points
+    .style('left', (point) => pct(player.scale(point.frame)))
+    .style('background-color', object.color)
+    .on('click', (point) => player.seek(point.frame));
 };
 // convenience function to currying+pulling apart an each call into the standard draw call:
-const subdrawTrackpoints = (frames, timescale) => function(object) {
+const subdrawTrackpoints = (frames, player) => function(object) {
   const objectFrames = frames.filter((frame) => frame.shapes.some((shape) => shape.id === object.id));
-  return drawTrackpoints(object, objectFrames, timescale, select(this));
+  return drawTrackpoints(object, objectFrames, player, select(this));
 };
 
 
