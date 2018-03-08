@@ -3,7 +3,7 @@ window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const { round, trunc, abs, ceil } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
-const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawTracks } = require('./timeline');
+const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
 const { draggable, clamp, defer } = require('./util');
 
 
@@ -12,30 +12,23 @@ const { draggable, clamp, defer } = require('./util');
 
 const data = {
   video: { duration: 182970, fps: 30, height: 720, width: 1280, source: '/assets/lttp.mp4' },
-  objects: [{
-    title: 'object a',
-    color: '#07e4ff',
-    trackpoints: [{
-      frame: 2490,
-      poly: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
+  objects: [
+    { id: 1, title: 'object a', color: '#07e4ff' },
+    { id: 2, title: 'object b', color: '#ff2096' },
+    { id: 3, title: 'object c', color: '#ccb71a' }
+  ],
+  frames: [{
+    frame: 2490,
+    shapes: [{
+      id: 1, poly: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
     }, {
-      frame: 4492,
-      poly: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
+      id: 2, poly: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
     }]
   }, {
-    title: 'object b',
-    color: '#ff2096',
-    trackpoints: [{
-      frame: 2490,
-      poly: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
-    }, {
-      frame: 4492,
-      poly: [{ x: 400, y: 450 }, { x: 700, y: 450 }, { x: 500, y: 700 }, { x: 400, y: 700 }]
+    frame: 4492,
+    shapes: [{
+      id: 1, poly: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
     }]
-  }, {
-    title: 'object c',
-    color: '#ccb71a',
-    trackpoints: []
   }]
 };
 
@@ -121,7 +114,7 @@ class Player {
     this._range = value;
     this.scale = scaleLinear().domain(this.range).range([ 0, 1 ]);
     drawTicks(this, tickWrapper);
-    drawTracks(this, data.objects, objectWrapper);
+    drawObjectTracks(this, data, objectWrapper);
     drawPlayhead(this, playhead);
     drawRanger(this, ranger);
   }

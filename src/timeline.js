@@ -92,26 +92,27 @@ const drawRanger = (player, target) => {
 
 // draws the collection of data-driven timeline row at the bottom of the screen.
 const trackTemplate = getTemplate('track');
-const drawTracks = (player, tracksData, target) => {
-  const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(tracksData), trackTemplate);
+const drawObjectTracks = (player, data, target) => {
+  const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(data.objects), trackTemplate);
 
-  tracks.select('.vannot-track-title').text((track) => track.title);
-  tracks.select('.vannot-track-color').style('background-color', (track) => track.color);
-  tracks.select('.vannot-track-points').each(subdrawTrackpoints(player.scale));
+  tracks.select('.vannot-track-title').text((object) => object.title);
+  tracks.select('.vannot-track-color').style('background-color', (object) => object.color);
+  tracks.select('.vannot-track-points').each(subdrawTrackpoints(data.frames, player.scale));
 };
 
 // draws the collection of trackpoints within a timeline.
-const drawTrackpoints = (track, pointsData, timescale, target) => {
-  const points = instantiateDivs(target.selectAll('.vannot-track-point').data(pointsData), 'vannot-track-point');
+const drawTrackpoints = (object, objectFrames, timescale, target) => {
+  const points = instantiateDivs(target.selectAll('.vannot-track-point').data(objectFrames), 'vannot-track-point');
 
   points.style('left', (point) => pct(timescale(point.frame)));
-  points.style('background-color', track.color);
+  points.style('background-color', object.color);
 };
 // convenience function to currying+pulling apart an each call into the standard draw call:
-const subdrawTrackpoints = (timescale) => function(track) {
-  return drawTrackpoints(track, track.trackpoints, timescale, select(this));
+const subdrawTrackpoints = (frames, timescale) => function(object) {
+  const objectFrames = frames.filter((frame) => frame.shapes.some((shape) => shape.id === object.id));
+  return drawTrackpoints(object, objectFrames, timescale, select(this));
 };
 
 
-module.exports = { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawTracks, drawTrackpoints };
+module.exports = { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks, drawTrackpoints };
 
