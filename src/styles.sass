@@ -13,6 +13,7 @@ $subaction-highlight: #1371a0
 $font-sans: "helvetica neue", helvetica, arial, sans-serif
 $font-mono: consolas, monaco, courier new, monospace
 
+$toolbar-height: 50px
 $controls-height: 60px
 $timeline-height: 300px // TODO: eventually drag-resizable
 $left-pane-width: 350px // TODO: eventually drag-resizable
@@ -27,6 +28,8 @@ $icon-left: "\f104"
 $icon-right: "\f105"
 $icon-play: "\f144"
 $icon-pause: "\f28b"
+$icon-pencil: "\f040"
+$icon-duplicate: "\f0c5"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -132,7 +135,13 @@ html, body
 
 .vannot-player
   @include fill
+  bottom: $toolbar-height + $controls-height + $timeline-height
+
+.vannot-toolbar
+  @include fill
   bottom: $controls-height + $timeline-height
+  height: $toolbar-height
+  top: auto
 
 .vannot-controls
   @include fill
@@ -149,14 +158,8 @@ html, body
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Video
 
-.vannot-player-left
+.vannot-video-wrapper
   @include fill
-  right: auto
-  width: $left-pane-width
-
-.vannot-player-right
-  @include fill
-  left: $left-pane-width
 
   .vannot-video
     @include fill(20px)
@@ -167,46 +170,59 @@ html, body
       width: 100%
 
 ////////////////////////////////////////////////////////////////////////////////
-// SECTION: Shapelist
+// SECTION: Toolbar
 
-.vannot-player-left.has-frame
-  .vannot-frame-untracked
-    display: none
-  .vannot-frame-tracked
-    display: block
+.vannot-toolbar
+  background-color: #2d2d2d
+  text-align: center
+  > div
+    padding: 10px 0
 
-.vannot-frame-untracked
-  @include center-vert
+  label
+    color: #999
+    font-size: 12px
+    font-weight: bold
+    letter-spacing: -0.2px
+    margin-right: 10px
+
+.vannot-toolbutton
+  $icon-size: 18px
+  $icon-box-size: 30px
+  background: transparent
+  border: none
+    radius: 999px 2px 2px 999px
+  color: #fff
+  line-height: $icon-box-size
+  margin: 0 6px
+  outline: none
+  padding: 0
+    right: 8px
   text-align: center
 
-  p
+  &:before
+    @include icon
+    background-color: $action
+    border-radius: 999px
     color: #fff
-    font-size: 14px
-    padding-bottom: 8px
+    display: block
+    float: left
+    font-size: $icon-size
+    height: $icon-box-size
+    line-height: $icon-box-size
+    margin-right: 8px
+    width: $icon-box-size
 
-  button:before
-    content: $icon-plus
+  &:hover
+    background: #222
+    &:before
+      background-color: $action-highlight
 
-.vannot-frame-tracked
-  display: none
-  padding: 25px 15px
-  p
-    color: #fff
-    font-size: 14px
-    padding-bottom: 8px
-
-.vannot-frame-shape-count
-  font-weight: bold
-
-.vannot-shape-list
-  background: #222
-  height: calc(100vh - #{$timeline-height} - 170px)
-  margin-bottom: 10px
-
-.vannot-shape-add:before
-  content: $icon-plus
-.vannot-frame-untrack:before
-  content: $icon-minus
+.vannot-draw-shape:before
+  content: $icon-pencil
+  text-indent: 2px
+.vannot-copy-last:before
+  content: $icon-duplicate
+  text-indent: -1px
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls
