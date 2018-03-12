@@ -5,6 +5,7 @@ const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
 const { drawShapeList } = require('./shape-list');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
+const { drawShapes, drawWipSegment } = require('./canvas');
 const { draggable, clamp, defer } = require('./util');
 
 
@@ -21,23 +22,24 @@ const data = {
   frames: [{
     frame: 2490,
     shapes: [{
-      id: 1, poly: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
+      id: 1, points: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
     }, {
-      id: 2, poly: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
+      id: 2, points: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
     }]
   }, {
     frame: 4492,
     shapes: [{
-      id: 1, poly: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
+      id: 1, points: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
     }]
   }]
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// PLAYER MODEL
+// PLAYER VIEWMODEL
 
 const wrapper = select('#vannot');
+const $wrapper = $('#vannot');
 
 const leftWrapper = wrapper.select('.vannot-player-left');
 const $video = $('#vannot video');
@@ -109,6 +111,7 @@ class Player {
       drawTimecode(this, timecode);
       drawPlayhead(this, playhead);
       drawShapeList(data, this, leftWrapper);
+      $wrapper.trigger('frameChange', this._frame);
     });
   }
 
@@ -124,6 +127,48 @@ class Player {
   }
 }
 const player = new Player(data.video);
+
+
+////////////////////////////////////////////////////////////////////////////////
+// CANVAS VIEWMODEL
+
+const $canvasWrapper = $('#vannot .vannot-canvas');
+const svg = wrapper.select('svg');
+
+class Canvas {
+  constructor(player, data) {
+    this.player = player;
+    this.data = data;
+    this._initialize();
+  }
+
+  _initialize() {
+    const updateFrame = () => {
+      this.currentFrameData = this.data.frames.find((x) => x.frame === this.player.frame);
+    };
+    $wrapper.on('frameChange', updateFrame);
+    updateFrame();
+  };
+
+  get currentFrameData() { return this._currentFrameData; }
+  set currentFrameData(frameData) {
+    this._currentFrameData = frameData;
+    drawShapes(this, svg);
+  };
+
+  ensureFrame() {
+    if (this._currentFrameData == null)
+      this.currentFrameData = { frame: this.player.frame, shapes: [] };
+  }
+
+  startShape() {
+    this.wipShape = { id: -1, poly: [], wip: true };
+    this.ensureFrame();
+    this.currentFrameData.push(this.wipShape);
+    $canvasWrapper.addClass('drawing');
+  }
+}
+const canvas = new Canvas(player, data);
 
 
 ////////////////////////////////////////////////////////////////////////////////

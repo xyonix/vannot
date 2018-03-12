@@ -158,16 +158,31 @@ html, body
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Video
 
-.vannot-video-wrapper
-  @include fill
+.vannot-video
+  @include fill(20px)
 
-  .vannot-video
-    @include fill(20px)
+  video
+    @include center-vert
+    max-height: 100%
+    width: 100%
 
-    video
-      @include center-vert
-      max-height: 100%
-      width: 100%
+////////////////////////////////////////////////////////////////////////////////
+// SECTION: Canvas
+
+.vannot-canvas
+  @include fill(20px)
+
+  svg
+    @include center-vert
+    max-height: 100%
+    width: 100%
+
+    .drawing &
+      cursor: crosshair
+
+    .shapePath
+      fill-opacity: 0.4;
+      stroke-width: 2;
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Toolbar
@@ -423,6 +438,8 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       top: 10px
       transform: translateX(-6px) rotate(45deg)
       width: $size
+      &:hover
+        border-color: #ccc
 
 ////////////////////////////////////////
 // > Ranger
