@@ -9,6 +9,9 @@ const { drawShapes, drawWipSegment } = require('./canvas');
 const { draggable, clamp, defer } = require('./util');
 
 
+// docready.
+$(function() {
+
 ////////////////////////////////////////////////////////////////////////////////
 // DUMMY DATA
 
@@ -134,6 +137,8 @@ const player = new Player(data.video);
 
 const $canvasWrapper = $('#vannot .vannot-canvas');
 const svg = wrapper.select('svg');
+const $svg = $(svg.node());
+const $player = $('#vannot .vannot-player');
 
 class Canvas {
   constructor(player, data) {
@@ -144,28 +149,39 @@ class Canvas {
 
   _initialize() {
     const updateFrame = () => {
-      this.currentFrameData = this.data.frames.find((x) => x.frame === this.player.frame);
+      this.frameObj = this.data.frames.find((x) => x.frame === this.player.frame);
     };
     $wrapper.on('frameChange', updateFrame);
     updateFrame();
   };
 
-  get currentFrameData() { return this._currentFrameData; }
-  set currentFrameData(frameData) {
-    this._currentFrameData = frameData;
+  get frameObj() { return this._frameObj; }
+  set frameObj(frameObj) {
+    this._frameObj = frameObj;
     drawShapes(this, svg);
   };
 
-  ensureFrame() {
-    if (this._currentFrameData == null)
-      this.currentFrameData = { frame: this.player.frame, shapes: [] };
+  draw() {
+    drawShapes(this, svg);
+  };
+
+  ensureFrameObj() {
+    if (this._frameObj == null)
+      this.frameObj = { frame: this.player.frame, shapes: [] };
   }
 
   startShape() {
-    this.wipShape = { id: -1, poly: [], wip: true };
-    this.ensureFrame();
-    this.currentFrameData.push(this.wipShape);
-    $canvasWrapper.addClass('drawing');
+    $player.addClass('drawing');
+    this.wipShape = { id: -1, points: [], wip: true };
+    this.ensureFrameObj();
+    this.frameObj.shapes.push(this.wipShape);
+    drawWipSegment(this, svg);
+  }
+  completeShape() {
+    $player.removeClass('drawing');
+    delete this.wipShape.wip;
+    this.wipShape = null;
+    this.draw();
   }
 }
 const canvas = new Canvas(player, data);
@@ -173,6 +189,72 @@ const canvas = new Canvas(player, data);
 
 ////////////////////////////////////////////////////////////////////////////////
 // INTERACTIVITY (eventually probably to be broken out into its own file)
+
+////////////////////////////////////////
+// > Drawing
+
+// the canvas object will trigger all the things to go to draw mode; just ask.
+$('#vannot .vannot-draw-shape').on('click', () => { canvas.startShape() });
+
+// ugly but much better for perf:
+const playerPadding = 40;
+let playerWidth = $player.width() - playerPadding, playerHeight = $player.height() - playerPadding;
+$(window).on('resize', () => {
+  playerWidth = $player.width() - playerPadding;
+  playerHeight = $player.height() - playerPadding;
+});
+
+// actually allow clicking on the entire video area. this means we have to do some
+// scuzzy measurement and math to figure out origin but it makes drawing much easier
+// in some cases.
+$(document).on('mousemove', (event) => {
+  // figure out our scaling factor and origin.
+  // first determine which the constraint side is, then calculate rendered video size.
+  const videoRatio = player.video.width / player.video.height;
+  const heightConstrained = (playerWidth / playerHeight) > videoRatio;
+  const renderedWidth = heightConstrained ? (playerHeight * videoRatio) : playerWidth;
+  const renderedHeight = heightConstrained ? playerHeight : (playerWidth / videoRatio);
+
+  // now determine origin point in screenspace.
+  const originX = heightConstrained ? round((playerWidth / 2) - (renderedWidth / 2)) : 0;
+  const originY = heightConstrained ? 0 : round((playerHeight / 2) - (renderedHeight / 2));
+
+  // get the delta, then transform into svg-space.
+  const { pageX, pageY } = event;
+  const factor = heightConstrained ? (player.video.height / playerHeight) : (player.video.width / playerWidth);
+  const x = (pageX - (playerPadding / 2) - originX) * factor;
+  const y = (pageY - (playerPadding / 2) - originY) * factor;
+
+  // save it.
+  canvas.mouse = { x, y };
+});
+$wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
+  if (canvas.wipShape == null) return;
+  canvas.wipShape.points.push(Object.assign({}, canvas.mouse));
+  canvas.draw();
+});
+$wrapper.on('mousemove', '.vannot-player.drawing', (event) => {
+  drawWipSegment(canvas, svg);
+});
+
+// a cute trick to make the complete shape button complete the shape.
+const completeButton = $('#vannot .vannot-complete');
+completeButton.on('mouseover', () => {
+  if (!$player.is('.drawing')) return;
+  if (canvas.wipShape.points.length === 0) return;
+  canvas.mouse = Object.assign({}, canvas.wipShape.points[0]);
+  drawWipSegment(canvas, svg);
+});
+
+// but of course complete the shape when clicked.
+completeButton.on('click', () => { canvas.completeShape() });
+
+// wire up drawing undo.
+$('#vannot .vannot-undo-draw').on('click', () => {
+  canvas.wipShape.points.pop();
+  canvas.draw();
+  drawWipSegment(canvas, svg);
+});
 
 ////////////////////////////////////////
 // > Controls
@@ -251,5 +333,7 @@ draggable(wrapper.select('.vannot-ranger-fill').node(), (dx) => {
     dframes = -player.range[0];
 
   player.range = [ player.range[0] + dframes, player.range[1] + dframes ];
+});
+
 });
 

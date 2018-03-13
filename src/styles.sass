@@ -30,6 +30,9 @@ $icon-play: "\f144"
 $icon-pause: "\f28b"
 $icon-pencil: "\f040"
 $icon-duplicate: "\f0c5"
+$icon-undo: "\f112"
+$icon-redo: "\f064"
+$icon-heart: "\f08a"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -169,6 +172,19 @@ html, body
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Canvas
 
+@keyframes flash
+  0%
+    fill: #eee;
+    stroke: #eee;
+  50%
+    fill: $action;
+    stroke: $action;
+  100%
+    fill: #eee;
+    stroke: #eee;
+@mixin flash
+  animation: flash 0.6s ease-in-out 0s infinite;
+
 .vannot-canvas
   @include fill(20px)
 
@@ -180,18 +196,38 @@ html, body
     .drawing &
       cursor: crosshair
 
+    .wipPath
+      stroke-width: 2;
+
+    .wipPoint, .wipPath
+      visibility: hidden
+      .drawing &
+        @include flash
+        visibility: visible
+
     .shapePath
       fill-opacity: 0.4;
       stroke-width: 2;
+
+    .shapePath, .shapePoint
+      fill: #aaa;
+      stroke: #aaa;
+
+    //.wip
+      .shapePath, .shapePoint
+        //@include flash
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Toolbar
 
 .vannot-toolbar
   background-color: #2d2d2d
+  overflow: hidden
   text-align: center
   > div
+    @include fill
     padding: 10px 0
+    transition: 0.3s transform
 
   label
     color: #999
@@ -232,12 +268,30 @@ html, body
     &:before
       background-color: $action-highlight
 
+////////////////////////////////////////
+// > Toolbar states
+.vannot-toolbar-drawing
+  transform: translateY(#{-$toolbar-height});
+.vannot-player.drawing ~ .vannot-toolbar
+  .vannot-toolbar-drawing
+    transform: translateY(0);
+  .vannot-toolbar-default
+    transform: translateY(#{$toolbar-height});
+
+////////////////////////////////////////
+// > Toolbar icons
 .vannot-draw-shape:before
   content: $icon-pencil
   text-indent: 2px
 .vannot-copy-last:before
   content: $icon-duplicate
   text-indent: -1px
+.vannot-undo-draw:before
+  content: $icon-undo
+  text-indent: -1px
+.vannot-complete:before
+  content: $icon-heart
+  text-indent: 2px
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls

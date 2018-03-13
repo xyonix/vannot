@@ -8,9 +8,19 @@
     <div id="vannot">
       <div class="vannot-player">
         <div class="vannot-video"><video/></div>
-        <div class="vannot-canvas"><svg viewBox="0 0 1280 720"/></div>
+        <div class="vannot-canvas">
+          <svg viewBox="0 0 1280 720">
+            <path class="wipPath"/>
+            <circle class="wipPoint" r="2"/>
+          </svg>
+        </div>
       </div>
       <div class="vannot-toolbar">
+        <div class="vannot-toolbar-drawing">
+          <label>Click in the video image to add points to your shape.</label>
+          <button class="vannot-toolbutton vannot-undo-draw">Undo</button>
+          <button class="vannot-toolbutton vannot-complete">Complete</button>
+        </div>
         <div class="vannot-toolbar-default">
           <button class="vannot-toolbutton vannot-draw-shape">Draw</button>
           <button class="vannot-toolbutton vannot-copy-last">Carry over</button>
