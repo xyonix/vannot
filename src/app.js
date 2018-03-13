@@ -166,8 +166,10 @@ class Canvas {
   };
 
   ensureFrameObj() {
-    if (this._frameObj == null)
+    if (this._frameObj == null) {
       this.frameObj = { frame: this.player.frame, shapes: [] };
+      this.data.frames.push(this.frameObj);
+    }
   }
 
   startShape() {

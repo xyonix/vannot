@@ -174,16 +174,16 @@ html, body
 
 @keyframes flash
   0%
-    fill: #eee;
-    stroke: #eee;
+    fill: #eee
+    stroke: #eee
   50%
-    fill: $action;
-    stroke: $action;
+    fill: $action
+    stroke: $action
   100%
-    fill: #eee;
-    stroke: #eee;
+    fill: #eee
+    stroke: #eee
 @mixin flash
-  animation: flash 0.6s ease-in-out 0s infinite;
+  animation: flash 0.6s ease-in-out 0s infinite
 
 .vannot-canvas
   @include fill(20px)
@@ -205,16 +205,20 @@ html, body
         @include flash
         visibility: visible
 
-    .shapePath
-      fill-opacity: 0.4;
-      stroke-width: 2;
-
     .shapePath, .shapePoint
       fill: #aaa;
       stroke: #aaa;
 
+    .shapePath
+      fill-opacity: 0.4;
+      stroke-width: 2;
+
     //.wip
       .shapePath, .shapePoint
+    .wip
+      .shapePath
+        fill: none
+
         //@include flash
 
 ////////////////////////////////////////////////////////////////////////////////

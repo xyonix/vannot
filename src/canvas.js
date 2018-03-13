@@ -16,7 +16,7 @@ const drawShapes = (canvas, target) => {
     // populate our line first for stacking order.
     const polyline = instantiateElems(select(this).selectAll('.shapePath').data([ shape ]), 'path', 'shapePath');
     polyline
-      .style('fill', (shape) => ((object == null) ? 'none' : object.color))
+      .style('fill', (shape) => ((object == null) ? null : object.color))
       .style('stroke', (object != null) ? object.color : null)
       .attr('d', (shape) => {
         const path = lineCalc(shape.points);
