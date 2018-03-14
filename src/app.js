@@ -155,9 +155,15 @@ class Canvas {
     };
     $wrapper.on('frameChange', updateFrame);
     updateFrame();
+
+    updateCanvasChrome(this, $player);
   };
 
-  get selectedPoints() { return (this.selectedShape != null) ? this.selectedShape.points : this._selectedPoints; }
+  get selectedPoints() {
+    return (this.selectedPoint != null) ? [ this.selectedPoint ]
+      : (this.selectedShape != null) ? this.selectedShape.points
+        : this._selectedPoints;
+  }
 
   get frameObj() { return this._frameObj; }
   set frameObj(frameObj) {
@@ -287,7 +293,17 @@ $wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
   canvas.draw();
 });
 $wrapper.on('mousedown', '.vannot-player.shape-select', (event) => {
+  // shape body:
   if (tryMousedownPath(event.target)) return;
+
+  // selected shape point:
+  if ($(event.target).is('.selected circle')) {
+    canvas.selectedPoint = select(event.target).datum();
+    initiateCanvasDrag(canvas, () => { canvas.selectedPoint = null; });
+    return;
+  }
+
+  // canvas bg:
   if (event.target === svg.node()) return canvas.deselect();
 });
 

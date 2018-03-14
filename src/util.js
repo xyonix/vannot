@@ -101,7 +101,7 @@ const draggable = (target, callback) => {
 };
 
 const $player = $('#vannot .vannot-player');
-const initiateCanvasDrag = (canvas) => {
+const initiateCanvasDrag = (canvas, complete) => {
   let lastX = canvas.mouse.x;
   let lastY = canvas.mouse.y;
 
@@ -119,7 +119,10 @@ const initiateCanvasDrag = (canvas) => {
     lastY = canvas.mouse.y;
   });
 
-  $document.one('mouseup', () => $player.off(eventName));
+  $document.one('mouseup', () => {
+    $player.off(eventName);
+    if (typeof complete === 'function') complete();
+  });
 };
 
 const defer = (f) => setTimeout(f, 0);
