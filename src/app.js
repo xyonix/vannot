@@ -3,9 +3,10 @@ window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const { round, trunc, abs, ceil } = Math;
 const { select, scaleLinear } = require('d3');
 const $ = require('jquery');
+window.$ = $;
 const { drawShapeList } = require('./shape-list');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
-const { drawShapes, drawWipSegment } = require('./canvas');
+const { drawShapes, drawWipSegment, updateCanvasChrome } = require('./canvas');
 const { draggable, clamp, defer } = require('./util');
 
 
@@ -16,23 +17,24 @@ $(function() {
 // DUMMY DATA
 
 const data = {
+  _seqId: 4,
   video: { duration: 182970, fps: 30, height: 720, width: 1280, source: '/assets/lttp.mp4' },
   objects: [
-    { id: 1, title: 'object a', color: '#07e4ff' },
-    { id: 2, title: 'object b', color: '#ff2096' },
-    { id: 3, title: 'object c', color: '#ccb71a' }
+    { id: 1, title: 'Link', color: '#07e4ff' },
+    { id: 2, title: 'Enemy', color: '#ff2096' },
+    { id: 3, title: 'Obstacle', color: '#ccb71a' }
   ],
   frames: [{
     frame: 2490,
     shapes: [{
-      id: 1, points: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
+      id: 1, objectId: 1, points: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
     }, {
-      id: 2, points: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
+      id: 2, objectId: 2, points: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
     }]
   }, {
     frame: 4492,
     shapes: [{
-      id: 1, points: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
+      id: 3, objectId: 1, points: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
     }]
   }]
 };
@@ -155,6 +157,8 @@ class Canvas {
     updateFrame();
   };
 
+  get selectedPoints() { return (this.selectedShape != null) ? this.selectedShape.points : this._selectedPoints; }
+
   get frameObj() { return this._frameObj; }
   set frameObj(frameObj) {
     this._frameObj = frameObj;
@@ -163,6 +167,7 @@ class Canvas {
 
   draw() {
     drawShapes(this, svg);
+    updateCanvasChrome(this, $player);
   };
 
   ensureFrameObj() {
@@ -173,16 +178,42 @@ class Canvas {
   }
 
   startShape() {
-    $player.addClass('drawing');
-    this.wipShape = { id: -1, points: [], wip: true };
+    this.state = 'drawing';
+    this.wipShape = { id: this.data._seqId++, objectId: -1, points: [], wip: true };
+    this.selectedShape = this.wipShape;
     this.ensureFrameObj();
     this.frameObj.shapes.push(this.wipShape);
+    this.draw();
     drawWipSegment(this, svg);
   }
   completeShape() {
-    $player.removeClass('drawing');
     delete this.wipShape.wip;
     this.wipShape = null;
+    this.state = 'shape-select';
+    this.draw();
+  }
+
+  selectShape(shape) {
+    if (this.selectedShape === shape) return;
+    this.state = 'shape-select';
+    this.selectedShape = shape;
+    this.draw();
+  }
+
+  removeShape(shape) {
+    const shapes = this.frameObj.shapes;
+    const index = shapes.indexOf(shape);
+    if (index < 0) return;
+    shapes.splice(index, 1);
+    if (shape === this.selectedShape)
+      this.deselect();
+    else
+      this.draw();
+  }
+
+  deselect() {
+    this.state = null;
+    this.selectedShape = null;
     this.draw();
   }
 }
@@ -230,19 +261,31 @@ $(document).on('mousemove', (event) => {
   // save it.
   canvas.mouse = { x, y };
 });
+$wrapper.on('mousemove', '.vannot-player.drawing', (event) => {
+  drawWipSegment(canvas, svg);
+});
+
+// on mousedown, walk through possible interactions in decreasing priority.
+$wrapper.on('mousedown', '.vannot-player.normal', (event) => {
+  if (event.target.tagName === 'path') return canvas.selectShape(select(event.target).datum());
+});
 $wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
   if (canvas.wipShape == null) return;
   canvas.wipShape.points.push(Object.assign({}, canvas.mouse));
   canvas.draw();
 });
-$wrapper.on('mousemove', '.vannot-player.drawing', (event) => {
-  drawWipSegment(canvas, svg);
+$wrapper.on('mousedown', '.vannot-player.shape-select', (event) => {
+  if (event.target.tagName === 'path') return canvas.selectShape(select(event.target).datum());
+  if (event.target === svg.node()) return canvas.deselect();
 });
+
+////////////////////////////////////////
+// > Toolbar
 
 // a cute trick to make the complete shape button complete the shape.
 const completeButton = $('#vannot .vannot-complete');
 completeButton.on('mouseover', () => {
-  if (!$player.is('.drawing')) return;
+  if (canvas.state !== 'drawing') return; // paranoia.
   if (canvas.wipShape.points.length === 0) return;
   canvas.mouse = Object.assign({}, canvas.wipShape.points[0]);
   drawWipSegment(canvas, svg);
@@ -253,9 +296,30 @@ completeButton.on('click', () => { canvas.completeShape() });
 
 // wire up drawing undo.
 $('#vannot .vannot-undo-draw').on('click', () => {
-  canvas.wipShape.points.pop();
+  if (canvas.wipShape.points.pop() != null) {
+    canvas.draw();
+    drawWipSegment(canvas, svg);
+  }
+});
+
+$('#vannot .vannot-object-select').on('change', (event) => {
+  if (canvas.selectedShape == null) return; // paranoia.
+  canvas.selectedShape.objectId = parseInt($(event.target).find(':selected').attr('value'));
   canvas.draw();
-  drawWipSegment(canvas, svg);
+  drawObjectTracks(player, data, objectWrapper);
+});
+
+$('#vannot .vannot-duplicate-shape').on('click', (event) => {
+  if (canvas.selectedShape == null) return; // paranoia.
+  const points = canvas.selectedShape.points.map(({ x, y }) => ({ x: x + 10, y: y + 10 }));
+  const duplicate = Object.assign({}, canvas.selectedShape, { points });
+  canvas.frameObj.shapes.push(duplicate);
+  canvas.selectShape(duplicate);
+});
+
+$('#vannot .vannot-delete-shape').on('click', (event) => {
+  if (canvas.selectedShape == null) return; // paranoia.
+  canvas.removeShape(canvas.selectedShape);
 });
 
 ////////////////////////////////////////

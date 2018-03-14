@@ -111,7 +111,7 @@ const drawTrackpoints = (object, objectFrames, player, target) => {
 };
 // convenience function to currying+pulling apart an each call into the standard draw call:
 const subdrawTrackpoints = (frames, player) => function(object) {
-  const objectFrames = frames.filter((frame) => frame.shapes.some((shape) => shape.id === object.id));
+  const objectFrames = frames.filter((frame) => frame.shapes.some((shape) => shape.objectId === object.id));
   return drawTrackpoints(object, objectFrames, player, select(this));
 };
 

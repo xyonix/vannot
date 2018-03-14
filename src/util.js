@@ -26,12 +26,15 @@ const instantiateTemplates = (selection, template) => {
 // same thing, but initiates arbitrary elements of a given class.
 const instantiateElems = (selection, tagName, className) => {
   selection.exit().remove();
-  const created = selection.enter().append(tagName).classed(className, true);
+  const created = selection.enter().append(tagName);
+  if (className != null) created.classed(className, true);
   return selection.merge(created);
 };
 
 // and one last shortcut for the above to just make divs.
 const instantiateDivs = (selection, className) => instantiateElems(selection, 'div', className);
+
+const boolAttr = (bool) => (bool === true) ? 'true' : null;
 
 const pct = (x) => `${x * 100}%`;
 
@@ -101,7 +104,7 @@ const defer = (f) => setTimeout(f, 0);
 
 module.exports = {
   clamp,
-  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, pct,
+  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, boolAttr, pct,
   pad, timecode, timecodePretty,
   draggable, defer
 };

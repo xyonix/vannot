@@ -9,6 +9,8 @@ $action: #1d89bf
 $action-highlight: #0071a9
 $subaction: #195979
 $subaction-highlight: #1371a0
+$warning: #b44
+$warning-highlight: #a22020
 
 $font-sans: "helvetica neue", helvetica, arial, sans-serif
 $font-mono: consolas, monaco, courier new, monospace
@@ -122,9 +124,9 @@ html, body
     background-color: $action-highlight
 
 .vannot-button-warn
-  background-color: #b44
+  background-color: $warning
   &:hover
-    background-color: #a22020
+    background-color: $warning-highlight
 
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
@@ -197,7 +199,7 @@ html, body
       cursor: crosshair
 
     .wipPath
-      stroke-width: 2;
+      stroke-width: 4px
 
     .wipPoint, .wipPath
       visibility: hidden
@@ -206,20 +208,30 @@ html, body
         visibility: visible
 
     .shapePath, .shapePoint
-      fill: #aaa;
-      stroke: #aaa;
+      fill: #aaa
+      stroke: #aaa
+      transition-duration: 0.2s
+      transition-property: fill-opacity, stroke-width, fill, stroke
 
     .shapePath
-      fill-opacity: 0.4;
-      stroke-width: 2;
+      fill-opacity: 0.4
+      stroke-width: 2px
 
-    //.wip
-      .shapePath, .shapePoint
+    .shapePoint
+      stroke-width: 0
+
     .wip
       .shapePath
-        fill: none
+        fill-opacity: 0
 
+      //.shapePath, .shapePoint
         //@include flash
+
+    .selected
+      .shapePath
+        stroke-width: 4px
+      .shapePoint
+        stroke-width: 6px
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Toolbar
@@ -231,7 +243,7 @@ html, body
   > div
     @include fill
     padding: 10px 0
-    transition: 0.3s transform
+    transition: 0.3s transform, 0.4s opacity
 
   label
     color: #999
@@ -239,6 +251,24 @@ html, body
     font-weight: bold
     letter-spacing: -0.2px
     margin-right: 10px
+
+  .vannot-select-group
+    background: #222
+    border-radius: 2px
+    display: inline-block
+    margin-right: 14px
+    padding: 0 8px 3px 12px
+
+    label
+      font-weight: normal
+      margin-right: -8px
+
+    select
+      background: transparent
+      border: none
+      color: #fff
+      margin: 0
+      outline: none
 
 .vannot-toolbutton
   $icon-size: 18px
@@ -272,15 +302,36 @@ html, body
     &:before
       background-color: $action-highlight
 
+.vannot-toolbutton-warn
+  &:before
+    background-color: $warning
+  &:hover:before
+    background-color: $warning-highlight
+
 ////////////////////////////////////////
 // > Toolbar states
 .vannot-toolbar-drawing
-  transform: translateY(#{-$toolbar-height});
+  opacity: 0
+  transform: translateY(#{-$toolbar-height})
+.vannot-toolbar-default
+  opacity: 1
+.vannot-toolbar-shape
+  opacity: 0
+  transform: translateY(#{$toolbar-height})
 .vannot-player.drawing ~ .vannot-toolbar
   .vannot-toolbar-drawing
-    transform: translateY(0);
+    opacity: 1
+    transform: translateY(0)
   .vannot-toolbar-default
-    transform: translateY(#{$toolbar-height});
+    opacity: 0
+    transform: translateY(#{$toolbar-height})
+.vannot-player.shape-select ~ .vannot-toolbar
+  .vannot-toolbar-shape
+    opacity: 1
+    transform: translateY(0)
+  .vannot-toolbar-default
+    opacity: 0
+    transform: translateY(#{-$toolbar-height})
 
 ////////////////////////////////////////
 // > Toolbar icons
@@ -296,6 +347,12 @@ html, body
 .vannot-complete:before
   content: $icon-heart
   text-indent: 2px
+.vannot-duplicate-shape:before
+  content: $icon-duplicate
+  text-indent: -1px
+.vannot-delete-shape:before
+  content: $icon-minus
+  text-indent: 0.5px
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls
