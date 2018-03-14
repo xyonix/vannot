@@ -1,5 +1,5 @@
 const { select, line } = require('d3');
-const { getTemplate, instantiateElems, boolAttr } = require('./util');
+const { getTemplate, instantiateElems, pointsEqual, normalizeBox } = require('./util');
 
 const lineCalc = line()
   .x((point) => point.x)
@@ -30,6 +30,7 @@ const drawShapes = (canvas, target) => {
     // populate our points.
     const points = instantiateElems(select(this).selectAll('.shapePoint').data(shape.points), 'circle', 'shapePoint');
     points
+      .classed('selected', (point) => selectedPoints.includes(point))
       .attr('r', 2)
       .style('fill', color)
       .style('stroke', color)
@@ -50,10 +51,25 @@ const drawWipSegment = (canvas, target) => {
     wipPath.attr('d', lineCalc([ lastPoint, canvas.mouse ]));
 };
 
+const drawSelectionBox = (canvas, target) => {
+  const active = ((canvas.selectionBox != null) && !pointsEqual(canvas.selectionBox[0], canvas.selectionBox[1]));
+  target.classed('active', active);
+
+  if (active) {
+    const box = normalizeBox(canvas.selectionBox);
+    target
+      .attr('x', box[0].x)
+      .attr('y', box[0].y)
+      .attr('width', box[1].x - box[0].x)
+      .attr('height', box[1].y - box[0].y);
+  }
+};
+
 const objectSelect = select('#vannot .vannot-object-select');
 const updateCanvasChrome = (canvas, target) => {
   target.toggleClass('drawing', (canvas.state === 'drawing'));
   target.toggleClass('shape-select', (canvas.state === 'shape-select'));
+  target.toggleClass('point-select', (canvas.state === 'point-select'));
   target.toggleClass('normal', (canvas.state == null));
 
   // update object select dropdown.
@@ -65,5 +81,5 @@ const updateCanvasChrome = (canvas, target) => {
   if (canvas.selectedShape != null) objectSelect.node().value = canvas.selectedShape.objectId;
 };
 
-module.exports = { drawShapes, drawWipSegment, updateCanvasChrome };
+module.exports = { drawShapes, drawWipSegment, drawSelectionBox, updateCanvasChrome };
 

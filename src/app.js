@@ -6,8 +6,8 @@ const $ = require('jquery');
 window.$ = $;
 const { drawShapeList } = require('./shape-list');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
-const { drawShapes, drawWipSegment, updateCanvasChrome } = require('./canvas');
-const { draggable, initiateCanvasDrag, clamp, defer } = require('./util');
+const { drawShapes, drawWipSegment, drawSelectionBox, updateCanvasChrome } = require('./canvas');
+const { draggable, initiateCanvasDrag, clamp, defer, pointsEqual, withinBox } = require('./util');
 
 
 // docready.
@@ -139,6 +139,8 @@ const player = new Player(data.video);
 
 const $canvasWrapper = $('#vannot .vannot-canvas');
 const svg = wrapper.select('svg');
+const shapeContainer = svg.select('.shapes');
+const selectionBox = svg.select('.selectionBox');
 const $svg = $(svg.node());
 const $player = $('#vannot .vannot-player');
 
@@ -162,17 +164,18 @@ class Canvas {
   get selectedPoints() {
     return (this.selectedPoint != null) ? [ this.selectedPoint ]
       : (this.selectedShape != null) ? this.selectedShape.points
-        : this._selectedPoints;
+        : (this._selectedPoints || []);
   }
 
   get frameObj() { return this._frameObj; }
   set frameObj(frameObj) {
     this._frameObj = frameObj;
-    drawShapes(this, svg);
+    drawShapes(this, shapeContainer);
   };
 
   draw() {
-    drawShapes(this, svg);
+    drawShapes(this, shapeContainer);
+    drawSelectionBox(this, selectionBox);
     updateCanvasChrome(this, $player);
   };
 
@@ -203,6 +206,39 @@ class Canvas {
     if (this.selectedShape === shape) return;
     this.state = 'shape-select';
     this.selectedShape = shape;
+    this._selectedPoints = null;
+    this.draw();
+  }
+
+  selectBox() {
+    this.selectedShape = null;
+
+    if ((this.selectionBox != null) && (this.frameObj != null) &&
+      !pointsEqual(this.selectionBox[0], this.selectionBox[1])) {
+      const points = [];
+      for (const shape of this.frameObj.shapes)
+        for (const point of shape.points)
+          if (withinBox(this.selectionBox, point))
+            points.push(point);
+
+      this.state = (points.length > 0) ? 'point-select' : null;
+      this._selectedPoints = points;
+    } else {
+      this.state = null;
+      this._selectedPoints = [];
+    }
+
+    this.draw();
+  }
+  selectBoxDone() {
+    this.selectionBox = null;
+    this.draw();
+  }
+
+  deselect() {
+    this.state = null;
+    this.selectedShape = null;
+    this._selectedPoints = null;
     this.draw();
   }
 
@@ -215,12 +251,6 @@ class Canvas {
       this.deselect();
     else
       this.draw();
-  }
-
-  deselect() {
-    this.state = null;
-    this.selectedShape = null;
-    this.draw();
   }
 }
 const canvas = new Canvas(player, data);
@@ -272,20 +302,44 @@ $wrapper.on('mousemove', '.vannot-player.drawing', (event) => {
   drawWipSegment(canvas, svg);
 });
 
+// drag helpers:
+const initiateCanvasMove = (complete) => initiateCanvasDrag(canvas,
+  ((dx, dy) => {
+    canvas.selectedPoints.forEach((point) => {
+      point.x += dx;
+      point.y += dy;
+    });
+    canvas.draw();
+  }), complete);
+const initiateCanvasSelect = () => {
+  canvas.selectionBox = [ Object.assign({}, canvas.mouse), Object.assign({}, canvas.mouse) ];
+  initiateCanvasDrag(canvas,
+    ((dx, dy) => {
+      canvas.selectionBox[1].x += dx;
+      canvas.selectionBox[1].y += dy;
+      canvas.selectBox();
+    }), () => { canvas.selectBoxDone(); });
+};
+
 // mousedown helpers:
 const tryMousedownPath = (target) => {
-  if (target.tagName === 'path') {
+  if (target.tagName === 'path') { // TODO: be more specific
     canvas.selectShape(select(event.target).datum());
-    initiateCanvasDrag(canvas);
+    initiateCanvasMove();
     return true;
   } else {
     return false;
   }
 };
 
+// TODO: fuse w state machine
 // on mousedown, walk through possible interactions in decreasing priority.
 $wrapper.on('mousedown', '.vannot-player.normal', (event) => {
+  // shape body:
   if (tryMousedownPath(event.target)) return;
+
+  // canvas bg:
+  if (event.target === svg.node()) return initiateCanvasSelect();
 });
 $wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
   if (canvas.wipShape == null) return;
@@ -297,14 +351,35 @@ $wrapper.on('mousedown', '.vannot-player.shape-select', (event) => {
   if (tryMousedownPath(event.target)) return;
 
   // selected shape point:
-  if ($(event.target).is('.selected circle')) {
+  if ($(event.target).is('.shapePoint.selected')) {
     canvas.selectedPoint = select(event.target).datum();
-    initiateCanvasDrag(canvas, () => { canvas.selectedPoint = null; });
+    initiateCanvasMove(() => {
+      canvas.selectedPoint = null;
+      canvas.draw();
+    });
     return;
   }
 
   // canvas bg:
-  if (event.target === svg.node()) return canvas.deselect();
+  if (event.target === svg.node()) {
+    canvas.deselect();
+    initiateCanvasSelect();
+    return;
+  }
+});
+$wrapper.on('mousedown', '.vannot-player.point-select', (event) => {
+  // shape body:
+  if (tryMousedownPath(event.target)) return;
+
+  // selected shape point:
+  if ($(event.target).is('.shapePoint.selected')) return initiateCanvasMove();
+
+  // canvas bg:
+  if (event.target === svg.node()) {
+    canvas.deselect();
+    initiateCanvasSelect();
+    return;
+  }
 });
 
 ////////////////////////////////////////

@@ -217,8 +217,17 @@ html, body
       fill-opacity: 0.4
       stroke-width: 2px
 
+    .selected
+      .shapePath
+        stroke-width: 4px
+
     .shapePoint
       stroke-width: 0
+      &.selected
+        stroke-width: 6px
+        transition-duration: 0.1s
+        &:hover
+          stroke-width: 12px
 
     .wip
       .shapePath
@@ -227,14 +236,14 @@ html, body
       //.shapePath, .shapePoint
         //@include flash
 
-    .selected
-      .shapePath
-        stroke-width: 4px
-      .shapePoint
-        stroke-width: 6px
-        transition-duration: 0.1s
-        &:hover
-          stroke-width: 12px
+    .selectionBox
+      visibility: hidden
+      &.active
+        fill: $action
+        fill-opacity: 0.5
+        stroke: $action
+        stroke-width: 2px
+        visibility: visible
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Toolbar
@@ -335,6 +344,10 @@ html, body
   .vannot-toolbar-default
     opacity: 0
     transform: translateY(#{-$toolbar-height})
+.vannot-player.point-select ~ .vannot-toolbar > div
+  opacity: 0.3
+  pointer-events: none
+
 
 ////////////////////////////////////////
 // > Toolbar icons

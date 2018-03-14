@@ -1,5 +1,5 @@
 const { select } = require('d3');
-const { floor } = Math;
+const { floor, min, max, sqrt, pow } = Math;
 const $ = require('jquery');
 
 
@@ -7,6 +7,7 @@ const $ = require('jquery');
 // MATH HELPERS
 
 const clamp = (min, x, max) => (x < min) ? min : (x > max) ? max : x;
+const square = (x) => pow(x, 2);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,8 +34,6 @@ const instantiateElems = (selection, tagName, className) => {
 
 // and one last shortcut for the above to just make divs.
 const instantiateDivs = (selection, className) => instantiateElems(selection, 'div', className);
-
-const boolAttr = (bool) => (bool === true) ? 'true' : null;
 
 const pct = (x) => `${x * 100}%`;
 
@@ -101,7 +100,7 @@ const draggable = (target, callback) => {
 };
 
 const $player = $('#vannot .vannot-player');
-const initiateCanvasDrag = (canvas, complete) => {
+const initiateCanvasDrag = (canvas, update, complete) => {
   let lastX = canvas.mouse.x;
   let lastY = canvas.mouse.y;
 
@@ -109,11 +108,7 @@ const initiateCanvasDrag = (canvas, complete) => {
   $player.on(eventName, () => {
     const dx = canvas.mouse.x - lastX;
     const dy = canvas.mouse.y - lastY;
-    canvas.selectedPoints.forEach((point) => {
-      point.x += dx;
-      point.y += dy;
-    });
-    canvas.draw();
+    update(dx, dy);
 
     lastX = canvas.mouse.x;
     lastY = canvas.mouse.y;
@@ -127,10 +122,28 @@ const initiateCanvasDrag = (canvas, complete) => {
 
 const defer = (f) => setTimeout(f, 0);
 
+
+////////////////////////////////////////////////////////////////////////////////
+// POINT MATH
+
+const pointsEqual = (a, b) => (a.x === b.x) && (a.y === b.y);
+const distance = (a, b) => sqrt(square(a.x - b.x) + square(a.y - b.y));
+const normalizeBox = (box) => [
+  { x: min(box[0].x, box[1].x), y: min(box[0].y, box[1].y) },
+  { x: max(box[0].x, box[1].x), y: max(box[0].y, box[1].y) }
+];
+
+const withinBox = (box, point) => {
+  const normalized = normalizeBox(box);
+  return (normalized[0].x <= point.x) && (point.x <= normalized[1].x) &&
+    (normalized[0].y <= point.y) && (point.y <= normalized[1].y);
+};
+
 module.exports = {
   clamp,
-  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, boolAttr, pct,
+  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, pct,
   pad, timecode, timecodePretty,
-  draggable, initiateCanvasDrag, defer
+  draggable, initiateCanvasDrag, defer,
+  pointsEqual, distance, normalizeBox, withinBox
 };
 
