@@ -7,7 +7,7 @@ window.$ = $;
 const { drawShapeList } = require('./shape-list');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
 const { drawShapes, drawWipSegment, updateCanvasChrome } = require('./canvas');
-const { draggable, clamp, defer } = require('./util');
+const { draggable, initiateCanvasDrag, clamp, defer } = require('./util');
 
 
 // docready.
@@ -237,7 +237,7 @@ $(window).on('resize', () => {
   playerHeight = $player.height() - playerPadding;
 });
 
-// actually allow clicking on the entire video area. this means we have to do some
+// actually allow clicking on the entire canvas area. this means we have to do some
 // scuzzy measurement and math to figure out origin but it makes drawing much easier
 // in some cases.
 $(document).on('mousemove', (event) => {
@@ -258,16 +258,28 @@ $(document).on('mousemove', (event) => {
   const x = (pageX - (playerPadding / 2) - originX) * factor;
   const y = (pageY - (playerPadding / 2) - originY) * factor;
 
-  // save it.
+  // save and notify.
   canvas.mouse = { x, y };
+  $player.trigger('canvas-mouse-update');
 });
 $wrapper.on('mousemove', '.vannot-player.drawing', (event) => {
   drawWipSegment(canvas, svg);
 });
 
+// mousedown helpers:
+const tryMousedownPath = (target) => {
+  if (target.tagName === 'path') {
+    canvas.selectShape(select(event.target).datum());
+    initiateCanvasDrag(canvas);
+    return true;
+  } else {
+    return false;
+  }
+};
+
 // on mousedown, walk through possible interactions in decreasing priority.
 $wrapper.on('mousedown', '.vannot-player.normal', (event) => {
-  if (event.target.tagName === 'path') return canvas.selectShape(select(event.target).datum());
+  if (tryMousedownPath(event.target)) return;
 });
 $wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
   if (canvas.wipShape == null) return;
@@ -275,7 +287,7 @@ $wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
   canvas.draw();
 });
 $wrapper.on('mousedown', '.vannot-player.shape-select', (event) => {
-  if (event.target.tagName === 'path') return canvas.selectShape(select(event.target).datum());
+  if (tryMousedownPath(event.target)) return;
   if (event.target === svg.node()) return canvas.deselect();
 });
 

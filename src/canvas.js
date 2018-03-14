@@ -61,8 +61,8 @@ const updateCanvasChrome = (canvas, target) => {
   const options = instantiateElems(objectSelect.selectAll('option').data(objectOptions), 'option');
   options
     .attr('value', (object) => object.id)
-    .text((object) => object.title)
-    .attr('selected', (object) => boolAttr((canvas.selectedShape != null) && (canvas.selectedShape.objectId === object.id)));
+    .text((object) => object.title);
+  if (canvas.selectedShape != null) objectSelect.node().value = canvas.selectedShape.objectId;
 };
 
 module.exports = { drawShapes, drawWipSegment, updateCanvasChrome };

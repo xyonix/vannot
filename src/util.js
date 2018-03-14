@@ -100,12 +100,34 @@ const draggable = (target, callback) => {
   });
 };
 
+const $player = $('#vannot .vannot-player');
+const initiateCanvasDrag = (canvas) => {
+  let lastX = canvas.mouse.x;
+  let lastY = canvas.mouse.y;
+
+  const eventName = `canvas-mouse-update.${(new Date()).getTime().toString()}`;
+  $player.on(eventName, () => {
+    const dx = canvas.mouse.x - lastX;
+    const dy = canvas.mouse.y - lastY;
+    canvas.selectedPoints.forEach((point) => {
+      point.x += dx;
+      point.y += dy;
+    });
+    canvas.draw();
+
+    lastX = canvas.mouse.x;
+    lastY = canvas.mouse.y;
+  });
+
+  $document.one('mouseup', () => $player.off(eventName));
+};
+
 const defer = (f) => setTimeout(f, 0);
 
 module.exports = {
   clamp,
   getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, boolAttr, pct,
   pad, timecode, timecodePretty,
-  draggable, defer
+  draggable, initiateCanvasDrag, defer
 };
 
