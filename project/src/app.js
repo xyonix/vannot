@@ -16,28 +16,22 @@ $(function() {
 ////////////////////////////////////////////////////////////////////////////////
 // DUMMY DATA
 
-const data = {
-  _seqId: 4,
-  video: { duration: 182970, fps: 30, height: 720, width: 1280, source: '/assets/lttp.mp4' },
-  objects: [
-    { id: 1, title: 'Link', color: '#07e4ff' },
-    { id: 2, title: 'Enemy', color: '#ff2096' },
-    { id: 3, title: 'Obstacle', color: '#ccb71a' }
-  ],
-  frames: [{
-    frame: 2490,
-    shapes: [{
-      id: 1, objectId: 1, points: [{ x: 200, y: 300 }, { x: 400, y: 300 }, { x: 400, y: 500 }, { x: 200, y: 500 }]
-    }, {
-      id: 2, objectId: 2, points: [{ x: 500, y: 600 }, { x: 700, y: 600 }, { x: 700, y: 700 }, { x: 500, y: 700 }]
-    }]
-  }, {
-    frame: 4492,
-    shapes: [{
-      id: 3, objectId: 1, points: [{ x: 100, y: 150 }, { x: 500, y: 150 }, { x: 200, y: 500 }, { x: 100, y: 500 }]
-    }]
-  }]
+const getData = () => {
+  const saved = localStorage.getItem('vannot');
+  return (saved != null) ? JSON.parse(saved) : {
+    _seqId: 0,
+    video: { duration: 125100, fps: 25, height: 1080, width: 1920, source: '/assets/sailing.mp4' },
+    objects: [
+      { id: -1, title: 'Unassigned', color: '#aaa' },
+      { id: 1, title: 'Port', color: '#07e4ff' },
+      { id: 2, title: 'Starboard', color: '#ff2096' },
+      { id: 3, title: 'Obstacle', color: '#ccb71a' }
+    ],
+    frames: []
+  };
 };
+const data = getData();
+window.saveData = () => localStorage.setItem('vannot', JSON.stringify(data));
 
 
 ////////////////////////////////////////////////////////////////////////////////

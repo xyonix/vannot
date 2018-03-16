@@ -73,8 +73,7 @@ const updateCanvasChrome = (canvas, target) => {
   target.toggleClass('normal', (canvas.state == null));
 
   // update object select dropdown.
-  const objectOptions = [{ id: -1, title: 'Unassigned', color: '#aaa' }].concat(canvas.data.objects);
-  const options = instantiateElems(objectSelect.selectAll('option').data(objectOptions), 'option');
+  const options = instantiateElems(objectSelect.selectAll('option').data(canvas.data.objects), 'option');
   options
     .attr('value', (object) => object.id)
     .text((object) => object.title);
