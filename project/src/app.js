@@ -6,7 +6,7 @@ const $ = require('jquery');
 window.$ = $;
 const { drawShapeList } = require('./shape-list');
 const { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks } = require('./timeline');
-const { drawShapes, drawWipSegment, drawSelectionBox, updateCanvasChrome } = require('./canvas');
+const { setupSvg, drawShapes, drawWipSegment, drawSelectionBox, updateCanvasChrome } = require('./canvas');
 const { draggable, initiateCanvasDrag, clamp, defer, pointsEqual, withinBox } = require('./util');
 
 
@@ -164,10 +164,11 @@ class Canvas {
   get frameObj() { return this._frameObj; }
   set frameObj(frameObj) {
     this._frameObj = frameObj;
-    drawShapes(this, shapeContainer);
+    this.draw();
   };
 
   draw() {
+    setupSvg(this, svg);
     drawShapes(this, shapeContainer);
     drawSelectionBox(this, selectionBox);
     updateCanvasChrome(this, $player);

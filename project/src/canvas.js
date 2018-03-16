@@ -5,6 +5,11 @@ const lineCalc = line()
   .x((point) => point.x)
   .y((point) => point.y);
 
+const setupSvg = (canvas, target) => {
+  const { width, height } = canvas.data.video;
+  target.attr('viewBox', `0 0 ${width} ${height}`);
+};
+
 const drawShapes = (canvas, target) => {
   const shapesData = (canvas.frameObj == null) ? [] : (canvas.frameObj.shapes);
   const shapes = instantiateElems(target.selectAll('.trackingShape').data(shapesData), 'g', 'trackingShape');
@@ -80,5 +85,5 @@ const updateCanvasChrome = (canvas, target) => {
   if (canvas.selectedShape != null) objectSelect.node().value = canvas.selectedShape.objectId;
 };
 
-module.exports = { drawShapes, drawWipSegment, drawSelectionBox, updateCanvasChrome };
+module.exports = { setupSvg, drawShapes, drawWipSegment, drawSelectionBox, updateCanvasChrome };
 
