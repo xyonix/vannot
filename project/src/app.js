@@ -197,6 +197,32 @@ class Canvas {
     this.draw();
   }
 
+  copyLast() {
+    // find the previous frame; bail if it doesn't exist.
+    const prevFrame = this.data.frames.reduce(((closest, candidate) =>
+      (candidate.frame < this.player.frame) && ((closest == null) || (candidate.frame > closest.frame))
+        ? candidate : closest), null);
+    if (prevFrame == null) return; // TODO: show message (or disable in the first place).
+
+    // do our data cloning; keep track of which points to select.
+    this.ensureFrameObj();
+    const thisFrame = this.frameObj;
+    const pointsToSelect = [];
+    prevFrame.shapes.forEach((shape) => {
+      // do this a bit manually since we want to copy data, not refs.
+      const clone = { id: this.data._seqId++, objectId: shape.objectId, points: [] };
+      shape.points.forEach((point) => clone.points.push({ x: point.x, y: point.y }));
+      pointsToSelect.push(...clone.points);
+      thisFrame.shapes.push(clone);
+    });
+
+    // update ui.
+    this.selectedShape = null;
+    this._selectedPoints = pointsToSelect;
+    this.state = 'point-select';
+    this.draw();
+  }
+
   selectShape(shape) {
     if (this.selectedShape === shape) return;
     this.state = 'shape-select';
@@ -256,9 +282,6 @@ const canvas = new Canvas(player, data);
 
 ////////////////////////////////////////
 // > Drawing
-
-// the canvas object will trigger all the things to go to draw mode; just ask.
-$('#vannot .vannot-draw-shape').on('click', () => { canvas.startShape() });
 
 // ugly but much better for perf:
 const playerPadding = 40;
@@ -379,6 +402,11 @@ $wrapper.on('mousedown', '.vannot-player.point-select', (event) => {
 
 ////////////////////////////////////////
 // > Toolbar
+
+// the canvas object will trigger all the things to go to draw mode; just ask.
+$('#vannot .vannot-draw-shape').on('click', () => { canvas.startShape(); });
+
+$('#vannot .vannot-copy-last').on('click', () => { canvas.copyLast(); });
 
 // a cute trick to make the complete shape button complete the shape.
 const completeButton = $('#vannot .vannot-complete');
