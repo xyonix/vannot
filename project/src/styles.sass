@@ -377,7 +377,7 @@ $control-button-size: 60px
 
 .vannot-controls-buttons
   margin: 0 auto
-  width: $control-button-size * 5
+  width: $control-button-size * 7
 
   button
     background: none
@@ -398,7 +398,7 @@ $control-button-size: 60px
   &:before
     content: $icon-doubleleft
 
-.vannot-skipback
+.vannot-skipback, .vannot-keyback
   @include icon
   &:before
     content: $icon-left
@@ -411,7 +411,7 @@ $control-button-size: 60px
     #vannot.playing &
       content: $icon-pause
 
-.vannot-skipforward
+.vannot-skipforward, .vannot-keyforward
   @include icon
   &:before
     content: $icon-right
@@ -420,6 +420,25 @@ $control-button-size: 60px
   @include icon
   &:before
     content: $icon-doubleright
+
+.vannot-keyback, .vannot-keyforward
+  $size: 8px
+  position: relative
+  &:after
+    @include reify
+    background: #aaa
+    border: 1px solid #fff
+    height: $size;
+    position: absolute;
+    top: ($control-button-size - $size) / 2
+    transform: rotate(45deg);
+    width: $size;
+
+// TODO: calculate:
+.vannot-keyback:after
+  right: 14px
+.vannot-keyforward:after
+  left: 14px
 
 .vannot-timecode
   background: $background

@@ -167,6 +167,17 @@ class Canvas {
     this.draw();
   };
 
+  prevFrame() {
+    return this.data.frames.reduce(((closest, candidate) =>
+      (candidate.frame < this.player.frame) && ((closest == null) || (candidate.frame > closest.frame))
+        ? candidate : closest), null);
+  }
+  nextFrame() { // TODO: copypasta
+    return this.data.frames.reduce(((closest, candidate) =>
+      (candidate.frame > this.player.frame) && ((closest == null) || (candidate.frame < closest.frame))
+        ? candidate : closest), null);
+  }
+
   draw() {
     setupSvg(this, svg);
     drawShapes(this, shapeContainer);
@@ -199,9 +210,7 @@ class Canvas {
 
   copyLast() {
     // find the previous frame; bail if it doesn't exist.
-    const prevFrame = this.data.frames.reduce(((closest, candidate) =>
-      (candidate.frame < this.player.frame) && ((closest == null) || (candidate.frame > closest.frame))
-        ? candidate : closest), null);
+    const prevFrame = this.prevFrame();
     if (prevFrame == null) return; // TODO: show message (or disable in the first place).
 
     // do our data cloning; keep track of which points to select.
@@ -451,12 +460,18 @@ $('#vannot .vannot-delete-shape').on('click', (event) => {
 ////////////////////////////////////////
 // > Controls
 
+const tryseek = (f) => () => {
+  const frame = f();
+  if (frame != null) player.seek(frame.frame);
+};
 const relseek = (x) => () => player.seek(player.frame + x);
+$('#vannot .vannot-keyback').on('click', tryseek(() => canvas.prevFrame()));
 $('#vannot .vannot-leapback').on('click', relseek(-5));
 $('#vannot .vannot-skipback').on('click', relseek(-1));
 $('#vannot .vannot-playpause').on('click', () => (player.playing ? videoObj.pause() : videoObj.play()));
 $('#vannot .vannot-skipforward').on('click', relseek(1));
 $('#vannot .vannot-leapforward').on('click', relseek(5));
+$('#vannot .vannot-keyforward').on('click', tryseek(() => canvas.nextFrame()));
 
 ////////////////////////////////////////
 // > Playhead dragging
