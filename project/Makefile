@@ -19,8 +19,8 @@ lib/styles.css: src/styles.sass lib node_modules
 lib/index.html: src/index.html lib
 	cp $< $@
 
-lib/assets: lib
-	@mkdir -p lib/assets
+lib/assets: src/assets lib
+	mkdir -p lib/assets
 
 lib/assets/%: src/assets/% lib/assets
 	cp $< $@
