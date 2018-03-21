@@ -99,13 +99,13 @@ const draggable = (target, callback) => {
   });
 };
 
-const $player = $('#vannot .vannot-player');
+const $viewport = $('#vannot .vannot-viewport');
 const initiateCanvasDrag = (canvas, update, complete) => {
   let lastX = canvas.mouse.x;
   let lastY = canvas.mouse.y;
 
   const eventName = `canvas-mouse-update.${(new Date()).getTime().toString()}`;
-  $player.on(eventName, () => {
+  $viewport.on(eventName, () => {
     const dx = canvas.mouse.x - lastX;
     const dy = canvas.mouse.y - lastY;
     update(dx, dy);
@@ -115,7 +115,7 @@ const initiateCanvasDrag = (canvas, update, complete) => {
   });
 
   $document.one('mouseup', () => {
-    $player.off(eventName);
+    $viewport.off(eventName);
     if (typeof complete === 'function') complete();
   });
 };

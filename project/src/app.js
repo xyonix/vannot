@@ -40,7 +40,6 @@ window.saveData = () => localStorage.setItem('vannot', JSON.stringify(data));
 const wrapper = select('#vannot');
 const $wrapper = $('#vannot');
 
-const leftWrapper = wrapper.select('.vannot-player-left');
 const $video = $('#vannot video');
 const videoObj = $video.get(0);
 
@@ -109,7 +108,6 @@ class Player {
     defer(() => { // defer work to get as many updates as possible.
       drawTimecode(this, timecode);
       drawPlayhead(this, playhead);
-      drawShapeList(data, this, leftWrapper);
       $wrapper.trigger('frameChange', this._frame);
     });
   }
@@ -136,7 +134,8 @@ const svg = wrapper.select('svg');
 const shapeContainer = svg.select('.shapes');
 const selectionBox = svg.select('.selectionBox');
 const $svg = $(svg.node());
-const $player = $('#vannot .vannot-player');
+const $viewport = $('#vannot .vannot-viewport');
+const $app = $('#vannot .vannot-app');
 
 class Canvas {
   constructor(player, data) {
@@ -152,7 +151,7 @@ class Canvas {
     $wrapper.on('frameChange', updateFrame);
     updateFrame();
 
-    updateCanvasChrome(this, $player);
+    updateCanvasChrome(this, $app);
   };
 
   get selectedPoints() {
@@ -182,7 +181,7 @@ class Canvas {
     setupSvg(this, svg);
     drawShapes(this, shapeContainer);
     drawSelectionBox(this, selectionBox);
-    updateCanvasChrome(this, $player);
+    updateCanvasChrome(this, $app);
   };
 
   ensureFrameObj() {
@@ -294,10 +293,10 @@ const canvas = new Canvas(player, data);
 
 // ugly but much better for perf:
 const playerPadding = 40;
-let playerWidth = $player.width() - playerPadding, playerHeight = $player.height() - playerPadding;
+let playerWidth = $viewport.width() - playerPadding, playerHeight = $viewport.height() - playerPadding;
 $(window).on('resize', () => {
-  playerWidth = $player.width() - playerPadding;
-  playerHeight = $player.height() - playerPadding;
+  playerWidth = $viewport.width() - playerPadding;
+  playerHeight = $viewport.height() - playerPadding;
 });
 
 // actually allow clicking on the entire canvas area. this means we have to do some
@@ -323,9 +322,9 @@ $(document).on('mousemove', (event) => {
 
   // save and notify.
   canvas.mouse = { x, y };
-  $player.trigger('canvas-mouse-update');
+  $viewport.trigger('canvas-mouse-update');
 });
-$wrapper.on('mousemove', '.vannot-player.drawing', (event) => {
+$wrapper.on('mousemove', '.vannot-app.drawing', (event) => {
   drawWipSegment(canvas, svg);
 });
 
@@ -361,19 +360,19 @@ const tryMousedownPath = (target) => {
 
 // TODO: fuse w state machine
 // on mousedown, walk through possible interactions in decreasing priority.
-$wrapper.on('mousedown', '.vannot-player.normal', (event) => {
+$wrapper.on('mousedown', '.vannot-app.normal .vannot-viewport', (event) => {
   // shape body:
   if (tryMousedownPath(event.target)) return;
 
   // canvas bg:
   if (event.target === svg.node()) return initiateCanvasSelect();
 });
-$wrapper.on('mousedown', '.vannot-player.drawing', (event) => {
+$wrapper.on('mousedown', '.vannot-app.drawing .vannot-viewport', (event) => {
   if (canvas.wipShape == null) return;
   canvas.wipShape.points.push(Object.assign({}, canvas.mouse));
   canvas.draw();
 });
-$wrapper.on('mousedown', '.vannot-player.shape-select', (event) => {
+$wrapper.on('mousedown', '.vannot-app.shape-select .vannot-viewport', (event) => {
   // shape body:
   if (tryMousedownPath(event.target)) return;
 
@@ -394,7 +393,7 @@ $wrapper.on('mousedown', '.vannot-player.shape-select', (event) => {
     return;
   }
 });
-$wrapper.on('mousedown', '.vannot-player.point-select', (event) => {
+$wrapper.on('mousedown', '.vannot-app.point-select .vannot-viewport', (event) => {
   // shape body:
   if (tryMousedownPath(event.target)) return;
 

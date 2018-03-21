@@ -6,70 +6,72 @@
   </head>
   <body>
     <div id="vannot">
-      <div class="vannot-player">
-        <div class="vannot-video"><video/></div>
-        <div class="vannot-canvas">
-          <svg viewBox="0 0 1280 720">
-            <g class="shapes"/>
-            <path class="wipPath"/>
-            <circle class="wipPoint" r="5"/>
-            <rect class="selectionBox"/>
-          </svg>
-        </div>
-      </div>
-      <div class="vannot-toolbar">
-        <div class="vannot-toolbar-drawing">
-          <label>Click in the video image to add points to your shape.</label>
-          <button class="vannot-toolbutton vannot-undo-draw">Undo</button>
-          <button class="vannot-toolbutton vannot-complete">Complete</button>
-        </div>
-        <div class="vannot-toolbar-default">
-          <button class="vannot-toolbutton vannot-draw-shape">Draw</button>
-          <button class="vannot-toolbutton vannot-copy-last">Carry over</button>
-        </div>
-        <div class="vannot-toolbar-shape">
-          <label>Selected shape</label>
-          <div class="vannot-select-group">
-            <label>Part of</label>
-            <select class="vannot-object-select"></select>
+      <div class="vannot-app">
+        <div class="vannot-viewport">
+          <div class="vannot-video"><video/></div>
+          <div class="vannot-canvas">
+            <svg viewBox="0 0 1280 720">
+              <g class="shapes"/>
+              <path class="wipPath"/>
+              <circle class="wipPoint" r="5"/>
+              <rect class="selectionBox"/>
+            </svg>
           </div>
-          <button class="vannot-toolbutton vannot-duplicate-shape">Duplicate</button>
-          <button class="vannot-toolbutton vannot-toolbutton-warn vannot-delete-shape">Delete</button>
         </div>
-      </div>
-      <div class="vannot-controls">
-        <div class="vannot-controls-buttons">
-          <button class="vannot-keyback" title="Jump to previous keyframe"></button>
-          <button class="vannot-leapback" title="Rewind 5 frames"></button>
-          <button class="vannot-skipback" title="Rewind 1 frame"></button>
-          <button class="vannot-playpause" title="Play/Pause"></button>
-          <button class="vannot-skipforward" title="Advance 1 frame"></button>
-          <button class="vannot-leapforward" title="Advance 5 frames"></button>
-          <button class="vannot-keyforward" title="Jump to next keyframe"></button>
+        <div class="vannot-toolbar">
+          <div class="vannot-toolbar-drawing">
+            <label>Click in the video image to add points to your shape.</label>
+            <button class="vannot-toolbutton vannot-undo-draw">Undo</button>
+            <button class="vannot-toolbutton vannot-complete">Complete</button>
+          </div>
+          <div class="vannot-toolbar-default">
+            <button class="vannot-toolbutton vannot-draw-shape">Draw</button>
+            <button class="vannot-toolbutton vannot-copy-last">Carry over</button>
+          </div>
+          <div class="vannot-toolbar-shape">
+            <label>Selected shape</label>
+            <div class="vannot-select-group">
+              <label>Part of</label>
+              <select class="vannot-object-select"></select>
+            </div>
+            <button class="vannot-toolbutton vannot-duplicate-shape">Duplicate</button>
+            <button class="vannot-toolbutton vannot-toolbutton-warn vannot-delete-shape">Delete</button>
+          </div>
         </div>
-        <div class="vannot-timecode">
-          <span class="vannot-timecode-hh">00</span>
-          :
-          <span class="vannot-timecode-mm">00</span>
-          :
-          <span class="vannot-timecode-ss">00</span>
-          .
-          <span class="vannot-timecode-fr">00</span>
+        <div class="vannot-controls">
+          <div class="vannot-controls-buttons">
+            <button class="vannot-keyback" title="Jump to previous keyframe"></button>
+            <button class="vannot-leapback" title="Rewind 5 frames"></button>
+            <button class="vannot-skipback" title="Rewind 1 frame"></button>
+            <button class="vannot-playpause" title="Play/Pause"></button>
+            <button class="vannot-skipforward" title="Advance 1 frame"></button>
+            <button class="vannot-leapforward" title="Advance 5 frames"></button>
+            <button class="vannot-keyforward" title="Jump to next keyframe"></button>
+          </div>
+          <div class="vannot-timecode">
+            <span class="vannot-timecode-hh">00</span>
+            :
+            <span class="vannot-timecode-mm">00</span>
+            :
+            <span class="vannot-timecode-ss">00</span>
+            .
+            <span class="vannot-timecode-fr">00</span>
+          </div>
         </div>
-      </div>
-      <div class="vannot-timeline">
-        <div class="vannot-scale">
-          <div class="vannot-ticks"></div>
-          <div class="vannot-playhead"></div>
-        </div>
-        <div class="vannot-tracks">
-          <div class="vannot-objects"></div>
-          <div class="vannot-ranges"></div>
-        </div>
-        <div class="vannot-ranger">
-          <div class="vannot-ranger-fill"></div>
-          <div class="vannot-ranger-start"></div>
-          <div class="vannot-ranger-end"></div>
+        <div class="vannot-timeline">
+          <div class="vannot-scale">
+            <div class="vannot-ticks"></div>
+            <div class="vannot-playhead"></div>
+          </div>
+          <div class="vannot-tracks">
+            <div class="vannot-objects"></div>
+            <div class="vannot-ranges"></div>
+          </div>
+          <div class="vannot-ranger">
+            <div class="vannot-ranger-fill"></div>
+            <div class="vannot-ranger-start"></div>
+            <div class="vannot-ranger-end"></div>
+          </div>
         </div>
       </div>
     </div>

@@ -138,7 +138,7 @@ html, body
   -webkit-user-select: none
   -moz-user-select: none
 
-.vannot-player
+.vannot-viewport
   @include fill
   bottom: $toolbar-height + $controls-height + $timeline-height
 
@@ -330,21 +330,21 @@ html, body
 .vannot-toolbar-shape
   opacity: 0
   transform: translateY(#{$toolbar-height})
-.vannot-player.drawing ~ .vannot-toolbar
+.vannot-app.drawing .vannot-toolbar
   .vannot-toolbar-drawing
     opacity: 1
     transform: translateY(0)
   .vannot-toolbar-default
     opacity: 0
     transform: translateY(#{$toolbar-height})
-.vannot-player.shape-select ~ .vannot-toolbar
+.vannot-app.shape-select .vannot-toolbar
   .vannot-toolbar-shape
     opacity: 1
     transform: translateY(0)
   .vannot-toolbar-default
     opacity: 0
     transform: translateY(#{-$toolbar-height})
-.vannot-player.point-select ~ .vannot-toolbar > div
+.vannot-app.point-select .vannot-toolbar > div
   opacity: 0.3
   pointer-events: none
 
