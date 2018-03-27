@@ -4,7 +4,8 @@
   "private": true,
   "dependencies": {
     "d3": "~4",
-    "jquery": "~3"
+    "jquery": "~3",
+    "ramda": "~0.25"
   },
   "devDependencies": {
     "browserify": "~16",

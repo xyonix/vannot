@@ -11,7 +11,7 @@ lib:
 	@mkdir -p lib/
 
 lib/app.js: src/app.js lib node_modules $(CODE)
-	node node_modules/browserify/bin/cmd.js -e $< -o $@ --im
+	node node_modules/browserify/bin/cmd.js -e $< -o $@
 
 lib/styles.css: src/styles.sass lib node_modules
 	node node_modules/node-sass/bin/node-sass --output-style compressed $< > $@

@@ -11,6 +11,16 @@ const square = (x) => pow(x, 2);
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// ARRAY HELPERS
+
+const last = (array) => array[array.length - 1];
+const spliceOut = (elem, array) => {
+  const idx = array.indexOf(elem);
+  if (idx >= 0) array.splice(idx, 1);
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
 // D3 HELPERS
 
 // fetch a template from the DOM.
@@ -36,6 +46,9 @@ const instantiateElems = (selection, tagName, className) => {
 const instantiateDivs = (selection, className) => instantiateElems(selection, 'div', className);
 
 const pct = (x) => `${x * 100}%`;
+
+// takes a jquery element and gets the d3 data out of it.
+const datum = ($elem) => select($elem[0]).datum();
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,51 +89,47 @@ const timecodePretty = (frame, fps, showFrames = false) => {
 // assists with dragging tasks. does not actually manipulate the element; provides
 // basic event tracking and maths for updating the model which then sets position.
 //
-// the callback is given (dx, dy) in pixels from the last reported position. it
-// may return false if the interval was too small to react to, in which case the
-// following deltas will still be from the last known anchor.
+// the callback is given (dx, dy) in pixels from the initial position.
 const $document = $(document);
-const draggable = (target, callback) => {
-  $(target).on('mousedown', (event) => {
+const draggable = ($target, callback) => {
+  $target.on('mousedown', (event) => {
     if (event.isDefaultPrevented()) return; // someone already handled this.
     if (event.button !== 0) return; // ignore right-click.
 
     event.preventDefault();
-    let lastX = event.pageX;
-    let lastY = event.pageY;
+    const initX = event.pageX;
+    const initY = event.pageY;
 
+    let memo = undefined;
     $document.on('mousemove.draggable', (event) => {
-      if (callback(event.pageX - lastX, event.pageY - lastY) !== false) {
-        lastX = event.pageX;
-        lastY = event.pageY;
-      }
+      memo = callback(event.pageX - initX, event.pageY - initY, memo);
     });
-    $document.one('mouseup', () => $document.off('mousemove.draggable'));
+    $document.one('mouseup', () => { $document.off('mousemove.draggable'); });
   });
 };
-
-const $viewport = $('#vannot .vannot-viewport');
-const initiateCanvasDrag = (canvas, update, complete) => {
-  let lastX = canvas.mouse.x;
-  let lastY = canvas.mouse.y;
-
-  const eventName = `canvas-mouse-update.${(new Date()).getTime().toString()}`;
-  $viewport.on(eventName, () => {
-    const dx = canvas.mouse.x - lastX;
-    const dy = canvas.mouse.y - lastY;
-    update(dx, dy);
-
-    lastX = canvas.mouse.x;
-    lastY = canvas.mouse.y;
-  });
-
-  $document.one('mouseup', () => {
-    $viewport.off(eventName);
-    if (typeof complete === 'function') complete();
-  });
+// can be inserted around a callback to draggable to convert the reported dx, dy
+// from being relative to the origin to being relative to the previous report.
+const byDelta = (f) => {
+  let lastx = 0, lasty = 0;
+  return (x, y, { lastx = 0, lasty = 0 } = {}) => {
+    f(x - lastx, y - lasty);
+    return { lastx: x, lasty: y };
+  };
 };
 
 const defer = (f) => setTimeout(f, 0);
+
+const queuer = (callback) => {
+  let scheduled = false;
+  return () => {
+    if (scheduled === true) return;
+    scheduled = true;
+    window.requestAnimationFrame(() => {
+      scheduled = false;
+      callback();
+    });
+  };
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,11 +148,13 @@ const withinBox = (box, point) => {
     (normalized[0].y <= point.y) && (point.y <= normalized[1].y);
 };
 
+
 module.exports = {
   clamp,
-  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, pct,
+  last, spliceOut,
+  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, pct, datum,
   pad, timecode, timecodePretty,
-  draggable, initiateCanvasDrag, defer,
+  draggable, byDelta, defer, queuer,
   pointsEqual, distance, normalizeBox, withinBox
 };
 

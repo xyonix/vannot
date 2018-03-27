@@ -1,9 +1,13 @@
 const { ceil } = Math;
 const { select, scaleLinear } = require('d3');
-const { getTemplate, instantiateTemplates, instantiateDivs, pct, pad, timecode, timecodePretty } = require('./util');
+const { getTemplate, instantiateTemplates, instantiateDivs, pct, pad, timecode, timecodePretty, queuer } = require('../util');
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// DRAWING ROUTINES
+// Completely stateless routines that each update one part of the timeline/player UI.
+
+////////////////////////////////////////
 // TIMECODE
 
 const drawTimecode = (player, target) => {
@@ -14,7 +18,7 @@ const drawTimecode = (player, target) => {
   target.select('.vannot-timecode-fr').text(pad(parts.frame));
 };
 
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////
 // TICK SCALE
 
 // given start, end in frames, fps, and width in pixels, creates an array of
@@ -66,10 +70,13 @@ const drawPlayhead = (player, target) => {
   if (inRange === true) target.style('left', pct(scaled));
 };
 
+////////////////////////////////////////
+// RANGER
+
 const minThumb = 100; // the smallest pxwidth the scrollthumb can get
 const drawRanger = (player, target) => {
   // account for deadzone due to minThumb:
-  const deadzone = minThumb / player.width / 2; // px/px => unit
+  const deadzone = minThumb / target.node().clientWidth / 2; // px/px => unit
   const wholeScale = scaleLinear().domain([ 0, player.video.duration ]).range([ deadzone, 1 - deadzone ]);
   const centerFrame = (player.range[1] - player.range[0]) / 2 + player.range[0];
   const thumbCenter = wholeScale(centerFrame);
@@ -86,8 +93,7 @@ const drawRanger = (player, target) => {
   target.select('.vannot-ranger-end').style('right', pct(rightPos));
 };
 
-
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////
 // DATA TRACKS
 
 // draws the collection of data-driven timeline row at the bottom of the screen.
@@ -116,5 +122,57 @@ const subdrawTrackpoints = (frames, player) => function(object) {
 };
 
 
-module.exports = { drawTimecode, drawTicks, drawPlayhead, drawRanger, drawObjectTracks, drawTrackpoints };
+////////////////////////////////////////////////////////////////////////////////
+// RENDER SCHEDULER
+// Ties into the Player viewmodel and schedules the appropriate drawing
+// operations. Queues them up so rapid changes don't cause drawchurn.
+
+const drawer = (app, player) => {
+  const tickWrapper = app.select('.vannot-ticks');
+  const objectWrapper = app.select('.vannot-objects');
+  const playhead = app.select('.vannot-playhead');
+  const timecode = app.select('.vannot-timecode');
+  const ranger = app.select('.vannot-ranger');
+
+  const draw = (all = false) => {
+    const dirty = draw.dirty;
+    draw.dirty = {};
+
+    if (all || dirty.playing)
+      app.classed('playing', player.playing);
+
+    if (all || dirty.frame)
+      drawTimecode(player, timecode);
+
+    if (all || dirty.range) {
+      drawRanger(player, ranger);
+      drawTicks(player, tickWrapper);
+    }
+
+    if (all || dirty.range || dirty.frame)
+      drawPlayhead(player, playhead);
+
+    if (all || dirty.range || dirty.shapes)
+      drawObjectTracks(player, player.data, objectWrapper);
+  };
+  draw.dirty = {};
+  draw.all = () => draw(true);
+  return draw;
+};
+const reactor = (app, player, canvas) => {
+  const draw = drawer(app, player);
+  const queue = queuer(draw);
+  const mark = (prop) => () => {
+    queue();
+    draw.dirty[prop] = true;
+  };
+  player.events.on('change.playing', mark('playing'));
+  player.events.on('change.range', mark('range'));
+  player.events.on('change.frame', mark('frame'));
+  canvas.events.on('change.shapes', mark('shapes'));
+
+  draw.all(); // always draw everything to start.
+};
+
+module.exports = { reactor };
 
