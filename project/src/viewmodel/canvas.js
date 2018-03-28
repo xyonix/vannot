@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { without } = require('ramda');
+const { without, concat } = require('ramda');
 const { spliceOut, last, pointsEqual, withinBox } = require('../util');
 
 class Canvas {
@@ -171,6 +171,9 @@ class Canvas {
 
   deselect() { this.selectedPoints = []; }
   selectShape(shape) { this.selectedPoints = shape.points.slice(); }
+  selectShapes(shapes) {
+    this.selectedPoints = shapes.map((shape) => shape.points).reduce(concat);
+  }
 
   setLasso(box) {
     if (box == null) {

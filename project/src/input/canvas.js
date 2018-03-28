@@ -204,16 +204,26 @@ module.exports = ($app, player, canvas) => {
     $app.find('.vannot-complete').on('click', () => canvas.endShape());
 
     $app.find('.vannot-object-select').on('change', (event) => {
-      canvas.selected.shape.objectId = parseInt($(event.target).find(':selected').attr('value'));
+      const objectId = parseInt($(event.target).find(':selected').attr('value'));
+      if (Number.isNaN(objectId)) return;
+
+      for (const shape of canvas.selected.wholeShapes)
+        shape.objectId = objectId;
       canvas.changedShapes();
     });
     $app.find('.vannot-duplicate-shape').on('click', () => {
-      const points = canvas.selected.shape.points.map(({ x, y }) => ({ x: x + 10, y: y + 10 }));
-      const duplicate = Object.assign({}, canvas.selected.shape, { points });
-      canvas.frameObj.shapes.push(duplicate);
-      canvas.selectShape(duplicate);
+      const duplicates = [];
+      for (const shape of canvas.selected.wholeShapes) {
+        const points = shape.points.map(({ x, y }) => ({ x: x + 10, y: y + 10 }));
+        const duplicate = Object.assign({}, shape, { points });
+        canvas.frameObj.shapes.push(duplicate);
+        duplicates.push(duplicate);
+      }
+      canvas.selectShapes(duplicates);
+      canvas.changedShapes();
     });
-    $app.find('.vannot-delete-shape').on('click', () => canvas.removeShape(canvas.selected.shape));
+    $app.find('.vannot-delete-shape').on('click', () =>
+      canvas.selected.wholeShapes.forEach((shape) => canvas.removeShape(shape)));
   }
 };
 

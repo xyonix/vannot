@@ -75,16 +75,27 @@ const updateCanvasChrome = (canvas, state, app) => {
 };
 
 const updateObjectSelect = (canvas, objectSelect) => {
-  // update object select dropdown.
-  const options = instantiateElems(objectSelect.selectAll('option').data(canvas.data.objects), 'option');
-  options
+  // do nothing if we are not visible:
+  if (canvas.selected.partialShapes.length > 0) return;
+  if (canvas.selected.wholeShapes.length === 0) return;
+
+  // determine if we have mixed or consistent selection.
+  const options = canvas.data.objects.slice();
+  const consistentAssignment = canvas.selected.wholeShapes.every((shape) =>
+    shape.objectId === canvas.selected.wholeShapes[0].objectId);
+  if (consistentAssignment === false)
+    options.unshift({ id: 'multiple', title: '(multiple objects)' });
+
+  // update object select dropdown options.
+  instantiateElems(objectSelect.selectAll('option').data(options), 'option')
     .attr('value', (object) => object.id)
     .text((object) => object.title);
-  if (canvas.selected.shape != null) {
-    objectSelect.node().value = canvas.selected.shape.objectId;
-  } else if (canvas.selected.wholeShapes.length > 0) {
-    // TODO: something intelligent.
-  }
+
+  // update dropdown selected value.
+  if (consistentAssignment === true)
+    objectSelect.node().value = canvas.selected.wholeShapes[0].objectId;
+  else
+    objectSelect.node().value = 'multiple';
 };
 
 
@@ -112,7 +123,7 @@ const drawer = (app, player, canvas) => {
     if (dirty.frame || dirty.selected || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
 
-    if (dirty.selected)
+    if (dirty.selected || dirty.shapes)
       updateObjectSelect(canvas, objectSelect);
 
     if (dirty.lasso)
