@@ -208,10 +208,8 @@ module.exports = ($app, player, canvas) => {
 
     $app.find('.vannot-draw-shape').on('click', () => canvas.startShape());
     $app.find('.vannot-undo-draw').on('click', () => {
-      if (canvas.wipShape.points.pop() != null) {
+      if (canvas.wip.points.pop() != null)
         canvas.changedPoints();
-        // wip segment
-      }
     });
     $app.find('.vannot-complete').on('click', () => canvas.endShape());
 
