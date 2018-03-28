@@ -207,6 +207,18 @@ html, body
         @include flash
         visibility: visible
 
+    .wipCloser
+      fill: $action
+      fill-opacity: 0.1
+      stroke: $action
+      stroke-width: 4px
+      transition: 0.2s stroke-width
+      visibility: hidden
+      .drawing &.visible
+        visibility: visible
+        &:hover
+          stroke-width: 8px
+
     .shapePath, .shapePoint
       fill: #aaa
       stroke: #aaa

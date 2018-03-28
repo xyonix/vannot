@@ -85,6 +85,13 @@ module.exports = ($app, player, canvas) => {
     }
   };
 
+  const closeShape = ($target) => {
+    if ($target.is('.wipCloser')) {
+      canvas.endShape();
+      return true;
+    };
+  };
+
   const drawPoint = (_, mouse) => {
     canvas.wip.points.push(mouse);
     canvas.changedPoints();
@@ -99,7 +106,7 @@ module.exports = ($app, player, canvas) => {
       [ selectShape, deselect ],
       [ dragPoints, dragLasso ]
     ],
-    drawing: [ [ drawPoint ] ],
+    drawing: [ [ closeShape, drawPoint ] ],
     shapes: [
       [ selectShape, deselect ],
       [ dragPoint, dragPoints, dragLasso ],

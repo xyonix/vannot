@@ -53,6 +53,15 @@ const drawWipSegment = (canvas, wipPoint, wipPath) => {
     wipPath.attr('d', lineCalc([ lastPoint, canvas.mouse ]));
 };
 
+const drawWipCloser = (canvas, wipCloser) => {
+  if ((canvas.wip == null) || (canvas.wip.points.length === 0)) {
+    wipCloser.classed('visible', false);
+  } else {
+    wipCloser.classed('visible', true);
+    wipCloser.attr('cx', canvas.wip.points[0].x).attr('cy', canvas.wip.points[0].y);
+  }
+};
+
 const drawLasso = (canvas, target) => {
   const active = ((canvas.lasso != null) && !pointsEqual(canvas.lasso[0], canvas.lasso[1]));
   target.classed('active', active);
@@ -108,8 +117,9 @@ const drawer = (app, player, canvas) => {
   const svg = app.select('svg');
   const shapeWrapper = svg.select('.shapes');
   const lasso = svg.select('.selectionBox');
-  const wipPoint = svg.select('.wipPoint');
   const wipPath = svg.select('.wipPath');
+  const wipPoint = svg.select('.wipPoint');
+  const wipCloser = svg.select('.wipCloser');
   const objectSelect = app.select('.vannot-object-select');
 
   const draw = () => {
@@ -129,8 +139,15 @@ const drawer = (app, player, canvas) => {
     if (dirty.lasso)
       drawLasso(canvas, lasso);
 
-    if ((state === 'drawing') && dirty.mouse)
+    if (state === 'drawing') {
+      // TODO: for now always run both of these:
+      // 1. when state initially transitions to drawing the leftover artifacts from the
+      //    previous shape needs clearing out, so we must call once.
+      // 2. wipsegment is already called every mousemove and wipcloser is dirt cheap.
+      // eventually maybe something more elegant.
       drawWipSegment(canvas, wipPoint, wipPath);
+      drawWipCloser(canvas, wipCloser);
+    }
   };
   draw.dirty = {};
   return draw;
