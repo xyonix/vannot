@@ -68,6 +68,11 @@ module.exports = ($app, player, canvas) => {
       return false;
 
     if (shape != null) {
+      // don't reselect if the shape is already part of some selection.
+      // TODO: but on /mouseup/ the shape should probably be singly-selected, yes?
+      if (canvas.selected.wholeShapes.includes(shape)) return;
+
+      // otherwise select it.
       canvas.selectShape(shape);
       return true;
     }
