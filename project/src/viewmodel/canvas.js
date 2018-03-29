@@ -129,6 +129,7 @@ class Canvas {
   // CONVENIENCE METHODS
   // State manipulators which purely manipulate foundation state or frame data.
 
+  // Shape creation:
   startShape() {
     this.frameObj.shapes.push({ id: this.data._seqId++, objectId: -1, points: [], wip: true });
     this.deselect();
@@ -142,14 +143,6 @@ class Canvas {
       this.selectedPoints = wip.points;
       this.changedShapes();
     }
-  }
-
-  removeShape(shape) {
-    const points = shape.points;
-    spliceOut(shape, this.frameObj.shapes);
-    this.changedShapes();
-    if (this.selected.points.length > 0)
-      this.selectedPoints = without(points, this.selected.points);
   }
 
   copyLast() {
@@ -169,7 +162,7 @@ class Canvas {
     this.selectedPoints = pointsToSelect;
   }
 
-  deselect() { this.selectedPoints = []; }
+  // Shape selection operations:
   selectShape(shape) { this.selectedPoints = shape.points.slice(); }
   selectShapes(shapes) {
     this.selectedPoints = shapes.map((shape) => shape.points).reduce(concat);
@@ -191,6 +184,17 @@ class Canvas {
         this.selectedPoints = points;
       }
     }
+  }
+
+  deselect() { this.selectedPoints = []; }
+
+  // Shape/point destruction:
+  removeShape(shape) {
+    const points = shape.points;
+    spliceOut(shape, this.frameObj.shapes);
+    this.changedShapes();
+    if (this.selected.points.length > 0)
+      this.selectedPoints = without(points, this.selected.points);
   }
 }
 

@@ -251,15 +251,18 @@ module.exports = ($app, player, canvas) => {
 
     const $toolbar = $app.find('.vannot-toolbar');
 
+    // Normal state:
     $app.find('.vannot-copy-last').on('click', () => canvas.copyLast());
-
     $app.find('.vannot-draw-shape').on('click', () => canvas.startShape());
+
+    // Drawing state:
     $app.find('.vannot-undo-draw').on('click', () => {
       if (canvas.wip.points.pop() != null)
         canvas.changedPoints();
     });
     $app.find('.vannot-complete').on('click', () => canvas.endShape());
 
+    // Shapes state:
     $app.find('.vannot-object-select').on('change', (event) => {
       const objectId = parseInt($(event.target).find(':selected').attr('value'));
       if (Number.isNaN(objectId)) return;
