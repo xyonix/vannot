@@ -1,10 +1,11 @@
 const $ = require('jquery');
 const { round, trunc } = Math;
-const { clamp, draggable, byDelta, normalizeBox } = require('../util');
+const { clamp, draggable, byDelta, normalizeBox, datum } = require('../util');
 
-module.exports = ($app, player) => {
+module.exports = ($app, player, canvas) => {
 
   const videoObj = $app.find('video')[0];
+  const $objectWrapper = $app.find('.vannot-objects');
 
   ////////////////////////////////////////
   // Global inputs
@@ -29,6 +30,17 @@ module.exports = ($app, player) => {
   $app.find('.vannot-skipforward').on('click', relseek(1));
   $app.find('.vannot-leapforward').on('click', relseek(5));
   $app.find('.vannot-keyforward').on('click', tryseek(() => player.nextFrame));
+
+  ////////////////////////////////////////
+  // Trackpoints
+
+  $objectWrapper.on('click', '.vannot-track-point', (event) => {
+    const $point = $(event.target);
+    const frameObj = datum($point);
+    const object = datum($point.closest('.vannot-track'));
+    player.seek(frameObj.frame);
+    canvas.selectShapes(frameObj.shapes.filter((shape) => shape.objectId === object.id));
+  });
 
   ////////////////////////////////////////
   // Playhead dragging

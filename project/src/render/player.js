@@ -112,8 +112,7 @@ const drawTrackpoints = (object, objectFrames, player, target) => {
 
   points
     .style('left', (point) => pct(player.scale(point.frame)))
-    .style('background-color', object.color)
-    .on('click', (point) => player.seek(point.frame));
+    .style('background-color', object.color);
 };
 // convenience function to currying+pulling apart an each call into the standard draw call:
 const subdrawTrackpoints = (frames, player) => function(object) {

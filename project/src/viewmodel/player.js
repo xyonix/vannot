@@ -24,10 +24,9 @@ class Player {
 
     let lastTimecode = 0;
     $video.on('timeupdate', () => {
-      if (this.videoObj.currentTime !== lastTimecode) {
-        lastTimecode = this.videoObj.currentTime;
-        this.frame = ceil(lastTimecode * this.video.fps);
-      }
+      lastTimecode = this.videoObj.currentTime;
+      // defer work for greater update resolution.
+      defer(() => { this.frame = ceil(lastTimecode * this.video.fps); });
     });
   }
 
@@ -43,9 +42,7 @@ class Player {
   set frame(value) {
     if (value === this._frame) return;
     this._frame = value;
-
-    // defer work to get as many updates as possible.
-    defer(() => { this.events.emit('change.frame', this._frame); });
+    this.events.emit('change.frame', this._frame);
   }
 
   get range() { return this._range; }

@@ -38,7 +38,7 @@ $(function() {
   const canvas = new Canvas(player, data);
 
   const playerInput = require('./input/player');
-  playerInput($app, player);
+  playerInput($app, player, canvas);
   const canvasInput = require('./input/canvas');
   canvasInput($app, player, canvas);
 
