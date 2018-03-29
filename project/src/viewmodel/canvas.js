@@ -196,6 +196,27 @@ class Canvas {
     if (this.selected.points.length > 0)
       this.selectedPoints = without(points, this.selected.points);
   }
+
+  removePoints(points) {
+    // easy to remove all wholly-selected shapes:
+    for (const shape of this.selected.wholeShapes)
+      spliceOut(shape, this.frameObj.shapes);
+
+    // now run through partially-selected shapes and check against points to splice out.
+    for (const shape of this.selected.partialShapes) {
+      for (const point of points)
+        if (shape.points.includes(point))
+          spliceOut(point, shape.points);
+
+      // shapes that are no longer viable are cleared out.
+      if (shape.points.length < 3)
+        spliceOut(shape, this.frameObj.shapes);
+    }
+
+    this.deselect();
+    this.changedPoints();
+    this.changedShapes();
+  }
 }
 
 module.exports = { Canvas };

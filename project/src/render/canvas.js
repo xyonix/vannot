@@ -107,6 +107,17 @@ const updateObjectSelect = (canvas, objectSelect) => {
     objectSelect.node().value = 'multiple';
 };
 
+const updateToolbarCounts = (canvas, toolbar) => {
+  if (canvas.state === 'shapes')
+    toolbar.select('.vannot-toolbar-shapes-plural')
+      .classed('visible', canvas.selected.wholeShapes.length > 1);
+  if (canvas.state === 'points') {
+    toolbar.select('.vannot-toolbar-points-count').text(canvas.selected.points.length);
+    toolbar.select('.vannot-toolbar-points-plural')
+      .classed('visible', canvas.selected.points.length > 1);
+  }
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // RENDER SCHEDULER
@@ -120,15 +131,18 @@ const drawer = (app, player, canvas) => {
   const wipPath = svg.select('.wipPath');
   const wipPoint = svg.select('.wipPoint');
   const wipCloser = svg.select('.wipCloser');
-  const objectSelect = app.select('.vannot-object-select');
+  const toolbar = app.select('.vannot-toolbar');
+  const objectSelect = toolbar.select('.vannot-object-select');
 
   const draw = () => {
     const dirty = draw.dirty;
     draw.dirty = {};
     const state = canvas.state;
 
-    if (dirty.selected)
+    if (dirty.selected) {
       updateCanvasChrome(canvas, state, app);
+      updateToolbarCounts(canvas, toolbar);
+    }
 
     if (dirty.frame || dirty.selected || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.

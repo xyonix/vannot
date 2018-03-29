@@ -284,6 +284,9 @@ module.exports = ($app, player, canvas) => {
     });
     $app.find('.vannot-delete-shape').on('click', () =>
       canvas.selected.wholeShapes.forEach((shape) => canvas.removeShape(shape)));
+
+    // Points state:
+    $app.find('.vannot-delete-points').on('click', () => canvas.removePoints(canvas.selected.points));
   }
 };
 

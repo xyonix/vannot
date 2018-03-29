@@ -295,6 +295,11 @@ html, body
       margin: 0
       outline: none
 
+.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural
+  display: none
+  &.visible
+    display: inline
+
 .vannot-toolbutton
   $icon-size: 18px
   $icon-box-size: 30px
@@ -340,7 +345,7 @@ html, body
   transform: translateY(#{-$toolbar-height})
 .vannot-toolbar-default
   opacity: 1
-.vannot-toolbar-shape
+.vannot-toolbar-shapes, .vannot-toolbar-points
   opacity: 0
   transform: translateY(#{$toolbar-height})
 .vannot-app.drawing .vannot-toolbar
@@ -351,15 +356,19 @@ html, body
     opacity: 0
     transform: translateY(#{$toolbar-height})
 .vannot-app.shapes .vannot-toolbar
-  .vannot-toolbar-shape
+  .vannot-toolbar-shapes
     opacity: 1
     transform: translateY(0)
   .vannot-toolbar-default
     opacity: 0
     transform: translateY(#{-$toolbar-height})
-.vannot-app.points .vannot-toolbar > div
-  opacity: 0.3
-  pointer-events: none
+.vannot-app.points .vannot-toolbar
+  .vannot-toolbar-points
+    opacity: 1
+    transform: translateY(0)
+  .vannot-toolbar-default
+    opacity: 0
+    transform: translateY(#{-$toolbar-height})
 
 
 ////////////////////////////////////////
@@ -379,7 +388,7 @@ html, body
 .vannot-duplicate-shape:before
   content: $icon-duplicate
   text-indent: -1px
-.vannot-delete-shape:before
+.vannot-delete-shape:before, .vannot-delete-points:before
   content: $icon-minus
   text-indent: 0.5px
 
