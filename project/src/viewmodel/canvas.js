@@ -29,21 +29,26 @@ class Canvas {
   set frame(frame) {
     const newFrame = this.data.frames.find((obj) => obj.frame === frame);
 
+    // before doing things with a new frame, possibly deal with the one we were just visiting:
     if (this._frameObj != null) {
-      // perf shortcut: if nothing has happened, just bail. makes video playing smoother.
-      if ((newFrame == null) && (this._frameObj.ephemeral === true) && (this._frameObj.shapes.length === 0))
+      // perf shortcut: if we can and we have to, just reuse the current frame.
+      if ((newFrame == null) && (this._frameObj.shapes.length === 0)) {
+        this._frameObj.frame = frame;
         return;
-
-      // before accepting a new frame, possibly write the current one to data.
-      if (this._frameObj.ephemeral && (this._frameObj.shapes.length > 0)) {
-        delete this._frameObj.ephemeral;
-        this.data.frames.push(this._frameObj);
-      } else if ((this._frameObj.ephemeral !== true) && (this._frameObj.shapes.length === 0)) {
-        spliceOut(this._frameObj, this.data.frames);
       }
+
+      // if the current frame is now useless, remove it.
+      if (this._frameObj.shapes.length === 0)
+        spliceOut(this._frameObj, this.data.frames);
     }
 
-    this._frameObj = newFrame || { frame, shapes: [], ephemeral: true };
+    if (newFrame == null) {
+      this._frameObj = { frame, shapes: [] };
+      this.data.frames.push(this._frameObj);
+    } else {
+      this._frameObj = newFrame;
+    }
+
     this.events.emit('change.frame');
     this.selectedPoints = [];
   };
