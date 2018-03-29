@@ -152,7 +152,7 @@ module.exports = ($app, player, canvas) => {
     // Mutable. Managed only by inputs below. Kept to an absolute minimum. Always
     // replace by reference, never write directly into.
 
-    let mouse, dragging, viewportWidth, viewportHeight;
+    let mouse, downState, dragging, viewportWidth, viewportHeight;
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -173,6 +173,7 @@ module.exports = ($app, player, canvas) => {
     $viewport.on('mousedown', (event) => {
       const $target = $(event.target);
       const [ shape, point ] = findData($target);
+      downState = canvas.state;
 
       // run all action sets for our state.
       for (const actionSets of mousedown[canvas.state]) {
@@ -192,10 +193,13 @@ module.exports = ($app, player, canvas) => {
       }
     });
     $viewport.on('mouseup', (event) => {
-      if ((dragging == null) || (dragging.dragged !== true)) {
+      const state = canvas.state;
+      // only process mouseup actions if the state has not changed since mousedown, AND
+      // if the user has not executed any dragging operations.
+      if ((state === downState) && ((dragging == null) || (dragging.dragged !== true))) {
         const $target = $(event.target);
         const [ shape, point ] = findData($target);
-        for (const actionSets of mouseup[canvas.state])
+        for (const actionSets of mouseup[state])
           actionSets.some((action) => action($target, mouse, shape, point));
       }
 
