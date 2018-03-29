@@ -62,7 +62,9 @@ module.exports = ($app, player, canvas) => {
     }
   }));
 
-  const selectShape = ($target, _, shape, point) => {
+  // "down" refers to mousedown; we don't want to change the selection to a subset on
+  // mousedown in case a drag is intended.
+  const selectShapeDown = ($target, _, shape, point) => {
     // don't reselect if the point is already part of some selection.
     if ((point != null) && canvas.selected.points.includes(point))
       return false;
@@ -74,6 +76,21 @@ module.exports = ($app, player, canvas) => {
 
       // otherwise select it.
       canvas.selectShape(shape);
+      return true;
+    }
+  };
+
+  // whereas on neutral mouseup we definitely do.
+  const selectShapeUp = ($target, _, shape) => {
+    if (shape != null) {
+      canvas.selectShape(shape);
+      return true;
+    }
+  };
+
+  const selectPoint = ($target, _, __, point) => {
+    if (point != null) {
+      canvas.selectedPoints = [ point ];
       return true;
     }
   };
@@ -100,21 +117,33 @@ module.exports = ($app, player, canvas) => {
   ////////////////////////////////////////////////////////////////////////////////
   // ACTIONS
   // Given application state, determines which actions are available.
+  // Each state contains multiple action sets; within each set if an action
+  // returns true the rest of the set is halted and the next set is run.
 
-  const actions = {
+  // mousedown actions happen on every mousedown, and can possibly initiate drags.
+  const mousedown = {
     normal: [
-      [ selectShape, deselect ],
+      [ selectShapeDown, deselect ],
       [ dragPoints, dragLasso ]
     ],
     drawing: [ [ closeShape, drawPoint ] ],
     shapes: [
-      [ selectShape, deselect ],
+      [ selectShapeDown, deselect ],
       [ dragPoint, dragPoints, dragLasso ],
     ],
     points: [
-      [ selectShape, deselect ],
+      [ selectShapeDown, deselect ],
       [ dragPoints, dragLasso ]
     ]
+  };
+  // mouseup operations occur only when a drag has not occurred.
+  // we don't make a great deal of effort to ensure the mouse has not moved but there
+  // are no cases yet that this is truly disruptive.
+  const mouseup = {
+    normal: [],
+    drawing: [],
+    shapes: [ [ selectPoint, selectShapeUp ] ],
+    points: [ [ selectPoint ] ]
   };
 
   {
@@ -123,38 +152,56 @@ module.exports = ($app, player, canvas) => {
     // Mutable. Managed only by inputs below. Kept to an absolute minimum. Always
     // replace by reference, never write directly into.
 
-    let dragging, viewportWidth, viewportHeight, mouse;
+    let mouse, dragging, viewportWidth, viewportHeight;
 
 
     ////////////////////////////////////////////////////////////////////////////////
     // ACTION EXECUTION
-    // Mousedown on the canvas initiates possible actions; check with the viewmodel
+    // Mousedown/up on the canvas initiates possible actions; check with the viewmodel
     // to see which should be allowed, then run that set.
+    // Mousemove is processed a bit further below.
+
+    // predetermine catch if we have a shape or point and provide that data for the test.
+    const findData = ($target) => {
+      const $shape = $target.closest('.trackingShape');
+      const shape = ($shape.length > 0) ? datum($shape) : null;
+      const point = $target.hasClass('shapePoint') ? datum($target) : null;
+      return [ shape, point ];
+    };
 
     const $viewport = $app.find('.vannot-viewport');
     $viewport.on('mousedown', (event) => {
       const $target = $(event.target);
+      const [ shape, point ] = findData($target);
 
-      // predetermine catch if we have a shape or point and provide that data for the test.
-      const point = $target.hasClass('shapePoint') ? datum($target) : null;
-      const $shape = $target.closest('.trackingShape');
-      const shape = ($shape.length > 0) ? datum($shape) : null;
-
-      for (const actionSets of actions[canvas.state]) {
+      // run all action sets for our state.
+      for (const actionSets of mousedown[canvas.state]) {
         actionSets.some((action) => {
           if (typeof action === 'function') {
             return action($target, mouse, shape, point);
           } else if (action.test($target, shape, point) === true) {
             let memo = action.init($target, mouse);
-            dragging = () => { memo = action.drag(memo, mouse) || memo; };
-            $viewport.one('mouseup', () => {
-              action.end(memo, mouse);
-              dragging = null;
-            });
+            dragging = () => {
+              dragging.dragged = true;
+              memo = action.drag(memo, mouse) || memo;
+            };
+            $viewport.one('mouseup', () => action.end(memo, mouse));
             return true;
           }
         });
       }
+    });
+    $viewport.on('mouseup', (event) => {
+      if ((dragging == null) || (dragging.dragged !== true)) {
+        const $target = $(event.target);
+        const [ shape, point ] = findData($target);
+        for (const actionSets of mouseup[canvas.state])
+          actionSets.some((action) => action($target, mouse, shape, point));
+      }
+
+      // we wait until here to clear out the old drag so we know whether to process
+      // the mouseup.
+      if (dragging != null) dragging = null;
     });
 
 
