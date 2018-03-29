@@ -165,6 +165,21 @@ class Canvas {
       this.frameObj.shapes.push(clone);
     });
     this.selectedPoints = pointsToSelect;
+
+    this.changedShapes();
+  }
+
+  // do not call unless only whole shapes are selected.
+  duplicateSelected(delta = 0) {
+    const duplicates = [];
+    for (const shape of this.selected.wholeShapes) {
+      const points = shape.points.map(({ x, y }) => ({ x: x + delta, y: y + delta }));
+      const duplicate = Object.assign({}, shape, { points });
+      this.frameObj.shapes.push(duplicate);
+      duplicates.push(duplicate);
+    }
+    this.selectShapes(duplicates);
+    this.changedShapes();
   }
 
   // Shape selection operations:

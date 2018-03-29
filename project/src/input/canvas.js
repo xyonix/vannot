@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const { round } = Math;
+const { without } = require('ramda');
 const { normalizeBox, datum } = require('../util');
 
 module.exports = ($app, player, canvas) => {
@@ -12,17 +13,17 @@ module.exports = ($app, player, canvas) => {
   // Canvas interactions
 
   const dragBase = {
-    test: ($elem, shape, point) => false,
-    init: ($elem, mouse) => null,
+    test: ($elem, { shape, point }) => false,
+    init: ($elem, { mouse }) => null,
     drag: (memo, mouse) => null,
-    end: (memo, mouse) => null
+    end: (memo, { mouse }) => null
   };
   const drag = (obj) => Object.assign({}, dragBase, obj);
 
   const byDelta = (obj) => Object.assign({}, obj, {
-    init: ($elem, mouse) => ({
-      inner: (typeof obj.init === 'function') ? obj.init($elem) : null,
-      last: mouse
+    init: ($elem, args) => ({
+      inner: (typeof obj.init === 'function') ? obj.init($elem, args) : null,
+      last: args.mouse
     }),
     drag: ({ inner, last }, now) => ({
       inner: obj.drag(inner, { dx: now.x - last.x, dy: now.y - last.y }) || inner,
@@ -33,15 +34,20 @@ module.exports = ($app, player, canvas) => {
 
   const dragLasso = drag({
     test: ($target) => $target.is('svg'),
-    init: (_, mouse) => mouse,
+    init: (_, { mouse }) => mouse,
     drag: (init, mouse) => { canvas.setLasso(normalizeBox([ init, mouse ])); },
     end: () => canvas.setLasso(null)
   });
 
   const dragPoints = drag(byDelta({
-    test: ($target, shape, point) =>
+    test: ($target, { shape, point }) =>
       ((point != null) && canvas.selected.points.includes(point)) ||
       ((shape != null) && canvas.selected.wholeShapes.includes(shape)),
+    init: (_, { keys }) => {
+      // clone if applicable.
+      if ((keys.duplicate) && (canvas.selected.partialShapes.length === 0))
+        canvas.duplicateSelected();
+    },
     drag: (_, { dx, dy }) => {
       canvas.selected.points.forEach((point) => {
         point.x += dx;
@@ -52,7 +58,7 @@ module.exports = ($app, player, canvas) => {
   }));
 
   const dragPoint = drag(byDelta({
-    test: ($target, _, point) => (canvas.selected.shape != null) && (point != null) &&
+    test: ($target, { point }) => (canvas.selected.shape != null) && (point != null) &&
       canvas.selected.shape.points.includes(point),
     init: ($target) => datum($target),
     drag: (point, { dx, dy }) => {
@@ -64,31 +70,39 @@ module.exports = ($app, player, canvas) => {
 
   // "down" refers to mousedown; we don't want to change the selection to a subset on
   // mousedown in case a drag is intended.
-  const selectShapeDown = ($target, _, shape, point) => {
+  const selectShapeDown = ($target, { shape, point, keys }) => {
     // don't reselect if the point is already part of some selection.
     if ((point != null) && canvas.selected.points.includes(point))
       return false;
 
     if (shape != null) {
-      // don't reselect if the shape is already part of some selection.
-      // TODO: but on /mouseup/ the shape should probably be singly-selected, yes?
-      if (canvas.selected.wholeShapes.includes(shape)) return;
-
-      // otherwise select it.
-      canvas.selectShape(shape);
-      return true;
+      const isSelected = canvas.selected.wholeShapes.includes(shape);
+      if (keys.select) {
+        if (isSelected)
+          canvas.selectedPoints = without(shape.points, canvas.selected.points);
+        else
+          canvas.selectedPoints = canvas.selected.points.concat(shape.points);
+        return true;
+      } else if (isSelected) {
+        // if we are not toggling and we have already selected this shape do nothing.
+        return false;
+      } else {
+        // otherwise select it.
+        canvas.selectShape(shape);
+        return true;
+      }
     }
   };
 
   // whereas on neutral mouseup we definitely do.
-  const selectShapeUp = ($target, _, shape) => {
-    if (shape != null) {
+  const selectShapeUp = ($target, { shape, keys }) => {
+    if (!keys.select && (shape != null)) {
       canvas.selectShape(shape);
       return true;
     }
   };
 
-  const selectPoint = ($target, _, __, point) => {
+  const selectPoint = ($target, { point }) => {
     if (point != null) {
       canvas.selectedPoints = [ point ];
       return true;
@@ -109,7 +123,7 @@ module.exports = ($app, player, canvas) => {
     };
   };
 
-  const drawPoint = (_, mouse) => {
+  const drawPoint = (_, { mouse }) => {
     canvas.wip.points.push(mouse);
     canvas.changedPoints();
   };
@@ -162,31 +176,36 @@ module.exports = ($app, player, canvas) => {
     // Mousemove is processed a bit further below.
 
     // predetermine catch if we have a shape or point and provide that data for the test.
-    const findData = ($target) => {
+    const eventData = (event) => {
+      const $target = $(event.target);
       const $shape = $target.closest('.trackingShape');
       const shape = ($shape.length > 0) ? datum($shape) : null;
       const point = $target.hasClass('shapePoint') ? datum($target) : null;
-      return [ shape, point ];
+      const keys = { select: event.shiftKey, duplicate: (event.ctrlKey || event.altKey) };
+      return [ $target, shape, point, keys ];
     };
 
     const $viewport = $app.find('.vannot-viewport');
     $viewport.on('mousedown', (event) => {
-      const $target = $(event.target);
-      const [ shape, point ] = findData($target);
       downState = canvas.state;
+      const [ $target, shape, point, keys ] = eventData(event);
+      const dataArg = { mouse, keys, shape, point };
 
       // run all action sets for our state.
       for (const actionSets of mousedown[canvas.state]) {
         actionSets.some((action) => {
           if (typeof action === 'function') {
-            return action($target, mouse, shape, point);
-          } else if (action.test($target, shape, point) === true) {
-            let memo = action.init($target, mouse);
+            return action($target, dataArg);
+          } else if (action.test($target, dataArg) === true) {
+            let memo;
             dragging = () => {
-              dragging.dragged = true;
+              if (dragging.dragged !== true) {
+                dragging.dragged = true;
+                memo = action.init($target, dataArg);
+                $viewport.one('mouseup', () => action.end(memo, mouse));
+              }
               memo = action.drag(memo, mouse) || memo;
             };
-            $viewport.one('mouseup', () => action.end(memo, mouse));
             return true;
           }
         });
@@ -197,10 +216,10 @@ module.exports = ($app, player, canvas) => {
       // only process mouseup actions if the state has not changed since mousedown, AND
       // if the user has not executed any dragging operations.
       if ((state === downState) && ((dragging == null) || (dragging.dragged !== true))) {
-        const $target = $(event.target);
-        const [ shape, point ] = findData($target);
+        const [ $target, shape, point, keys ] = eventData(event);
+        const dataArg = { mouse, keys, shape, point };
         for (const actionSets of mouseup[state])
-          actionSets.some((action) => action($target, mouse, shape, point));
+          actionSets.some((action) => action($target, dataArg));
       }
 
       // we wait until here to clear out the old drag so we know whether to process
@@ -275,17 +294,7 @@ module.exports = ($app, player, canvas) => {
         shape.objectId = objectId;
       canvas.changedShapes();
     });
-    $app.find('.vannot-duplicate-shape').on('click', () => {
-      const duplicates = [];
-      for (const shape of canvas.selected.wholeShapes) {
-        const points = shape.points.map(({ x, y }) => ({ x: x + 10, y: y + 10 }));
-        const duplicate = Object.assign({}, shape, { points });
-        canvas.frameObj.shapes.push(duplicate);
-        duplicates.push(duplicate);
-      }
-      canvas.selectShapes(duplicates);
-      canvas.changedShapes();
-    });
+    $app.find('.vannot-duplicate-shape').on('click', () => canvas.duplicateSelected(10));
     $app.find('.vannot-delete-shape').on('click', () =>
       canvas.selected.wholeShapes.forEach((shape) => canvas.removeShape(shape)));
 
