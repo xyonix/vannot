@@ -137,11 +137,13 @@ const queuer = (callback) => {
 
 const pointsEqual = (a, b) => (a.x === b.x) && (a.y === b.y);
 const distance = (a, b) => sqrt(square(a.x - b.x) + square(a.y - b.y));
+const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+const digestPoint = (point) => `${point.x} ${point.y}`;
+
 const normalizeBox = (box) => [
   { x: min(box[0].x, box[1].x), y: min(box[0].y, box[1].y) },
   { x: max(box[0].x, box[1].x), y: max(box[0].y, box[1].y) }
 ];
-
 const withinBox = (box, point) => {
   const normalized = normalizeBox(box);
   return (normalized[0].x <= point.x) && (point.x <= normalized[1].x) &&
@@ -155,6 +157,7 @@ module.exports = {
   getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, pct, datum,
   pad, timecode, timecodePretty,
   draggable, byDelta, defer, queuer,
-  pointsEqual, distance, normalizeBox, withinBox
+  pointsEqual, distance, midpoint, digestPoint,
+  normalizeBox, withinBox
 };
 

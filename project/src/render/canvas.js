@@ -1,5 +1,5 @@
 const { select, line } = require('d3');
-const { getTemplate, instantiateElems, last, pointsEqual, normalizeBox, queuer } = require('../util');
+const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer } = require('../util');
 
 const lineCalc = line()
   .x((point) => point.x)
@@ -33,7 +33,7 @@ const drawShapes = (canvas, target) => {
       });
 
     // populate our points.
-    const points = instantiateElems(select(this).selectAll('.shapePoint').data(shape.points), 'circle', 'shapePoint');
+    const points = instantiateElems(select(this).selectAll('.shapePoint').data(shape.points, digestPoint), 'circle', 'shapePoint');
     points
       .classed('selected', (point) => selected.points.includes(point))
       .attr('r', 2)
@@ -42,6 +42,20 @@ const drawShapes = (canvas, target) => {
       .attr('cx', (point) => point.x)
       .attr('cy', (point) => point.y);
   });
+};
+
+const drawImplicitPoints = (canvas, target) => {
+  const points = instantiateElems(target.selectAll('.implicitPoint').data(canvas.implicitPoints.points,
+    (implied) => digestPoint(implied.coords)), 'circle', 'implicitPoint');
+
+  if (canvas.implicitPoints.object != null) {
+    points
+      .style('fill', canvas.implicitPoints.object.color)
+      .style('stroke', canvas.implicitPoints.object.color)
+      .attr('r', 8)
+      .attr('cx', (implied) => implied.coords.x)
+      .attr('cy', (implied) => implied.coords.y);
+  }
 };
 
 const drawWipSegment = (canvas, wipPoint, wipPath) => {
@@ -127,6 +141,7 @@ const updateToolbarCounts = (canvas, toolbar) => {
 const drawer = (app, player, canvas) => {
   const svg = app.select('svg');
   const shapeWrapper = svg.select('.shapes');
+  const implicitWrapper = svg.select('.implicitPoints');
   const lasso = svg.select('.selectionBox');
   const wipPath = svg.select('.wipPath');
   const wipPoint = svg.select('.wipPoint');
@@ -162,6 +177,9 @@ const drawer = (app, player, canvas) => {
       drawWipSegment(canvas, wipPoint, wipPath);
       drawWipCloser(canvas, wipCloser);
     }
+
+    if (dirty.selected || ((canvas.selected.shape != null) && dirty.mouse))
+      drawImplicitPoints(canvas, implicitWrapper);
   };
   draw.dirty = {};
   return draw;

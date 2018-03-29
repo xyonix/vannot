@@ -68,6 +68,23 @@ module.exports = ($app, player, canvas) => {
     }
   }));
 
+  const dragImplicitPoint = drag(byDelta({
+    test: ($target) => $target.is('.implicitPoint'),
+    init: ($target) => {
+      const implied = datum($target);
+      const idx = canvas.selected.shape.points.indexOf(implied.after);
+      canvas.selected.shape.points.splice(idx + 1, 0, implied.coords);
+      canvas.changedPoints();
+      canvas.selectShape(canvas.selected.shape);
+      return implied.coords;
+    },
+    drag: (point, { dx, dy }) => {
+      point.x += dx;
+      point.y += dy;
+      canvas.changedPoints();
+    }
+  }));
+
   // "down" refers to mousedown; we don't want to change the selection to a subset on
   // mousedown in case a drag is intended.
   const selectShapeDown = ($target, { shape, point, keys }) => {
@@ -143,7 +160,7 @@ module.exports = ($app, player, canvas) => {
     drawing: [ [ closeShape, drawPoint ] ],
     shapes: [
       [ selectShapeDown, deselect ],
-      [ dragPoint, dragPoints, dragLasso ],
+      [ dragImplicitPoint, dragPoint, dragPoints, dragLasso ],
     ],
     points: [
       [ selectShapeDown, deselect ],

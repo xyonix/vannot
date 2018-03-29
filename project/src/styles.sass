@@ -249,6 +249,13 @@ html, body
       //.shapePath, .shapePoint
         //@include flash
 
+    .implicitPoint
+      fill-opacity: 0.6
+      stroke-width: 0
+      transition: 0.1s stroke-width
+      &:hover
+        stroke-width: 5px
+
     .selectionBox
       visibility: hidden
       &.active

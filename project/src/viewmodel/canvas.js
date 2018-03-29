@@ -1,6 +1,6 @@
 const EventEmitter = require('events');
 const { without, concat } = require('ramda');
-const { spliceOut, last, pointsEqual, withinBox } = require('../util');
+const { spliceOut, last, pointsEqual, withinBox, distance, midpoint } = require('../util');
 
 class Canvas {
   constructor(player, data) {
@@ -15,6 +15,8 @@ class Canvas {
     const updateFrame = () => { this.frame = this.player.frame; };
     this.player.events.on('change.frame', updateFrame);
     updateFrame();
+
+    this.implicitPoints = implicitPoints(this);
   };
 
 
@@ -238,6 +240,39 @@ class Canvas {
     this.changedShapes();
   }
 }
+
+const implicitPoints = (canvas) => {
+  const implicit = {};
+
+  const compute = () => {
+    if (canvas.selected.shape == null)
+      return;
+
+    implicit.points = [];
+    const shapePoints = canvas.selected.shape.points;
+    for (let i = 0; i < shapePoints.length; i++) {
+      const it = shapePoints[i];
+      const next = shapePoints[((i + 1) === shapePoints.length) ? 0 : (i + 1)];
+      const candidate = midpoint(it, next);
+      if (distance(candidate, canvas.mouse) < 40)
+        implicit.points.push({ coords: candidate, after: it });
+    }
+  };
+
+  canvas.events.on('change.selected', () => {
+    if (canvas.selected.shape == null) {
+      implicit.object = null;
+      implicit.points = [];
+    } else {
+      implicit.object = canvas.data.objects.find((object) => object.id === canvas.selected.shape.objectId);
+      compute();
+    }
+  });
+
+  canvas.events.on('change.mouse', compute);
+
+  return implicit;
+};
 
 module.exports = { Canvas };
 
