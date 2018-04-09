@@ -157,7 +157,7 @@ const drawer = (app, player, canvas) => {
       updateToolbarCounts(canvas, toolbar);
     }
 
-    if (dirty.frame || dirty.selected || dirty.shapes || dirty.points)
+    if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
 
     if (dirty.selected || dirty.shapes)
@@ -195,6 +195,7 @@ const reactor = (app, player, canvas) => {
   canvas.events.on('change.mouse', mark('mouse'));
   canvas.events.on('change.points', mark('points'));
   canvas.events.on('change.shapes', mark('shapes'));
+  player.events.on('change.objects', mark('objects'));
 
   // set the svg viewbox and draw the frame to start.
   setupSvg(canvas, app.select('svg'));

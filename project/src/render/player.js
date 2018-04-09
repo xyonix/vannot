@@ -1,3 +1,4 @@
+const $ = require('jquery');
 const { ceil } = Math;
 const { select, scaleLinear } = require('d3');
 const { getTemplate, instantiateTemplates, instantiateDivs, pct, pad, timecode, timecodePretty, queuer } = require('../util');
@@ -102,7 +103,10 @@ const drawObjectTracks = (player, data, target) => {
   const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(data.objects), trackTemplate);
 
   tracks.select('.vannot-track-title').text((object) => object.title);
-  tracks.select('.vannot-track-color').style('background-color', (object) => object.color);
+  tracks.select('.vannot-track-color-edit').each(function(object) {
+    const $input = $(this);
+    if ($input.next().length === 0) $input.spectrum({ color: object.color });
+  });
   tracks.select('.vannot-track-points').each(subdrawTrackpoints(data.frames, player));
 };
 
@@ -151,7 +155,7 @@ const drawer = (app, player) => {
     if (all || dirty.range || dirty.frame)
       drawPlayhead(player, playhead);
 
-    if (all || dirty.range || dirty.shapes)
+    if (all || dirty.range || dirty.objects || dirty.shapes)
       drawObjectTracks(player, player.data, objectWrapper);
   };
   draw.dirty = {};
@@ -168,6 +172,7 @@ const reactor = (app, player, canvas) => {
   player.events.on('change.playing', mark('playing'));
   player.events.on('change.range', mark('range'));
   player.events.on('change.frame', mark('frame'));
+  player.events.on('change.objects', mark('objects'));
   canvas.events.on('change.shapes', mark('shapes'));
 
   draw.all(); // always draw everything to start.

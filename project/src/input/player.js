@@ -32,6 +32,15 @@ module.exports = ($app, player, canvas) => {
   $app.find('.vannot-keyforward').on('click', tryseek(() => player.nextFrame));
 
   ////////////////////////////////////////
+  // Track properties
+  const colorChange = (event, color) => {
+    datum($(event.target).closest('.vannot-track')).color = color.toHexString();
+    player.changedObjects();
+  };
+  $app.on('dragstop.spectrum', '.vannot-track-color-edit', colorChange);
+  $app.on('change.spectrum', '.vannot-track-color-edit', colorChange);
+
+  ////////////////////////////////////////
   // Trackpoints
 
   $objectWrapper.on('click', '.vannot-track-point', (event) => {

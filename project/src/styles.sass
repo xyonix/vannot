@@ -601,12 +601,16 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     line-height: $track-height
 
   .vannot-track-color
-    border: 1px solid #222
     float: left
-    height: 15px
     margin-right: 10px
-    margin-top: 4px
-    width: 18px
+    margin-top: 2px
+    overflow: hidden
+
+    .sp-replacer
+      border: none
+      height: 15px
+      padding: 0
+      width: 18px
 
   .vannot-track-points
     background: #111

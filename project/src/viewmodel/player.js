@@ -59,6 +59,9 @@ class Player {
     this.events.emit('change.range');
   }
 
+  // and if anybody changes object properties they need to tell us manually.
+  changedObjects() { this.events.emit('change.objects'); }
+
 
   ////////////////////////////////////////
   // CALCULATED STATE

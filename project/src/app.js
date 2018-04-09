@@ -1,5 +1,5 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
-const $ = window.$ = require('jquery');
+const $ = window.$ = window.jQuery = require('jquery');
 const { select } = require('d3');
 
 // docready.
