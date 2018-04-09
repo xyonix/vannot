@@ -602,7 +602,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       font-weight: bold
       line-height: $track-height
       padding: 0
-      width: calc(100% - 70px) // TODO: get 70px by calculation instead
+      width: calc(100% - 80px) // TODO: get 70px by calculation instead
 
     .vannot-track-title-edit
       background: none
@@ -631,6 +631,54 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       height: 15px
       padding: 0
       width: 18px
+
+  .vannot-track-remove
+    background: none
+    border: none
+    color: #fff
+    display: none
+    line-height: 15px
+    outline: none
+    overflow: hidden
+    padding: 0 5px 4px
+    position: absolute
+    right: 4px
+    top: 6px
+    white-space: nowrap
+    width: 20px
+
+    &:before
+      @include icon
+      content: $icon-minus
+      font-size: 16px
+      margin-right: 4px
+      position: relative
+      top: 3px
+
+    &:hover
+      color: $warning
+
+    &.confirm
+      background: $warning
+      border-radius: 999px
+      color: #fff
+      display: block
+      transition: 0.2s background, 0.2s color, 0.2s width
+      width: 216px
+      &:hover
+        background: $warning-highlight
+        color: #fff
+
+  .vannot-track-header:hover .vannot-track-remove
+    display: block
+
+  &.system
+    .vannot-track-title-edit
+      pointer-events: none
+    .vannot-track-title-ghost
+      display: none
+    .vannot-track-remove
+      display: none !important
 
   .vannot-track-points
     background: #111

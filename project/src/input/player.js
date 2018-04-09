@@ -1,10 +1,11 @@
 const $ = require('jquery');
 const { round, trunc } = Math;
-const { clamp, draggable, byDelta, normalizeBox, datum } = require('../util');
+const { clamp, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
 
 module.exports = ($app, player, canvas) => {
 
   const videoObj = $app.find('video')[0];
+  const $document = $(document);
   const $objectWrapper = $app.find('.vannot-objects');
 
   ////////////////////////////////////////
@@ -48,6 +49,17 @@ module.exports = ($app, player, canvas) => {
   };
   $app.on('dragstop.spectrum', '.vannot-track-color-edit', colorChange);
   $app.on('change.spectrum', '.vannot-track-color-edit', colorChange);
+
+  $app.on('click', '.vannot-track-remove', (event) => {
+    const $button = $(event.target);
+    if ($button.hasClass('confirm')) {
+      spliceOut(datum($button.closest('.vannot-track')), player.data.objects);
+      player.changedObjects();
+    } else {
+      $button.addClass('confirm');
+      defer(() => { $document.one('click', () => { $button.removeClass('confirm'); }) });
+    }
+  });
 
   ////////////////////////////////////////
   // Trackpoints

@@ -102,6 +102,7 @@ const trackTemplate = getTemplate('track');
 const drawObjectTracks = (player, data, target) => {
   const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(data.objects), trackTemplate);
 
+  tracks.classed('system', (object) => object.system);
   tracks.select('.vannot-track-title-edit').property('value', (object) => object.title);
   tracks.select('.vannot-track-title-ghost').text((object) => object.title);
   tracks.select('.vannot-track-color-edit').each(function(object) {

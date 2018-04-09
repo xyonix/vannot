@@ -14,7 +14,7 @@ $(function() {
       _seqId: 0,
       video: { duration: 125100, fps: 25, height: 1080, width: 1920, source: '/assets/sailing.mp4' },
       objects: [
-        { id: -1, title: 'Unassigned', color: '#aaa' },
+        { id: -1, title: 'Unassigned', color: '#aaa', system: true },
         { id: 1, title: 'Port', color: '#07e4ff' },
         { id: 2, title: 'Starboard', color: '#ff2096' },
         { id: 3, title: 'Obstacle', color: '#ccb71a' }
