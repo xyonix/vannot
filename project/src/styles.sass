@@ -595,10 +595,30 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     z-index: 1
 
   .vannot-track-title
-    color: $text-light
-    font-size: 12px
-    font-weight: bold
-    line-height: $track-height
+    &, .vannot-track-title-edit
+      color: $text-light
+      font-family: $font-sans
+      font-size: 12px
+      font-weight: bold
+      line-height: $track-height
+      padding: 0
+      width: calc(100% - 70px) // TODO: get 70px by calculation instead
+
+    .vannot-track-title-edit
+      background: none
+      border: none
+      outline: none
+      position: absolute
+
+    .vannot-track-title-ghost
+      color: transparent
+      &:after
+        @include icon
+        content: $icon-pencil
+        padding-left: 6px
+
+    &:hover .vannot-track-title-ghost:after
+      color: #999
 
   .vannot-track-color
     float: left

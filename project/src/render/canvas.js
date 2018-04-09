@@ -160,7 +160,7 @@ const drawer = (app, player, canvas) => {
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
 
-    if (dirty.selected || dirty.shapes)
+    if (dirty.selected || dirty.objects || dirty.shapes)
       updateObjectSelect(canvas, objectSelect);
 
     if (dirty.lasso)

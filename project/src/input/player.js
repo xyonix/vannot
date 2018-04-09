@@ -33,6 +33,15 @@ module.exports = ($app, player, canvas) => {
 
   ////////////////////////////////////////
   // Track properties
+
+  $app.on('input', '.vannot-track-title-edit', (event) => {
+    const $input = $(event.target);
+    const text = $input.val();
+    $input.next().text(text);
+    datum($input.closest('.vannot-track')).title = text;
+    player.changedObjects();
+  });
+
   const colorChange = (event, color) => {
     datum($(event.target).closest('.vannot-track')).color = color.toHexString();
     player.changedObjects();
