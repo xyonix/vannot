@@ -36,9 +36,8 @@ const drawShapes = (canvas, target) => {
     const points = instantiateElems(select(this).selectAll('.shapePoint').data(shape.points, digestPoint), 'circle', 'shapePoint');
     points
       .classed('selected', (point) => selected.points.includes(point))
-      .attr('r', 2)
+      .attr('r', (point) => (selected.points.includes(point) ? 8 : 2))
       .style('fill', color)
-      .style('stroke', color)
       .attr('cx', (point) => point.x)
       .attr('cy', (point) => point.y);
   });
@@ -51,7 +50,6 @@ const drawImplicitPoints = (canvas, target) => {
   if (canvas.implicitPoints.object != null) {
     points
       .style('fill', canvas.implicitPoints.object.color)
-      .style('stroke', canvas.implicitPoints.object.color)
       .attr('r', 8)
       .attr('cx', (implied) => implied.coords.x)
       .attr('cy', (implied) => implied.coords.y);
