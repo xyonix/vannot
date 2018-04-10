@@ -1,6 +1,7 @@
 const $ = require('jquery');
-const { round, trunc } = Math;
+const { round, trunc, random } = Math;
 const { clamp, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
+const tcolor = require('tinycolor2');
 
 module.exports = ($app, player, canvas) => {
 
@@ -59,6 +60,15 @@ module.exports = ($app, player, canvas) => {
       $button.addClass('confirm');
       defer(() => { $document.one('click', () => { $button.removeClass('confirm'); }) });
     }
+  });
+
+  $app.find('.vannot-object-new').on('click', () => {
+    player.data.objects.push({
+      id: player.data._seqId++,
+      title: 'New object',
+      color: tcolor.fromRatio({ h: random(), s: 1, v: 1 }).toHexString()
+    });
+    player.changedObjects();
   });
 
   ////////////////////////////////////////

@@ -5,7 +5,8 @@
   "dependencies": {
     "d3": "~4",
     "jquery": "~3",
-    "ramda": "~0.25"
+    "ramda": "~0.25",
+    "tinycolor2": "~1"
   },
   "devDependencies": {
     "browserify": "~16",
