@@ -1,11 +1,12 @@
 const $ = require('jquery');
 const { round, trunc, random } = Math;
-const { clamp, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
 const tcolor = require('tinycolor2');
+const { clamp, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
 
 module.exports = ($app, player, canvas) => {
 
-  const videoObj = $app.find('video')[0];
+  const $video = $app.find('video');
+  const videoObj = $video[0];
   const $document = $(document);
   const $objectWrapper = $app.find('.vannot-objects');
 
@@ -16,6 +17,22 @@ module.exports = ($app, player, canvas) => {
   const updateTimelineWidth = () => { player.timelineWidth = $ticks.width(); };
   $(window).on('resize', updateTimelineWidth);
   updateTimelineWidth();
+
+  ////////////////////////////////////////
+  // Video Adjustments
+
+  const adjustments = { brightness: 1, greyscale: 0 };
+  const applyAdjustments = () => {
+    $video.css('filter', `brightness(${adjustments.brightness}) grayscale(${adjustments.greyscale})`);
+  };
+  $app.find('.vannot-video-brightness-edit').on('change', (event) => {
+    adjustments.brightness = parseFloat($(event.target).val());
+    applyAdjustments();
+  });
+  $app.find('.vannot-video-chromatic-edit').on('change', (event) => {
+    adjustments.greyscale = parseFloat($(event.target).val());
+    applyAdjustments();
+  });
 
   ////////////////////////////////////////
   // Controls
