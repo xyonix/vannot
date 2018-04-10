@@ -1,6 +1,7 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const $ = window.$ = window.jQuery = require('jquery');
 const { select } = require('d3');
+const { px } = require('./util');
 
 // docready.
 $(function() {
@@ -46,5 +47,13 @@ $(function() {
   playerRenderer(app, player, canvas);
   const canvasRenderer = require('./render/canvas').reactor;
   canvasRenderer(app, player, canvas);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // LAYOUT ADJUSTMENT
+
+  const $tracks = $app.find('.vannot-tracks');
+  const scrollWidth = $tracks[0].offsetWidth - $tracks[0].clientWidth;
+  $app.find('.vannot-scale').css('right', px(scrollWidth));
+  $app.find('.vannot-ranger').css('right', px(scrollWidth));
 });
 

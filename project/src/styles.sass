@@ -514,8 +514,9 @@ $timeline-ranger-height: 16px
 
 .vannot-scale
   height: $timeline-ticks-height
-  margin-left: $left-pane-width
-  position: relative
+  left: $left-pane-width
+  position: absolute
+  right: 0
 
 $playhead-color: #6cf
 .vannot-playhead
@@ -580,6 +581,24 @@ $playhead-color: #6cf
 $track-height: 25px
 $track-vpadding: 5px
 $track-outerheight: $track-height + (2 * $track-vpadding)
+
+.vannot-tracks
+  @include fill
+  bottom: $timeline-ranger-height
+  overflow-x: hidden
+  overflow-y: scroll
+  padding-bottom: 40px
+  top: $timeline-ticks-height
+
+  &::-webkit-scrollbar
+    background: #222
+    width: 10px
+
+  &::-webkit-scrollbar-thumb
+    background: #888
+  &::-webkit-scrollbar-thumb:hover
+    background: #999
+
 .vannot-track
   height: $track-outerheight
 

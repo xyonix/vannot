@@ -45,6 +45,7 @@ const instantiateElems = (selection, tagName, className) => {
 // and one last shortcut for the above to just make divs.
 const instantiateDivs = (selection, className) => instantiateElems(selection, 'div', className);
 
+const px = (x) => `${x}px`;
 const pct = (x) => `${x * 100}%`;
 
 // takes a jquery element and gets the d3 data out of it.
@@ -154,7 +155,7 @@ const withinBox = (box, point) => {
 module.exports = {
   clamp,
   last, spliceOut,
-  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, pct, datum,
+  getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, px, pct, datum,
   pad, timecode, timecodePretty,
   draggable, byDelta, defer, queuer,
   pointsEqual, distance, midpoint, digestPoint,
