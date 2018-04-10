@@ -26,12 +26,21 @@ $(function() {
   const data = getData();
   window.saveData = () => localStorage.setItem('vannot', JSON.stringify(data));
 
+  const $app = $('#vannot .vannot-app');
+  const app = select($app[0]);
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // LAYOUT ADJUSTMENT
+
+  const $tracks = $app.find('.vannot-tracks');
+  const scrollWidth = $tracks[0].offsetWidth - $tracks[0].clientWidth;
+  $app.find('.vannot-scale').css('right', px(scrollWidth));
+  $app.find('.vannot-ranger').css('right', px(scrollWidth));
+
 
   ////////////////////////////////////////////////////////////////////////////////
   // APPLICATION
-
-  const $app = $('#vannot .vannot-app');
-  const app = select($app[0]);
 
   const { Player } = require('./viewmodel/player');
   const player = new Player($app.find('video'), data);
@@ -47,13 +56,5 @@ $(function() {
   playerRenderer(app, player, canvas);
   const canvasRenderer = require('./render/canvas').reactor;
   canvasRenderer(app, player, canvas);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // LAYOUT ADJUSTMENT
-
-  const $tracks = $app.find('.vannot-tracks');
-  const scrollWidth = $tracks[0].offsetWidth - $tracks[0].clientWidth;
-  $app.find('.vannot-scale').css('right', px(scrollWidth));
-  $app.find('.vannot-ranger').css('right', px(scrollWidth));
 });
 
