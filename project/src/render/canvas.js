@@ -97,6 +97,9 @@ const updateCanvasChrome = (canvas, state, app) => {
   app.classed('drawing', state === 'drawing');
   app.classed('shapes', state === 'shapes');
   app.classed('points', state == 'points');
+
+  app.classed('tool-select', canvas.tool === 'select');
+  app.classed('tool-pan', canvas.tool === 'pan');
 };
 
 const updateObjectSelect = (canvas, objectSelect) => {
@@ -160,10 +163,11 @@ const drawer = (app, player, canvas) => {
     if (dirty.projection)
       setProjection(canvas, viewportWrapper);
 
-    if (dirty.selected) {
+    if (dirty.tool || dirty.selected)
       updateCanvasChrome(canvas, state, app);
+
+    if (dirty.selected)
       updateToolbarCounts(canvas, toolbar);
-    }
 
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
@@ -204,6 +208,8 @@ const reactor = (app, player, canvas) => {
   canvas.events.on('change.mouse', mark('mouse'));
   canvas.events.on('change.points', mark('points'));
   canvas.events.on('change.shapes', mark('shapes'));
+  canvas.events.on('change.tool', mark('tool'));
+
   player.events.on('change.objects', mark('objects'));
 
   // set the svg viewbox and draw the frame to start.

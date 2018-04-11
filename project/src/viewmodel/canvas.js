@@ -9,6 +9,7 @@ class Canvas {
 
     this._scale = 1;
     this._pan = { x: 0, y: 0 };
+    this._tool = 'select';
 
     this.events = new EventEmitter();
     this._initialize();
@@ -114,6 +115,16 @@ class Canvas {
   set pan(pan) {
     this._pan = pan;
     this.events.emit('change.projection');
+  }
+
+  get tool() { return this._toolOverride || this._tool; }
+  set tool(tool) {
+    this._tool = tool;
+    this.events.emit('change.tool');
+  }
+  set toolOverride(override) {
+    this._toolOverride = override;
+    this.events.emit('change.tool');
   }
 
   // and if anybody changes points or shapes they need to tell us manually.

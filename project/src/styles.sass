@@ -170,10 +170,6 @@ html, body
   .vannot-viewport-content
     @include fill(20px)
 
-  .panning &
-    cursor: -webkit-grab
-    cursor: grab
-
 .vannot-video
   @include fill
 
@@ -253,6 +249,11 @@ html, body
 
     .drawing &
       cursor: crosshair
+
+    .tool-pan &
+      cursor: -webkit-grab
+      cursor: grab
+
 
     .wipPath
       stroke-width: 4px

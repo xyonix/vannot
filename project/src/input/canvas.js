@@ -88,7 +88,7 @@ module.exports = ($app, player, canvas) => {
   }));
 
   const pan = drag({
-    test: (_, { panning }) => (panning === true),
+    test: () => (canvas.tool === 'pan'),
     init: () => {
       // we do this manually as we wish to operate in screen-space.
       let lastX, lastY;
@@ -200,7 +200,7 @@ module.exports = ($app, player, canvas) => {
     // Mutable. Managed only by inputs below. Kept to an absolute minimum. Always
     // replace by reference, never write directly into.
 
-    let mouse, downState, dragging, panning, viewportWidth, viewportHeight;
+    let mouse, downState, dragging, viewportWidth, viewportHeight;
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ module.exports = ($app, player, canvas) => {
     $viewport.on('mousedown', (event) => {
       downState = canvas.state;
       const [ $target, shape, point, keys ] = eventData(event);
-      const dataArg = { mouse, keys, shape, point, panning };
+      const dataArg = { mouse, keys, shape, point };
 
       // run all action sets for our state.
       for (const actionSets of mousedown[canvas.state]) {
@@ -251,7 +251,7 @@ module.exports = ($app, player, canvas) => {
       // if the user has not executed any dragging operations.
       if ((state === downState) && ((dragging == null) || (dragging.dragged !== true))) {
         const [ $target, shape, point, keys ] = eventData(event);
-        const dataArg = { mouse, keys, shape, point, panning };
+        const dataArg = { mouse, keys, shape, point };
         for (const actionSets of mouseup[state])
           actionSets.some((action) => action($target, dataArg));
       }
@@ -270,19 +270,8 @@ module.exports = ($app, player, canvas) => {
     // Global inputs
 
     // Track whether we are holding the spacebar:
-    // TODO: do not mutate document state here.
-    $document.on('keydown', (event) => {
-      if (event.which === 32) {
-        panning = true;
-        $app.addClass('panning');
-      }
-    });
-    $document.on('keyup', (event) => {
-      if (event.which === 32) {
-        panning = false;
-        $app.removeClass('panning');
-      }
-    });
+    $document.on('keydown', (event) => { if (event.which === 32) canvas.toolOverride = 'pan'; });
+    $document.on('keyup', (event) => { if (event.which === 32) canvas.toolOverride = null; });
 
     // Update viewport size when window is resized (and set it immediately).
     const $video = $app.find('video');
