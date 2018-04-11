@@ -174,7 +174,7 @@ module.exports = ($app, player, canvas) => {
       [ selectShapeDown, deselect ],
       [ dragPoints, pan, dragLasso ]
     ],
-    drawing: [ [ closeShape, drawPoint ] ],
+    drawing: [ [ pan, closeShape, drawPoint ] ],
     shapes: [
       [ selectShapeDown, deselect ],
       [ dragImplicitPoint, dragPoint, dragPoints, pan, dragLasso ],
@@ -369,7 +369,10 @@ module.exports = ($app, player, canvas) => {
 
     // Normal state:
     $app.find('.vannot-copy-last').on('click', () => canvas.copyLast());
-    $app.find('.vannot-draw-shape').on('click', () => canvas.startShape());
+    $app.find('.vannot-draw-shape').on('click', () => {
+      canvas.startShape()
+      canvas.tool = 'select';
+    });
 
     // Drawing state:
     $app.find('.vannot-undo-draw').on('click', () => {
