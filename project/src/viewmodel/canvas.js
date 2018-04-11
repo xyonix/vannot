@@ -233,6 +233,11 @@ class Canvas {
   }
 
   removePoints(points) {
+    // if we are deleting only some points from one shape alone, reselect it afterwards.
+    const reselect = ((this.selected.wholeShapes.length === 0) && (this.selected.partialShapes.length === 1))
+      ? this.selected.partialShapes[0]
+      : null;
+
     // easy to remove all wholly-selected shapes:
     for (const shape of this.selected.wholeShapes)
       spliceOut(shape, this.frameObj.shapes);
@@ -248,9 +253,15 @@ class Canvas {
         spliceOut(shape, this.frameObj.shapes);
     }
 
-    this.deselect();
+    // mark dirty.
     this.changedPoints();
     this.changedShapes();
+
+    // do that reselection; otherwies just deselect.
+    if ((reselect != null) && (this.frameObj.shapes.includes(reselect)))
+      this.selectShape(reselect);
+    else
+      this.deselect();
   }
 }
 
