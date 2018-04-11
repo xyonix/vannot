@@ -164,8 +164,14 @@ html, body
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Video
 
+.vannot-viewport
+  overflow: hidden
+
+  .vannot-viewport-content
+    @include fill(20px)
+
 .vannot-video
-  @include fill(20px)
+  @include fill
 
   video
     @include center-vert
@@ -234,7 +240,7 @@ html, body
   animation: flash 0.6s ease-in-out 0s infinite
 
 .vannot-canvas
-  @include fill(20px)
+  @include fill
 
   svg
     @include center-vert

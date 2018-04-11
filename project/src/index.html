@@ -9,16 +9,18 @@
     <div id="vannot">
       <div class="vannot-app">
         <div class="vannot-viewport">
-          <div class="vannot-video"><video/></div>
-          <div class="vannot-canvas">
-            <svg viewBox="0 0 1280 720">
-              <g class="shapes"/>
-              <g class="implicitPoints"/>
-              <path class="wipPath"/>
-              <circle class="wipPoint" r="5"/>
-              <circle class="wipCloser" r="8"/>
-              <rect class="selectionBox"/>
-            </svg>
+          <div class="vannot-viewport-content">
+            <div class="vannot-video"><video/></div>
+            <div class="vannot-canvas">
+              <svg viewBox="0 0 1280 720">
+                <g class="shapes"/>
+                <g class="implicitPoints"/>
+                <path class="wipPath"/>
+                <circle class="wipPoint" r="5"/>
+                <circle class="wipCloser" r="8"/>
+                <rect class="selectionBox"/>
+              </svg>
+            </div>
           </div>
           <div class="vannot-video-adjust">
             <div class="vannot-video-parameter vannot-video-brightness">
@@ -125,6 +127,7 @@
     </div>
     <script src="app.js"></script>
     <script src="assets/spectrum.js"></script>
+    <script src="assets/jquery.mousewheel.min.js"></script>
   </body>
 </html>
 

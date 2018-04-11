@@ -1,7 +1,7 @@
 const $ = require('jquery');
-const { round } = Math;
-const { without } = require('ramda');
-const { normalizeBox, datum } = require('../util');
+const { round, min, abs, sign } = Math;
+const { without, last, mean } = require('ramda');
+const { normalizeBox, datum, clamp } = require('../util');
 
 module.exports = ($app, player, canvas) => {
 
@@ -263,26 +263,72 @@ module.exports = ($app, player, canvas) => {
     updateViewportSize();
 
     // Translate mouse position to canvas-space, store for all handlers to use.
-    $(document).on('mousemove', ({ pageX, pageY }) => {
-      // figure out our scaling factor and origin.
+    const processMouse = (pageX, pageY) => {
+      // figure out our stacked scaling factor and origin.
       // first determine which the constraint side is, then calculate rendered video size.
       const videoRatio = player.video.width / player.video.height;
       const heightConstrained = (viewportWidth / viewportHeight) > videoRatio;
-      const renderedWidth = heightConstrained ? (viewportHeight * videoRatio) : viewportWidth;
-      const renderedHeight = heightConstrained ? viewportHeight : (viewportWidth / videoRatio);
-
-      // now determine origin point in screenspace.
-      const originX = heightConstrained ? round((viewportWidth / 2) - (renderedWidth / 2)) : 0;
-      const originY = heightConstrained ? 0 : round((viewportHeight / 2) - (renderedHeight / 2));
-
-      // get the delta, then transform into svg-space.
-      const factor = heightConstrained ? (player.video.height / viewportHeight) : (player.video.width / viewportWidth);
+      const factor = heightConstrained
+        ? (player.video.height / (viewportHeight * canvas.scale))
+        : (player.video.width / (viewportWidth * canvas.scale));
+      const originX = (viewportWidth / 2) - (player.video.width / 2 / factor);
+      const originY = (viewportHeight / 2) - (player.video.height / 2 / factor);
       const x = (pageX - (viewportPadding / 2) - originX) * factor;
       const y = (pageY - (viewportPadding / 2) - originY) * factor;
 
-      mouse = { x, y };
-      canvas.mouse = mouse;
+      canvas.mouse = mouse = { x, y };
       if (dragging != null) dragging(mouse);
+    };
+    $(document).on('mousemove', ({ pageX, pageY }) => { processMouse(pageX, pageY); });
+
+
+    ////////////////////////////////////////
+    // Pan/zoom
+
+    // we have to do a ton of work to normalize scroll delta between different browsers;
+    // the reported delta can be anything from ~1 to ~1,000.
+    const wheelSamples = []; // track the largest-rate samples.
+    const factorRateCap = 1.3; // ideally we cap by rate (scalefactor/sec), but
+    const factorTickCap = 0.1; // lacking enough samples we'll cap by per-event-fire instead.
+    let lastSample; // we need the previous sample to compute deltas.
+
+    const scaleSign = (x) => (x > 1) ? 1 : (x === 1) ? 0 : -1;
+    let signLock; // we also pause momentarily at zoom sign-change.
+    $viewport.on('mousewheel', (event) => {
+      // deal with sample collection:
+      const now = new Date();
+      if (lastSample != null) {
+        const deltaT = now - lastSample.at;
+        if ((deltaT > 5) && (deltaT < 500) && (wheelSamples.length < 100))
+          wheelSamples.push({ deltaT, rate: abs(event.deltaY / deltaT) });
+      }
+      lastSample = { at: now, deltaY: event.deltaY };
+
+      // compute the desired scale change:
+      const effectiveDelta = (wheelSamples.length < 2)
+        ? (factorTickCap * sign(event.deltaY))
+        : event.deltaY * factorRateCap / mean(wheelSamples.map((x) => x.rate * 1000)); // msec => sec
+
+      // apply the scale change, with clamping and signlocking considerations:
+      const currentScale = canvas.scale;
+      const targetScale = clamp(0.5, currentScale + effectiveDelta, 3.5);
+      const currentSign = scaleSign(currentScale);
+      const targetSign = scaleSign(targetScale);
+      if ((currentSign === targetSign) || ((currentSign === 0) && (signLock == null))) {
+        // same-sign, we can always apply.
+        canvas.scale = targetScale;
+      } else if (signLock == null) {
+        canvas.scale = 1;
+        signLock = { sign: currentSign, at: now };
+      } else if ((targetSign === signLock.sign) || ((now - signLock.at) > 500)) {
+        canvas.scale = targetScale;
+        signLock = null;
+      }
+
+      // finally, adjust our pan so that the relative mouse-position remains static:
+
+      // and recalculate scaled mouse position:
+      processMouse(event.pageX, event.pageY);
     });
 
 

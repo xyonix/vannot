@@ -1,5 +1,5 @@
 const { select, line } = require('d3');
-const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer } = require('../util');
+const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer, px } = require('../util');
 
 const lineCalc = line()
   .x((point) => point.x)
@@ -8,6 +8,10 @@ const lineCalc = line()
 const setupSvg = (canvas, target) => {
   const { width, height } = canvas.data.video;
   target.attr('viewBox', `0 0 ${width} ${height}`);
+};
+
+const setProjection = (canvas, target) => {
+  target.style('transform', `translate(${px(canvas.pan.x)}, ${px(canvas.pan.y)}) scale(${canvas.scale})`);
 };
 
 const drawShapes = (canvas, target) => {
@@ -137,6 +141,7 @@ const updateToolbarCounts = (canvas, toolbar) => {
 // operations. Queues them up so rapid changes don't cause drawchurn.
 
 const drawer = (app, player, canvas) => {
+  const viewportWrapper = app.select('.vannot-viewport-content');
   const svg = app.select('svg');
   const shapeWrapper = svg.select('.shapes');
   const implicitWrapper = svg.select('.implicitPoints');
@@ -151,6 +156,9 @@ const drawer = (app, player, canvas) => {
     const dirty = draw.dirty;
     draw.dirty = {};
     const state = canvas.state;
+
+    if (dirty.projection)
+      setProjection(canvas, viewportWrapper);
 
     if (dirty.selected) {
       updateCanvasChrome(canvas, state, app);
@@ -192,6 +200,7 @@ const reactor = (app, player, canvas) => {
   canvas.events.on('change.frame', mark('frame'));
   canvas.events.on('change.selected', mark('selected'));
   canvas.events.on('change.lasso', mark('lasso'));
+  canvas.events.on('change.projection', mark('projection'));
   canvas.events.on('change.mouse', mark('mouse'));
   canvas.events.on('change.points', mark('points'));
   canvas.events.on('change.shapes', mark('shapes'));

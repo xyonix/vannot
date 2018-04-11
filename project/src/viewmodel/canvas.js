@@ -7,6 +7,9 @@ class Canvas {
     this.player = player;
     this.data = data;
 
+    this._scale = 1;
+    this._pan = { x: 0, y: 0 };
+
     this.events = new EventEmitter();
     this._initialize();
   }
@@ -101,6 +104,16 @@ class Canvas {
   set mouse(mouse) {
     this._mouse = mouse;
     this.events.emit('change.mouse');
+  }
+  get scale() { return this._scale; }
+  set scale(scale) {
+    this._scale = scale;
+    this.events.emit('change.projection');
+  }
+  get pan() { return this._pan; }
+  set pan(pan) {
+    this._pan = pan;
+    this.events.emit('change.projection');
   }
 
   // and if anybody changes points or shapes they need to tell us manually.
