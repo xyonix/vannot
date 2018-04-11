@@ -5,6 +5,8 @@ const { normalizeBox, datum, clamp } = require('../util');
 
 module.exports = ($app, player, canvas) => {
 
+  const $document = $(document);
+
   ////////////////////////////////////////////////////////////////////////////////
   // INTERACTIONS
   // The possible interactions that can exist.
@@ -85,6 +87,21 @@ module.exports = ($app, player, canvas) => {
     }
   }));
 
+  const pan = drag({
+    test: (_, { panning }) => (panning === true),
+    init: () => {
+      // we do this manually as we wish to operate in screen-space.
+      let lastX, lastY;
+      $document.on('mousemove.pan', ({ pageX, pageY }) => {
+        if (lastX != null)
+          canvas.pan = { x: canvas.pan.x + (pageX - lastX), y: canvas.pan.y + (pageY - lastY) };
+        lastX = pageX;
+        lastY = pageY;
+      });
+    },
+    end: () => { $document.off('mousemove.pan'); }
+  });
+
   // "down" refers to mousedown; we don't want to change the selection to a subset on
   // mousedown in case a drag is intended.
   const selectShapeDown = ($target, { shape, point, keys }) => {
@@ -155,16 +172,16 @@ module.exports = ($app, player, canvas) => {
   const mousedown = {
     normal: [
       [ selectShapeDown, deselect ],
-      [ dragPoints, dragLasso ]
+      [ dragPoints, pan, dragLasso ]
     ],
     drawing: [ [ closeShape, drawPoint ] ],
     shapes: [
       [ selectShapeDown, deselect ],
-      [ dragImplicitPoint, dragPoint, dragPoints, dragLasso ],
+      [ dragImplicitPoint, dragPoint, dragPoints, pan, dragLasso ],
     ],
     points: [
       [ selectShapeDown, deselect ],
-      [ dragPoints, dragLasso ]
+      [ dragPoints, pan, dragLasso ]
     ]
   };
   // mouseup operations occur only when a drag has not occurred.
@@ -183,7 +200,7 @@ module.exports = ($app, player, canvas) => {
     // Mutable. Managed only by inputs below. Kept to an absolute minimum. Always
     // replace by reference, never write directly into.
 
-    let mouse, downState, dragging, viewportWidth, viewportHeight;
+    let mouse, downState, dragging, panning, viewportWidth, viewportHeight;
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +223,7 @@ module.exports = ($app, player, canvas) => {
     $viewport.on('mousedown', (event) => {
       downState = canvas.state;
       const [ $target, shape, point, keys ] = eventData(event);
-      const dataArg = { mouse, keys, shape, point };
+      const dataArg = { mouse, keys, shape, point, panning };
 
       // run all action sets for our state.
       for (const actionSets of mousedown[canvas.state]) {
@@ -234,7 +251,7 @@ module.exports = ($app, player, canvas) => {
       // if the user has not executed any dragging operations.
       if ((state === downState) && ((dragging == null) || (dragging.dragged !== true))) {
         const [ $target, shape, point, keys ] = eventData(event);
-        const dataArg = { mouse, keys, shape, point };
+        const dataArg = { mouse, keys, shape, point, panning };
         for (const actionSets of mouseup[state])
           actionSets.some((action) => action($target, dataArg));
       }
@@ -252,6 +269,21 @@ module.exports = ($app, player, canvas) => {
     ////////////////////////////////////////
     // Global inputs
 
+    // Track whether we are holding the spacebar:
+    // TODO: do not mutate document state here.
+    $document.on('keydown', (event) => {
+      if (event.which === 32) {
+        panning = true;
+        $app.addClass('panning');
+      }
+    });
+    $document.on('keyup', (event) => {
+      if (event.which === 32) {
+        panning = false;
+        $app.removeClass('panning');
+      }
+    });
+
     // Update viewport size when window is resized (and set it immediately).
     const $video = $app.find('video');
     const viewportPadding = $viewport.width() - $video.width();
@@ -262,24 +294,28 @@ module.exports = ($app, player, canvas) => {
     $(window).on('resize', updateViewportSize);
     updateViewportSize();
 
-    // Translate mouse position to canvas-space, store for all handlers to use.
-    const processMouse = (pageX, pageY) => {
+    // Translate mouse position to canvas-space.
+    const project = (pageX, pageY, { scale, pan }) => {
       // figure out our stacked scaling factor and origin.
       // first determine which the constraint side is, then calculate rendered video size.
       const videoRatio = player.video.width / player.video.height;
       const heightConstrained = (viewportWidth / viewportHeight) > videoRatio;
       const factor = heightConstrained
-        ? (player.video.height / (viewportHeight * canvas.scale))
-        : (player.video.width / (viewportWidth * canvas.scale));
+        ? (player.video.height / (viewportHeight * scale))
+        : (player.video.width / (viewportWidth * scale));
       const originX = (viewportWidth / 2) - (player.video.width / 2 / factor);
       const originY = (viewportHeight / 2) - (player.video.height / 2 / factor);
-      const x = (pageX - (viewportPadding / 2) - originX) * factor;
-      const y = (pageY - (viewportPadding / 2) - originY) * factor;
+      const x = (pageX - pan.x - (viewportPadding / 2) - originX) * factor;
+      const y = (pageY - pan.y - (viewportPadding / 2) - originY) * factor;
 
-      canvas.mouse = mouse = { x, y };
+      return { factor, mouse: { x, y } };
+    };
+    const processMouse = (pageX, pageY) => {
+      const projected = project(pageX, pageY, canvas);
+      canvas.mouse = mouse = projected.mouse;
       if (dragging != null) dragging(mouse);
     };
-    $(document).on('mousemove', ({ pageX, pageY }) => { processMouse(pageX, pageY); });
+    $document.on('mousemove', ({ pageX, pageY }) => { processMouse(pageX, pageY); });
 
 
     ////////////////////////////////////////
@@ -326,6 +362,11 @@ module.exports = ($app, player, canvas) => {
       }
 
       // finally, adjust our pan so that the relative mouse-position remains static:
+      const scaled = project(event.pageX, event.pageY, canvas);
+      canvas.pan = {
+        x: canvas.pan.x + (scaled.mouse.x - mouse.x) / scaled.factor,
+        y: canvas.pan.y + (scaled.mouse.y - mouse.y) / scaled.factor
+      };
 
       // and recalculate scaled mouse position:
       processMouse(event.pageX, event.pageY);
