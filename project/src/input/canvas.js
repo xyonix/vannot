@@ -200,7 +200,7 @@ module.exports = ($app, player, canvas) => {
     // Mutable. Managed only by inputs below. Kept to an absolute minimum. Always
     // replace by reference, never write directly into.
 
-    let mouse, downState, dragging, viewportWidth, viewportHeight;
+    let mouse, downState, dragging;
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -276,32 +276,26 @@ module.exports = ($app, player, canvas) => {
     // Update viewport size when window is resized (and set it immediately).
     const $video = $app.find('video');
     const viewportPadding = $viewport.width() - $video.width();
-    const updateViewportSize = (width, height) => {
-      viewportWidth = $viewport.width() - viewportPadding;
-      viewportHeight = $viewport.height() - viewportPadding;
+    const updateViewportSize = () => {
+      canvas.viewportSize = {
+        width: $viewport.width(),
+        height: $viewport.height(),
+        padding: viewportPadding
+      };
     };
     $(window).on('resize', updateViewportSize);
     updateViewportSize();
 
-    // Translate mouse position to canvas-space.
-    const project = (pageX, pageY, { scale, pan }) => {
-      // figure out our stacked scaling factor and origin.
-      // first determine which the constraint side is, then calculate rendered video size.
-      const videoRatio = player.video.width / player.video.height;
-      const heightConstrained = (viewportWidth / viewportHeight) > videoRatio;
-      const factor = heightConstrained
-        ? (player.video.height / (viewportHeight * scale))
-        : (player.video.width / (viewportWidth * scale));
-      const originX = (viewportWidth / 2) - (player.video.width / 2 / factor);
-      const originY = (viewportHeight / 2) - (player.video.height / 2 / factor);
-      const x = (pageX - pan.x - (viewportPadding / 2) - originX) * factor;
-      const y = (pageY - pan.y - (viewportPadding / 2) - originY) * factor;
-
-      return { factor, mouse: { x, y } };
+    // Translates page-space mouse position to canvas-space.
+    const projectMouse = (pageX, pageY, projection) => {
+      const x = (pageX - (viewportPadding / 2) - projection.origin.x) * projection.factor;
+      const y = (pageY - (viewportPadding / 2) - projection.origin.y) * projection.factor;
+      return { x, y };
     };
+
+    // Sets local/canvas mouse state give page coordinates.
     const processMouse = (pageX, pageY) => {
-      const projected = project(pageX, pageY, canvas);
-      canvas.mouse = mouse = projected.mouse;
+      canvas.mouse = mouse = projectMouse(pageX, pageY, canvas.projection);
       if (dragging != null) dragging(mouse);
     };
     $document.on('mousemove', ({ pageX, pageY }) => { processMouse(pageX, pageY); });
@@ -351,10 +345,10 @@ module.exports = ($app, player, canvas) => {
       }
 
       // finally, adjust our pan so that the relative mouse-position remains static:
-      const scaled = project(event.pageX, event.pageY, canvas);
+      const scaled = projectMouse(event.pageX, event.pageY, canvas.projection);
       canvas.pan = {
-        x: canvas.pan.x + (scaled.mouse.x - mouse.x) / scaled.factor,
-        y: canvas.pan.y + (scaled.mouse.y - mouse.y) / scaled.factor
+        x: canvas.pan.x + (scaled.x - mouse.x) / canvas.projection.factor,
+        y: canvas.pan.y + (scaled.y - mouse.y) / canvas.projection.factor
       };
 
       // and recalculate scaled mouse position:

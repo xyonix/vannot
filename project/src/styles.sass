@@ -189,11 +189,8 @@ html, body
 .vannot-viewport
   overflow: hidden
 
-  .vannot-viewport-content
-    @include fill(20px)
-
 .vannot-video
-  @include fill
+  @include fill(20px)
 
   video
     @include center-vert
@@ -297,8 +294,7 @@ html, body
   @include fill
 
   svg
-    @include center-vert
-    max-height: 100%
+    height: 100%
     width: 100%
 
     .drawing &

@@ -7,13 +7,19 @@ const lineCalc = line()
   .x((point) => point.x)
   .y((point) => point.y);
 
-const setupSvg = (canvas, target) => {
-  const { width, height } = canvas.data.video;
-  target.attr('viewBox', `0 0 ${width} ${height}`);
-};
+const setProjection = (canvas, videoWrapper, svg) => {
+  // first set transform on the video.
+  videoWrapper.style('transform', `translate(${px(canvas.pan.x)}, ${px(canvas.pan.y)}) scale(${canvas.scale})`);
 
-const setProjection = (canvas, target) => {
-  target.style('transform', `translate(${px(canvas.pan.x)}, ${px(canvas.pan.y)}) scale(${canvas.scale})`);
+  // then set the viewbox on the svg to match the viewport canvas-space coordinates.
+  // we first compute the bounds in screenspace, then project into canvas-space at the end.
+  const video = canvas.data.video;
+  const padding = canvas.viewportSize.padding;
+  const x = (-padding / 2) - canvas.projection.origin.x;
+  const y = (-padding / 2) - canvas.projection.origin.y;
+  const w = canvas.viewportSize.width;
+  const h = canvas.viewportSize.height;
+  svg.attr('viewBox', [ x, y, w, h ].map((k) => k * canvas.projection.factor).join(' '));
 };
 
 const drawShapes = (canvas, target) => {
@@ -157,7 +163,7 @@ const updateZoomSelect = (canvas, zoomSelect) => {
 // operations. Queues them up so rapid changes don't cause drawchurn.
 
 const drawer = (app, player, canvas) => {
-  const viewportWrapper = app.select('.vannot-viewport-content');
+  const videoWrapper = app.select('.vannot-video');
   const svg = app.select('svg');
   const shapeWrapper = svg.select('.shapes');
   const implicitWrapper = svg.select('.implicitPoints');
@@ -175,7 +181,7 @@ const drawer = (app, player, canvas) => {
     const state = canvas.state;
 
     if (dirty.projection) {
-      setProjection(canvas, viewportWrapper);
+      setProjection(canvas, videoWrapper, svg);
       updateZoomSelect(canvas, zoomSelect);
     }
 
@@ -228,9 +234,8 @@ const reactor = (app, player, canvas) => {
 
   player.events.on('change.objects', mark('objects'));
 
-  // set the svg viewbox and draw the frame to start.
-  setupSvg(canvas, app.select('svg'));
-  mark('frame');
+  mark('frame')();
+  mark('projection')();
 };
 
 module.exports = { reactor };

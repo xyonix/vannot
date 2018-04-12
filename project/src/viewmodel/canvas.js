@@ -28,7 +28,7 @@ class Canvas {
   // FOUNDATION
   // The actual primitive operations that everything else relies on, internal or external.
 
-  // frame is also asymmetric. the frame /number/ goes into the property; the frame /data/
+  // frame is asymmetric. the frame /number/ goes into the property; the frame /data/
   // comes out. this is so we can manage the automatic creation and destruction of frame
   // data given the presence of shapes.
   get frameObj() { return this._frameObj; }
@@ -94,6 +94,65 @@ class Canvas {
     this.events.emit('change.selected'); // TODO: don't event if set but not changed.
   }
 
+  // these core properties affect the projection. they feed into the projection getter below.
+
+  // scale is a scalar factor which indicates the desired scaling /relative to the rest size/
+  // when the page loads; so 1.0 is default rest size, and 2.0 is double size.
+  get scale() { return this._scale; }
+  set scale(scale) {
+    this._scale = scale;
+    this._projection = null;
+    this.events.emit('change.projection');
+  }
+  // pan is a dx, dy coördinate in screen-space indicating the current pan transform. a positive
+  // number indicates a right/downwards transformation.
+  get pan() { return this._pan; }
+  set pan(pan) {
+    this._pan = pan;
+    this._projection = null;
+    this.events.emit('change.projection');
+  }
+  // the viewport size indicates the measured full viewport size, which is the entire canvas area
+  // including overdraw beyond the video. the padding property indicates the measured linear
+  // difference between video dimension and viewport dimension in either direction (it is a constant
+  // padding no matter the direction).
+  get viewportSize() { return this._viewportSize; }
+  set viewportSize(size) {
+    this._viewportSize = size;
+    this._projection = null;
+    this.events.emit('change.projection');
+  }
+
+  // Projection is computed based on scale, pan, and viewportSize(+padding). The computed
+  // products are:
+  // * factor: is derived from scale, but instead of representing a relative scalar to resting state,
+  //   represents the scalar factor translating from screen-space to canvas-space. it is, essentially,
+  //   the stacked factor of the default video scaling to fit the screen on top of the requested scale
+  //   factor.
+  // * origin: is an { x, y } coördinate in screen-space indicating where we compute the present
+  //   top-left of the rendered video image is. we must compute this ourselves due to the way the
+  //   browser represents the scaling of the element; its internal and external dimensions mismatch.
+  get projection() {
+    // return cached value if we have it:
+    if (this._projection != null) return this._projection;
+
+    // otherwise compute our stacked scaling factor and origin; cache them.
+    // first determine which the constraint side is, then calculate rendered video size.
+    const video = this.data.video;
+    const videoRatio = video.width / video.height;
+    const paddedWidth = this.viewportSize.width - this.viewportSize.padding;
+    const paddedHeight = this.viewportSize.height - this.viewportSize.padding;
+    const heightConstrained = (paddedWidth / paddedHeight) > videoRatio;
+    const factor = heightConstrained
+      ? (video.height / paddedHeight) / this.scale
+      : (video.width / paddedWidth) / this.scale;
+    const originX = (paddedWidth / 2) - (video.width / 2 / factor) + this.pan.x;
+    const originY = (paddedHeight / 2) - (video.height / 2 / factor) + this.pan.y;
+
+    this._projection = { factor, origin: { x: originX, y: originY } };
+    return this._projection;
+  }
+
   // we don't actually do anything fancy these properties other than render them, but
   // they're still root pieces of state here and we do still need to track changes.
   get lasso() { return this._lasso; }
@@ -105,16 +164,6 @@ class Canvas {
   set mouse(mouse) {
     this._mouse = mouse;
     this.events.emit('change.mouse');
-  }
-  get scale() { return this._scale; }
-  set scale(scale) {
-    this._scale = scale;
-    this.events.emit('change.projection');
-  }
-  get pan() { return this._pan; }
-  set pan(pan) {
-    this._pan = pan;
-    this.events.emit('change.projection');
   }
 
   get tool() { return this._toolOverride || this._tool; }
