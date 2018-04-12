@@ -361,6 +361,13 @@ module.exports = ($app, player, canvas) => {
       processMouse(event.pageX, event.pageY);
     });
 
+    // Also handle the zoom toolbar:
+    const $zoomSelect = $app.find('.vannot-video-zoom-edit');
+    $zoomSelect.on('change', (event) => {
+      canvas.scale = parseFloat($zoomSelect.val());
+      $zoomSelect.blur(); // otherwise if you then try to spacebar to pan it reselects the dropdown.
+    });
+
 
     ////////////////////////////////////////
     // Element inputs

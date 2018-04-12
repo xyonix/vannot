@@ -7,10 +7,6 @@ class Canvas {
     this.player = player;
     this.data = data;
 
-    this._scale = 1;
-    this._pan = { x: 0, y: 0 };
-    this._tool = 'select';
-
     this.events = new EventEmitter();
     this._initialize();
   }
@@ -19,6 +15,10 @@ class Canvas {
     const updateFrame = () => { this.frame = this.player.frame; };
     this.player.events.on('change.frame', updateFrame);
     updateFrame();
+
+    this._scale = 1;
+    this._pan = { x: 0, y: 0 };
+    this._tool = 'select';
 
     this.implicitPoints = implicitPoints(this);
   };

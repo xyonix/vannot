@@ -1,4 +1,6 @@
 const { select, line } = require('d3');
+const { identity } = require('ramda');
+const { round } = Math;
 const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer, px } = require('../util');
 
 const lineCalc = line()
@@ -137,6 +139,17 @@ const updateToolbarCounts = (canvas, toolbar) => {
   }
 };
 
+const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];
+const updateZoomSelect = (canvas, zoomSelect) => {
+  const options = zoomStops.includes(canvas.scale)
+    ? zoomStops
+    : zoomStops.concat([ canvas.scale ]).sort();
+  instantiateElems(zoomSelect.selectAll('option').data(options), 'option')
+    .attr('value', identity)
+    .text((x) => round(x * 100) + '%');
+  zoomSelect.node().value = canvas.scale;
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // RENDER SCHEDULER
@@ -154,14 +167,17 @@ const drawer = (app, player, canvas) => {
   const wipCloser = svg.select('.wipCloser');
   const toolbar = app.select('.vannot-toolbar');
   const objectSelect = toolbar.select('.vannot-object-select');
+  const zoomSelect = app.select('.vannot-video-zoom-edit');
 
   const draw = () => {
     const dirty = draw.dirty;
     draw.dirty = {};
     const state = canvas.state;
 
-    if (dirty.projection)
+    if (dirty.projection) {
       setProjection(canvas, viewportWrapper);
+      updateZoomSelect(canvas, zoomSelect);
+    }
 
     if (dirty.tool || dirty.selected)
       updateCanvasChrome(canvas, state, app);
