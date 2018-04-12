@@ -367,6 +367,9 @@ module.exports = ($app, player, canvas) => {
       canvas.scale = parseFloat($zoomSelect.val());
       $zoomSelect.blur(); // otherwise if you then try to spacebar to pan it reselects the dropdown.
     });
+    // And the select/pan toolbuttons:
+    $app.find('.vannot-select-mode').on('click', () => { canvas.tool = 'select'; });
+    $app.find('.vannot-pan-mode').on('click', () => { canvas.tool = 'pan'; });
 
 
     ////////////////////////////////////////

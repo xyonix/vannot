@@ -7,6 +7,7 @@ $text-light: #eee
 $text-light-fade: #aaa
 $action: #1d89bf
 $action-highlight: #0071a9
+$action-alt: #6cf
 $subaction: #195979
 $subaction-highlight: #1371a0
 $warning: #b44
@@ -36,6 +37,8 @@ $icon-undo: "\f112"
 $icon-redo: "\f064"
 $icon-heart: "\f08a"
 $icon-sun: "\f185"
+$icon-cursor: "\f245"
+$icon-move: "\f047"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -230,6 +233,30 @@ html, body
       content: $icon-zoomplus
       position: relative
       top: 3px
+
+  .vannot-icon-toolbutton
+    background: none
+    border: none
+    color: #fff
+    outline: none
+    &:before
+      @include icon
+      font-size: 15px
+      position: relative
+      top: 3px
+
+  .vannot-select-mode:before
+    content: $icon-cursor
+    .tool-select &
+      color: $action-alt
+  .vannot-pan-mode
+    padding-right: 5px
+    &:before
+      content: $icon-move
+      .tool-pan &
+        color: $action-alt
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Canvas
@@ -583,9 +610,8 @@ $timeline-ranger-height: 16px
   position: absolute
   right: 0
 
-$playhead-color: #6cf
 .vannot-playhead
-  border-right: 1px solid $playhead-color
+  border-right: 1px solid $action-alt
   height: $timeline-height - $timeline-ticks-height
   position: absolute
   top: 100%
@@ -596,7 +622,7 @@ $playhead-color: #6cf
   $halfsize: $size / 2
   &:before
     @include reify
-    background: $playhead-color
+    background: $action-alt
     border-radius: 2px 2px 0 0
     bottom: calc(100% + #{$halfsize})
     height: $size
@@ -607,7 +633,7 @@ $playhead-color: #6cf
     @include reify
     border: $halfsize solid transparent
       bottom-width: 0
-      top-color: $playhead-color
+      top-color: $action-alt
     bottom: 100%
     left: -$halfsize
     position: absolute
