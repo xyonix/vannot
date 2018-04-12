@@ -132,6 +132,25 @@ html, body
   &:hover
     background-color: $warning-highlight
 
+#vannot-tooltip
+  $content-margin: 8px
+  $hpadding: 8px
+
+  background: rgba(0, 0, 0, 0.8)
+  color: #fff
+  display: none
+  font-size: 12px
+  padding: 4px $hpadding
+  pointer-events: none
+  position: absolute
+  z-index: 99
+
+  margin-top: -$content-margin
+  &.mirrored
+    margin-left: -$hpadding
+  &.dropped
+    margin-top: $content-margin
+
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
 
