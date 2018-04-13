@@ -1,34 +1,14 @@
 window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const $ = window.$ = window.jQuery = require('jquery');
 const { select } = require('d3');
+const { compose } = require('ramda');
 const { px } = require('./util');
 
 // docready.
 $(function() {
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // DUMMY DATA
-
-  const getData = () => {
-    const saved = localStorage.getItem('vannot');
-    return (saved != null) ? JSON.parse(saved) : {
-      _seqId: 0,
-      video: { duration: 125100, fps: 25, height: 1080, width: 1920, source: '/assets/sailing.mp4' },
-      objects: [
-        { id: -1, title: 'Unassigned', color: '#aaa', system: true },
-        { id: 1, title: 'Port', color: '#07e4ff' },
-        { id: 2, title: 'Starboard', color: '#ff2096' },
-        { id: 3, title: 'Obstacle', color: '#ccb71a' }
-      ],
-      frames: []
-    };
-  };
-  const data = getData();
-  window.saveData = () => localStorage.setItem('vannot', JSON.stringify(data));
-
   const $app = $('#vannot .vannot-app');
   const app = select($app[0]);
-
 
   ////////////////////////////////////////////////////////////////////////////////
   // LAYOUT ADJUSTMENT
@@ -42,58 +22,58 @@ $(function() {
   ////////////////////////////////////////////////////////////////////////////////
   // APPLICATION
 
-  const { Player } = require('./viewmodel/player');
-  const player = new Player($app.find('video'), data);
-  const { Canvas } = require('./viewmodel/canvas');
-  const canvas = new Canvas(player, data);
+  const run = (data) => {
+    const { Player } = require('./viewmodel/player');
+    const player = new Player($app.find('video'), data);
+    const { Canvas } = require('./viewmodel/canvas');
+    const canvas = new Canvas(player, data);
 
-  const playerInput = require('./input/player');
-  playerInput($app, player, canvas);
-  const canvasInput = require('./input/canvas');
-  canvasInput($app, player, canvas);
+    const playerInput = require('./input/player');
+    playerInput($app, player, canvas);
+    const canvasInput = require('./input/canvas');
+    canvasInput($app, player, canvas);
 
-  const playerRenderer = require('./render/player').reactor;
-  playerRenderer(app, player, canvas);
-  const canvasRenderer = require('./render/canvas').reactor;
-  canvasRenderer(app, player, canvas);
+    const playerRenderer = require('./render/player').reactor;
+    playerRenderer(app, player, canvas);
+    const canvasRenderer = require('./render/canvas').reactor;
+    canvasRenderer(app, player, canvas);
+
+    const globalInteractions = require('./input/global');
+    globalInteractions($app);
+  };
 
 
   ////////////////////////////////////////////////////////////////////////////////
-  // GLOBAL INTERACTION
+  // LOAD/STORE DATA
 
-  const $tooltip = $app.find('#vannot-tooltip');
-  $app.on('mouseenter', '[title]', (event) => {
-    const $target = $(event.target);
-    const targetOffset = $target.offset();
-    const targetWidth = $target.outerWidth();
-    const text = $target.attr('title');
-
-    $tooltip.removeClass('dropped mirrored');
-    $tooltip.css('left', targetOffset.left + (targetWidth / 2));
-    $tooltip.css('top', targetOffset.top);
-    $tooltip.text(text);
-    $tooltip.show();
-
-    // detect if tooltip needs reflection because it has wrapped.
-    if ($tooltip.height() > 20) {
-      $tooltip.addClass('mirrored');
-      $tooltip.css('left', 0); // move to left edge for full measurement.
-      $tooltip.css('left', targetOffset.left + (targetWidth / 2) - $tooltip.width());
+  // ensures that a given data object has certain required properties. mutates the object.
+  const normalizeData = (data) => {
+    if (data._seqId == null) data._seqId = 0;
+    if (data.objects == null) data.objects = [];
+    if (!data.objects.some((object) => object.id === -1))
+      data.objects.unshift({ id: -1, title: 'Unassigned', color: '#aaa', system: true });
+    if (data.frames == null) data.frames = [];
+    return data;
+  };
+  const getData = (callback) => {
+    const source = decodeURIComponent((new URL(window.location)).searchParams.get('data'));
+    if (source === 'local') {
+      const stored = localStorage.getItem('vannot');
+      if (stored != null) {
+        const data = JSON.parse(stored);
+        window.saveData = () => { localStorage.setItem('vannot', JSON.stringify(data)); };
+        callback(data);
+      }
+    } else {
+      try {
+        const requestPath = new URL(source, window.location.origin);
+        $.get(requestPath, callback);
+      } catch(ex) {
+        console.error('given data parameter is not a valid url!');
+      }
     }
-
-    // detect if tooltip needs to be dropped because it is too close to the top.
-    if (targetOffset.top < 25) {
-      $tooltip.addClass('dropped');
-      $tooltip.css('top', targetOffset.top + $target.outerHeight());
-    }
-
-    // strip the title off temporarily so the default tooltip does not show.
-    $target.attr('title', '');
-    $target.one('mouseleave', () => {
-      $target.attr('title', text);
-      $tooltip.hide();
-    });
-  });
+  };
+  getData(compose(run, normalizeData));
 
 });
 
