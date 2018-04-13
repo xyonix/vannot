@@ -1,5 +1,6 @@
 
-module.exports = ($app) => {
+module.exports = ($app, player, canvas) => {
+  // Instant tooltips:
   const $tooltip = $app.find('#vannot-tooltip');
   $app.on('mouseenter', '[title]', (event) => {
     const $target = $(event.target);
@@ -32,6 +33,14 @@ module.exports = ($app) => {
       $target.attr('title', text);
       $tooltip.hide();
     });
+  });
+
+  // Save data:
+  $app.find('.vannot-save').on('click', () => {
+    if (player.data.saveUrl != null)
+      $.ajax({ method: 'POST', data: JSON.stringify(player.data), contentType: 'application/json', url: player.data.saveUrl });
+    else
+      localStorage.setItem('vannot', JSON.stringify(player.data));
   });
 };
 

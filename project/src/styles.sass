@@ -25,6 +25,7 @@ $icon-zoomplus: "\f00e"
 $icon-zoomminus: "\f010"
 $icon-plus: "\f055"
 $icon-minus: "\f056"
+$icon-trash: "\f014"
 $icon-doubleleft: "\f100"
 $icon-doubleright: "\f101"
 $icon-left: "\f104"
@@ -39,6 +40,7 @@ $icon-heart: "\f08a"
 $icon-sun: "\f185"
 $icon-cursor: "\f245"
 $icon-move: "\f047"
+$icon-upload: "\f0ee"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -197,6 +199,38 @@ html, body
     max-height: 100%
     width: 100%
 
+.vannot-icon-toolbutton
+  background: none
+  border: none
+  color: #fff
+  outline: none
+  &:before
+    @include icon
+    font-size: 15px
+    position: relative
+    top: 3px
+
+.vannot-main-menu
+  left: 15px
+  overflow: hidden
+  position: absolute
+  top: 15px
+
+  .vannot-menu-item
+    background: rgba(36, 36, 36, 0.8)
+    border-radius: 2px
+    float: left
+    margin-right: 8px
+    padding: 3px 7px 6px
+    &:last-child
+      margin-right: 0
+
+  .vannot-save:before
+    @include icon
+    color: #fff
+    content: $icon-upload
+    margin-right: 6px
+
 .vannot-video-adjust
   overflow: hidden
   position: absolute
@@ -218,59 +252,48 @@ html, body
     color: #fff
     outline: none
 
-  .vannot-video-brightness:before
+.vannot-video-brightness:before
+  @include icon
+  color: #fff
+  content: $icon-sun
+  position: relative
+  top: 3px
+
+.vannot-video-chromatic-icon
+  $size: 10px
+  border: 2px solid #fff
+  border-radius: 999px
+  float: left
+  height: $size
+  overflow: hidden
+  position: relative
+  top: 4px
+  width: $size
+
+  &:before
+    @include reify
+    @include fill
+    background: #fff
+    left: 50%
+
+.vannot-video-zoom
+  &:before
     @include icon
     color: #fff
-    content: $icon-sun
+    content: $icon-zoomplus
     position: relative
     top: 3px
 
-  .vannot-video-chromatic-icon
-    $size: 10px
-    border: 2px solid #fff
-    border-radius: 999px
-    float: left
-    height: $size
-    overflow: hidden
-    position: relative
-    top: 4px
-    width: $size
-
-    &:before
-      @include reify
-      @include fill
-      background: #fff
-      left: 50%
-
-  .vannot-video-zoom
-    &:before
-      @include icon
-      color: #fff
-      content: $icon-zoomplus
-      position: relative
-      top: 3px
-
-  .vannot-icon-toolbutton
-    background: none
-    border: none
-    color: #fff
-    outline: none
-    &:before
-      @include icon
-      font-size: 15px
-      position: relative
-      top: 3px
-
-  .vannot-select-mode:before
-    content: $icon-cursor
-    .tool-select &
+.vannot-select-mode:before
+  content: $icon-cursor
+  .tool-select &
+    color: $action-alt
+.vannot-pan-mode
+  padding-right: 5px
+  &:before
+    content: $icon-move
+    .tool-pan &
       color: $action-alt
-  .vannot-pan-mode
-    padding-right: 5px
-    &:before
-      content: $icon-move
-      .tool-pan &
-        color: $action-alt
 
 
 
@@ -510,8 +533,7 @@ html, body
   content: $icon-duplicate
   text-indent: -1px
 .vannot-delete-shape:before, .vannot-delete-points:before
-  content: $icon-minus
-  text-indent: 0.5px
+  content: $icon-trash
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls
@@ -774,7 +796,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
 
     &:before
       @include icon
-      content: $icon-minus
+      content: $icon-trash
       font-size: 16px
       margin-right: 4px
       position: relative

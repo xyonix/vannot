@@ -28,6 +28,9 @@ $(function() {
     const { Canvas } = require('./viewmodel/canvas');
     const canvas = new Canvas(player, data);
 
+    const globalInteractions = require('./input/global');
+    globalInteractions($app, player, canvas);
+
     const playerInput = require('./input/player');
     playerInput($app, player, canvas);
     const canvasInput = require('./input/canvas');
@@ -37,9 +40,6 @@ $(function() {
     playerRenderer(app, player, canvas);
     const canvasRenderer = require('./render/canvas').reactor;
     canvasRenderer(app, player, canvas);
-
-    const globalInteractions = require('./input/global');
-    globalInteractions($app);
   };
 
 
@@ -59,11 +59,7 @@ $(function() {
     const source = decodeURIComponent((new URL(window.location)).searchParams.get('data'));
     if (source === 'local') {
       const stored = localStorage.getItem('vannot');
-      if (stored != null) {
-        const data = JSON.parse(stored);
-        window.saveData = () => { localStorage.setItem('vannot', JSON.stringify(data)); };
-        callback(data);
-      }
+      if (stored != null) callback(JSON.parse(stored));
     } else {
       try {
         const requestPath = new URL(source, window.location.origin);
