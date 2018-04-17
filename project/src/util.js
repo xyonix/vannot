@@ -161,6 +161,13 @@ const withinBox = (box, point) => {
 };
 
 
+////////////////////////////////////////////////////////////////////////////////
+// MISC
+
+const getQuerystringValue = (key) =>
+  decodeURIComponent((new URL(window.location)).searchParams.get(key));
+
+
 module.exports = {
   clamp,
   last, spliceOut,
@@ -169,6 +176,7 @@ module.exports = {
   pad, timecode, timecodePretty,
   draggable, byDelta, defer, queuer,
   pointsEqual, distance, midpoint, digestPoint,
-  normalizeBox, withinBox
+  normalizeBox, withinBox,
+  getQuerystringValue
 };
 

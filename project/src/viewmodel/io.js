@@ -1,5 +1,6 @@
 const { merge, omit, difference, fromPairs } = require('ramda');
 const { capture } = require('../render/capture');
+const { getQuerystringValue } = require('../util');
 
 // eventually we will call this to actually perform the save operation. not public.
 const doSave = (data) => {
@@ -38,6 +39,9 @@ const checkpoint = (data) => {
   return data;
 };
 
+// simply calls save with a request to export every annotated frame.
+const exportAllFrames = (data) => save(data, data.frames.map((x) => x.frame));
+
 // ensures that a given data object has certain required properties. mutates the object.
 const normalizeData = (data) => {
   if (data._seqId == null) data._seqId = 0;
@@ -50,7 +54,7 @@ const normalizeData = (data) => {
 
 // just fetches data and calls the callback with it.
 const getData = (callback) => {
-  const source = decodeURIComponent((new URL(window.location)).searchParams.get('data'));
+  const source = getQuerystringValue('data');
   if (source === 'local') {
     const stored = localStorage.getItem('vannot');
     if (stored != null) callback(JSON.parse(stored));
@@ -64,5 +68,5 @@ const getData = (callback) => {
   }
 };
 
-module.exports = { save, checkpoint, normalizeData, getData };
+module.exports = { save, checkpoint, exportAllFrames, normalizeData, getData };
 

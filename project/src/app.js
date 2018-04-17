@@ -2,7 +2,7 @@ window.tap = (x) => { console.log(x); return x; }; // for quick debug
 const $ = window.$ = window.jQuery = require('jquery');
 const { select } = require('d3');
 const { compose } = require('ramda');
-const { px } = require('./util');
+const { px, getQuerystringValue } = require('./util');
 
 // docready.
 $(function() {
@@ -47,8 +47,10 @@ $(function() {
   // LOAD/STORE DATA
 
   // actually fetch our data and wire together our data handlers/reactors.
-  const { getData, checkpoint, dataSaver, normalizeData } = require('./viewmodel/io');
-  getData(compose(run, checkpoint, normalizeData));
-
+  const { getData, checkpoint, dataSaver, normalizeData, exportAllFrames } = require('./viewmodel/io');
+  if (getQuerystringValue('mode') === 'export')
+    getData(compose(exportAllFrames, normalizeData));
+  else
+    getData(compose(run, checkpoint, normalizeData));
 });
 
