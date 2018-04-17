@@ -37,10 +37,7 @@ module.exports = ($app, player, canvas) => {
 
   // Save data:
   $app.find('.vannot-save').on('click', () => {
-    if (player.data.saveUrl != null)
-      $.ajax({ method: 'POST', data: JSON.stringify(player.data), contentType: 'application/json', url: player.data.saveUrl });
-    else
-      localStorage.setItem('vannot', JSON.stringify(player.data));
+    player.data.save();
   });
 };
 

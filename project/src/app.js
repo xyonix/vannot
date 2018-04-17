@@ -46,30 +46,9 @@ $(function() {
   ////////////////////////////////////////////////////////////////////////////////
   // LOAD/STORE DATA
 
-  // ensures that a given data object has certain required properties. mutates the object.
-  const normalizeData = (data) => {
-    if (data._seqId == null) data._seqId = 0;
-    if (data.objects == null) data.objects = [];
-    if (!data.objects.some((object) => object.id === -1))
-      data.objects.unshift({ id: -1, title: 'Unassigned', color: '#aaa', system: true });
-    if (data.frames == null) data.frames = [];
-    return data;
-  };
-  const getData = (callback) => {
-    const source = decodeURIComponent((new URL(window.location)).searchParams.get('data'));
-    if (source === 'local') {
-      const stored = localStorage.getItem('vannot');
-      if (stored != null) callback(JSON.parse(stored));
-    } else {
-      try {
-        const requestPath = new URL(source, window.location.origin);
-        $.get(requestPath, callback);
-      } catch(ex) {
-        console.error('given data parameter is not a valid url!');
-      }
-    }
-  };
-  getData(compose(run, normalizeData));
+  // actually fetch our data and wire together our data handlers/reactors.
+  const { getData, checkpoint, dataSaver, normalizeData } = require('./viewmodel/io');
+  getData(compose(run, checkpoint, normalizeData));
 
 });
 

@@ -21,6 +21,15 @@ const spliceOut = (elem, array) => {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// FUNCTION HELPERS
+
+const immediate = (f) => {
+  f();
+  return f;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
 // D3 HELPERS
 
 // fetch a template from the DOM.
@@ -155,6 +164,7 @@ const withinBox = (box, point) => {
 module.exports = {
   clamp,
   last, spliceOut,
+  immediate,
   getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, px, pct, datum,
   pad, timecode, timecodePretty,
   draggable, byDelta, defer, queuer,
