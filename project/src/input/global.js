@@ -29,7 +29,7 @@ module.exports = ($app, player, canvas) => {
 
     // strip the title off temporarily so the default tooltip does not show.
     $target.attr('title', '');
-    $target.one('mouseleave', () => {
+    $target.one('mouseleave click', () => {
       $target.attr('title', text);
       $tooltip.hide();
     });
