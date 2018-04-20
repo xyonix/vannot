@@ -1,11 +1,15 @@
 const { merge, omit, difference, fromPairs } = require('ramda');
 const { capture } = require('../render/capture');
+const { notify, thenNotify } = require('../render/chrome');
 const { getQuerystringValue } = require('../util');
 
 // eventually we will call this to actually perform the save operation. not public.
 const doSave = (data) => {
-  if (data.saveUrl != null)
-    $.ajax({ method: 'POST', data: JSON.stringify(data), contentType: 'application/json', url: data.saveUrl });
+  if (true || data.saveUrl != null)
+    $.ajax({ method: 'POST', data: JSON.stringify(data), contentType: 'application/json', url: data.saveUrl,
+      success: thenNotify('Data has been successfully saved!'),
+      error: thenNotify('Something went wrong trying to save data. Please check your connection and try again.', 'error')
+    });
   else
     localStorage.setItem('vannot', JSON.stringify(data));
 };
@@ -13,13 +17,14 @@ const doSave = (data) => {
 // given a data blob and an array of frame ids to export, potentially does the frame
 // capture on those frames, then executes the final save operation.
 const save = (data, frames = []) => {
+  notify('Saving, please wait.');
+
   // if we have provisioned new frames and are server-based, we need to export those
   // frame images first. otherwise we immediately kick off the actual save operation.
-  if ((data.saveUrl == null) || (frames.length === 0)) {
+  if ((data.saveUrl == null) || (frames.length === 0))
     doSave(data);
-  } else {
+  else
     capture(data.video, frames, (imageData) => { doSave(merge(data, { imageData })); });
-  }
 };
 
 // sets a checkpoint in the data so we know which frame images we need to export; that

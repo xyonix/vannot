@@ -9,6 +9,7 @@ $(function() {
 
   const $app = $('#vannot .vannot-app');
   const app = select($app[0]);
+  require('./render/chrome').attach($app); // inject context to global chrome renderer.
 
   ////////////////////////////////////////////////////////////////////////////////
   // LAYOUT ADJUSTMENT
@@ -52,5 +53,6 @@ $(function() {
     getData(compose(exportAllFrames, normalizeData));
   else
     getData(compose(run, checkpoint, normalizeData));
+
 });
 

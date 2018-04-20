@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const { immediate } = require('../util');
+const { notify } = require('./chrome');
 
 const capture = (video, frames, callback) => {
   const canvas = document.createElement('canvas');
@@ -21,6 +22,8 @@ const capture = (video, frames, callback) => {
     wait(() => {
       context.drawImage(videoElem, 0, 0);
       result[frame] = canvas.toDataURL('image/jpeg');
+      notify(`Exported frame ${frames.length - queue.length} of ${frames.length}.`);
+
       if (queue.length === 0)
         callback(result);
       else
