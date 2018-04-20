@@ -172,16 +172,16 @@ module.exports = ($app, player, canvas) => {
   const mousedown = {
     normal: [
       [ selectShapeDown, deselect ],
-      [ dragPoints, pan, dragLasso ]
+      [ pan, dragPoints, dragLasso ]
     ],
     drawing: [ [ pan, closeShape, drawPoint ] ],
     shapes: [
       [ selectShapeDown, deselect ],
-      [ dragImplicitPoint, dragPoint, dragPoints, pan, dragLasso ],
+      [ pan, dragImplicitPoint, dragPoint, dragPoints, dragLasso ],
     ],
     points: [
       [ selectShapeDown, deselect ],
-      [ dragPoints, pan, dragLasso ]
+      [ pan, dragPoints, dragLasso ]
     ]
   };
   // mouseup operations occur only when a drag has not occurred.
