@@ -18,13 +18,14 @@ const doSave = (data) => {
 // capture on those frames, then executes the final save operation.
 const save = (data, frames = []) => {
   notify('Saving, please wait.');
+  const normalized = normalizeData(data); // run through this to clean empty frames.
 
   // if we have provisioned new frames and are server-based, we need to export those
   // frame images first. otherwise we immediately kick off the actual save operation.
   if ((data.saveUrl == null) || (frames.length === 0))
-    doSave(data);
+    doSave(normalized);
   else
-    capture(data.video, frames, (imageData) => { doSave(merge(data, { imageData })); });
+    capture(data.video, frames, (imageData) => { doSave(merge(normalized, { imageData })); });
 };
 
 // sets a checkpoint in the data so we know which frame images we need to export; that
@@ -55,6 +56,7 @@ const normalizeData = (data) => {
     data.objects.unshift({ id: -1, title: 'Unassigned', color: '#aaa', system: true });
   if (data.frames == null) data.frames = [];
   if (data.labels == null) data.labels = [];
+  data.frames = data.frames.filter((frame) => frame.shapes.length > 0);
   return data;
 };
 
