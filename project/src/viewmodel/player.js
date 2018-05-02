@@ -3,23 +3,37 @@ const EventEmitter = require('events');
 const { scaleLinear } = require('d3');
 const { defer, clamp, spliceOut } = require('../util');
 
+class VideoData {
+  constructor(data) {
+    Object.assign(this, data, {
+      start: data.start || 0,
+      end: (data.start || 0) + data.duration
+    });
+  }
+
+  clamp(frame) { return clamp(this.start, frame, this.end); }
+
+  containsFrame(frame) { return (this.start <= frame) && (frame <= this.end); }
+}
+
 class Player {
   constructor($video, data) {
     this.data = data;
-    this.video = data.video;
+    this.video = new VideoData(data.video);
     this.videoObj = $video[0];
     this.events = new EventEmitter();
 
-    this.range = [ 0, this.video.duration ];
+    this.range = [ this.video.start, this.video.end ];
     this.frame = 0;
     this.playing = false;
     this.selection = null;
 
     this._initialize($video);
+    this.seek(this.video.start);
   }
 
   _initialize($video) {
-    $video.attr('src', this.data.video.source);
+    $video.attr('src', this.video.source);
     $video.on('playing', () => this.playing = true);
     $video.on('pause', () => this.playing = false);
 
@@ -97,7 +111,7 @@ class Player {
 
   seek(frame) {
     this.videoObj.pause();
-    this.frame = clamp(0, frame, this.video.duration);
+    this.frame = clamp(this.video.start, frame, this.video.end);
     this.videoObj.currentTime = this.frame / this.video.fps;
   }
 

@@ -64,7 +64,8 @@ Now that we have some tactile sense of what's going on, here is a full specifica
 
 * `video: Object`: Defines basic properties about the video itself. Never modified by Vannot.
   * `fps: Number`: The framerate of the video.
-  * `duration: Integer`: The duration of the video, in frames.
+  * `start: Integer = 0`: _(optional)_ The start of the video segment you wish to expose, in frames. Defaults to `0`.
+  * `duration: Integer`: The duration of the video segment you wish to expose, in frames.
   * `width: Integer`: The width of the video, in pixels.
   * `height: Integer`: The height of the video, in pixels.
   * `source: String[URL]`: The absolute or relative path to the video itself.

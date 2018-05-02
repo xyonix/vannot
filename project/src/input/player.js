@@ -178,7 +178,7 @@ module.exports = ($app, player, canvas) => {
     if (anchorFrame == null) anchorFrame = initiateFrame;
     initiateDrag(event, (dx) => {
       const dframes = round((dx / player.timelineWidth) * (player.range[1] - player.range[0])); // TODO: copypasta from below.
-      const currentFrame = snapToPlayhead(initiateFrame + dframes);
+      const currentFrame = player.video.clamp(snapToPlayhead(initiateFrame + dframes));
       dragTarget.start = min(anchorFrame, currentFrame);
       dragTarget.end = max(anchorFrame, currentFrame);
       player.changedLabels();
@@ -214,19 +214,19 @@ module.exports = ($app, player, canvas) => {
 
       // if zooming out and one side is clamped, put everything on the other side.
       if (dframes < 0) {
-        if (player.range[0] === 0) rightk = 1;
-        if (player.range[1] === player.video.duration) leftk = 1;
+        if (player.range[0] === player.video.start) rightk = 1;
+        if (player.range[1] === player.video.end) leftk = 1;
       }
 
       // we know our proportions; apply.
-      const left = clamp(0, player.range[0] + round(leftk * dframes), player.frame - deadzone);
-      const right = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.duration);
+      const left = clamp(player.video.start, player.range[0] + round(leftk * dframes), player.frame - deadzone);
+      const right = clamp(player.frame + deadzone, player.range[1] - round(rightk * dframes), player.video.end);
       player.range = [ left, right ];
     } else {
       // apply scaling equidistantly. compute one then the other to ensure clamping range.
       const edgeDeadzone = deadzone * 2; // double here: both sides of "playhead"
-      const left = clamp(0, player.range[0] + round(0.5 * dframes), player.range[1] - edgeDeadzone);
-      const right = clamp(left + edgeDeadzone, player.range[1] - round(0.5 * dframes), player.video.duration);
+      const left = clamp(player.video.start, player.range[0] + round(0.5 * dframes), player.range[1] - edgeDeadzone);
+      const right = clamp(left + edgeDeadzone, player.range[1] - round(0.5 * dframes), player.video.end);
       player.range = [ left, right ];
     }
   };
@@ -242,10 +242,10 @@ module.exports = ($app, player, canvas) => {
 
   draggable($app.find('.vannot-ranger-fill'), byDelta((dx) => {
     let dframes = round(dx / player.timelineWidth * player.video.duration);
-    if ((player.range[1] + dframes) >= player.video.duration)
-      dframes = player.video.duration - player.range[1];
-    else if ((player.range[0] + dframes) <= 0)
-      dframes = -player.range[0];
+    if ((player.range[1] + dframes) >= player.video.end)
+      dframes = player.video.end - player.range[1];
+    else if ((player.range[0] + dframes) <= player.video.start)
+      dframes = -player.range[0] + player.video.start;
 
     player.range = [ player.range[0] + dframes, player.range[1] + dframes ];
   }));
