@@ -92,6 +92,8 @@ Now that we have some tactile sense of what's going on, here is a full specifica
   * Each key in this bag is the frame-timecode, and each value is a [Data URI](https://tools.ietf.org/html/rfc2397) of an image capture of that frame. It is minorly lossy due to JPEG recompression.
 * `saveUrl: String[URL]`: The path that an updated version of this data structure will be `POST`ed back to when the user clicks on Save.
 
+Any data specified outside these reserved keys will be preserved by Vannot through save/load cycles without modification. However, as more features added and more keys will be used, we recommend the use of the `custom`, `user`, and `meta` top-level keys, which we will always reserve and avoid for this purpose.
+
 ### image data export
 
 Due to concern around deterministically isolating the same frame across different toolchains, Vannot captures image data of annotated frames and sends them to the server for safekeeping.
