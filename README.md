@@ -81,6 +81,12 @@ Now that we have some tactile sense of what's going on, here is a full specifica
   * `title: String`: The user-assigned title of this classification object.
   * `color: String[HexColor]`: _Internal_. A `#`-prepended hex color string. Meaningful only in the editor.
   * `system: Boolean`: Only true for the `Unassigned` system object (see the note on the `objects` array above). If true, do not modify or omit the data.
+* `labels: Array`: The time-segment labelling information is saved here.
+  * `title: String`: The user-assigned title of this annotation label.
+  * `color: String[HexColor]`: _Internal_. A `#`-prepended hex color string. Meaningful only in the editor.
+  * `segments: Array`: The time-segments of the video to which this label applies. They are stored in no particular order.
+    * `start: Integer`: The start of the segment, in frames.
+    * `end: Integer`: The start of the segment, in frames.
 * `imageData: Object`: **Provided only on save**; this k/v bag may contain base64-encoded captures of annotated video frames. See **image data export** below. It is _highly recommended_ not to store and send this data back to the Vannot client for session resumption; it is likely very large and useless to Vannot.
   * Each key in this bag is the frame-timecode, and each value is a [Data URI](https://tools.ietf.org/html/rfc2397) of an image capture of that frame. It is minorly lossy due to JPEG recompression.
 * `saveUrl: String[URL]`: The path that an updated version of this data structure will be `POST`ed back to when the user clicks on Save.

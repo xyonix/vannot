@@ -106,9 +106,12 @@
             <div class="vannot-playhead"></div>
           </div>
           <div class="vannot-tracks">
+            <h2>Objects</h2>
             <div class="vannot-objects"></div>
-            <button class="vannot-object-new">New object</button>
-            <div class="vannot-ranges"></div>
+            <button class="vannot-object-new" title="Draw shapes to identify objects in the video.">New object</button>
+            <h2>Labels</h2>
+            <div class="vannot-labels"></div>
+            <button class="vannot-label-new" title="Label time segments of the video that meet some criteria.">New label</button>
           </div>
           <div class="vannot-ranger">
             <div class="vannot-ranger-fill"></div>
@@ -129,11 +132,17 @@
             <input class="vannot-track-title-edit" type="text"/>
             <div class="vannot-track-title-ghost"></div>
           </div>
-          <button class="vannot-track-remove" title="Delete object">
+          <button class="vannot-track-remove" title="Delete this item">
             Are you sure? Click again to delete.
           </button>
         </div>
-        <div class="vannot-track-points"></div>
+        <div class="vannot-track-timeline">
+          <div class="vannot-track-selection"></div>
+        </div>
+      </div>
+      <div class="vannot-track-segment">
+        <div class="vannot-track-segment-handle handle-left"></div>
+        <div class="vannot-track-segment-handle handle-right"></div>
       </div>
       <div class="vannot-tick"><span></span></div>
     </div>

@@ -99,17 +99,17 @@ const drawRanger = (player, target) => {
 
 // draws the collection of data-driven timeline row at the bottom of the screen.
 const trackTemplate = getTemplate('track');
-const drawObjectTracks = (player, data, target) => {
-  const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(data.objects), trackTemplate);
+const drawTracks = (player, data, inner, target) => {
+  const tracks = instantiateTemplates(target.selectAll('.vannot-track').data(data), trackTemplate);
 
-  tracks.classed('system', (object) => object.system);
-  tracks.select('.vannot-track-title-edit').property('value', (object) => object.title);
-  tracks.select('.vannot-track-title-ghost').text((object) => object.title);
-  tracks.select('.vannot-track-color-edit').each(function(object) {
+  tracks.classed('system', (x) => x.system);
+  tracks.select('.vannot-track-title-edit').property('value', (x) => x.title);
+  tracks.select('.vannot-track-title-ghost').text((x) => x.title);
+  tracks.select('.vannot-track-color-edit').each(function(x) {
     const $input = $(this);
-    if ($input.next().length === 0) $input.spectrum({ color: object.color });
+    if ($input.next().length === 0) $input.spectrum({ color: x.color });
   });
-  tracks.select('.vannot-track-points').each(subdrawTrackpoints(data.frames, player));
+  tracks.select('.vannot-track-timeline').each(inner);
 };
 
 // draws the collection of trackpoints within a timeline.
@@ -126,6 +126,26 @@ const subdrawTrackpoints = (frames, player) => function(object) {
   return drawTrackpoints(object, objectFrames, player, select(this));
 };
 
+// draws the collection of tracklabels within a timeline.
+const segmentTemplate = getTemplate('track-segment');
+const drawTracklabels = (label, player, target) => {
+  const segments = instantiateTemplates(target.selectAll('.vannot-track-segment').data(label.segments), segmentTemplate);
+
+  segments
+    .style('background-color', label.color)
+    .style('left', (segment) => pct(player.scale(segment.start)))
+    .style('width', (segment) => pct(player.scale(segment.end) - player.scale(segment.start)));
+
+  const selection = target.selectAll('.vannot-track-selection');
+  selection
+    .classed('active', player.selection.target === label)
+    .style('left', pct(player.scale(player.selection.start)))
+    .style('width', pct(player.scale(player.selection.end) - player.scale(player.selection.start)));
+};
+const subdrawTracklabels = (player) => function(label) {
+  return drawTracklabels(label, player, select(this));
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // RENDER SCHEDULER
@@ -135,6 +155,7 @@ const subdrawTrackpoints = (frames, player) => function(object) {
 const drawer = (app, player) => {
   const tickWrapper = app.select('.vannot-ticks');
   const objectWrapper = app.select('.vannot-objects');
+  const labelWrapper = app.select('.vannot-labels');
   const playhead = app.select('.vannot-playhead');
   const timecode = app.select('.vannot-timecode');
   const ranger = app.select('.vannot-ranger');
@@ -158,7 +179,12 @@ const drawer = (app, player) => {
       drawPlayhead(player, playhead);
 
     if (all || dirty.range || dirty.objects || dirty.shapes)
-      drawObjectTracks(player, player.data, objectWrapper);
+      drawTracks(player, player.data.objects, subdrawTrackpoints(player.data.frames, player), objectWrapper);
+
+    // eventually, it may be possible to drag-select object keyframe diamonds as well. for now, only
+    // label tracks are selectable.
+    if (all || dirty.range || dirty.labels || dirty.selection)
+      drawTracks(player, player.data.labels, subdrawTracklabels(player), labelWrapper);
   };
   draw.dirty = {};
   draw.all = () => draw(true);
@@ -176,6 +202,8 @@ const reactor = (app, player, canvas) => {
   player.events.on('change.frame', mark('frame'));
   player.events.on('change.objects', mark('objects'));
   canvas.events.on('change.shapes', mark('shapes'));
+  player.events.on('change.labels', mark('labels'));
+  player.events.on('change.selection', mark('selection'));
 
   draw.all(); // always draw everything to start.
 };

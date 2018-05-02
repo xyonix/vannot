@@ -5,7 +5,7 @@ const { getQuerystringValue } = require('../util');
 
 // eventually we will call this to actually perform the save operation. not public.
 const doSave = (data) => {
-  if (true || data.saveUrl != null)
+  if (data.saveUrl != null)
     $.ajax({ method: 'POST', data: JSON.stringify(data), contentType: 'application/json', url: data.saveUrl,
       success: thenNotify('Data has been successfully saved!'),
       error: thenNotify('Something went wrong trying to save data. Please check your connection and try again.', 'error')
@@ -54,6 +54,7 @@ const normalizeData = (data) => {
   if (!data.objects.some((object) => object.id === -1))
     data.objects.unshift({ id: -1, title: 'Unassigned', color: '#aaa', system: true });
   if (data.frames == null) data.frames = [];
+  if (data.labels == null) data.labels = [];
   return data;
 };
 

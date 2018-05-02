@@ -1,7 +1,7 @@
 const { ceil } = Math;
 const EventEmitter = require('events');
 const { scaleLinear } = require('d3');
-const { defer, clamp } = require('../util');
+const { defer, clamp, spliceOut } = require('../util');
 
 class Player {
   constructor($video, data) {
@@ -13,6 +13,7 @@ class Player {
     this.range = [ 0, this.video.duration ];
     this.frame = 0;
     this.playing = false;
+    this.selection = null;
 
     this._initialize($video);
   }
@@ -59,8 +60,19 @@ class Player {
     this.events.emit('change.range');
   }
 
-  // and if anybody changes object properties they need to tell us manually.
+  // range selection on the timeline:
+  get selection() { return this._selection; }
+  set selection(value) {
+    if (value == null)
+      this._selection = { target: null }; // always have a .target property present.
+    else
+      this._selection = value;
+    this.events.emit('change.selection');
+  }
+
+  // and if anybody changes object or label properties they need to tell us manually.
   changedObjects() { this.events.emit('change.objects'); }
+  changedLabels() { this.events.emit('change.labels'); }
 
 
   ////////////////////////////////////////
@@ -87,6 +99,30 @@ class Player {
     this.videoObj.pause();
     this.frame = clamp(0, frame, this.video.duration);
     this.videoObj.currentTime = this.frame / this.video.fps;
+  }
+
+  mergeSegments() {
+    for (const label of this.data.labels) {
+      const segments = label.segments;
+      const queue = segments.slice(0);
+      while (queue.length > 0) {
+        const x = queue.pop();
+        for (const y of segments) {
+          if (x === y) {
+            continue;
+          } else if ((y.start <= x.start) && (x.end <= y.end)) { // [y  (x  )  ]
+            spliceOut(x, segments);
+          } else if ((x.start <= y.start) && (y.start < x.end) && (x.end <= y.end)) { // (x  [y  )  ]
+            y.start = x.start;
+            spliceOut(x, segments);
+          } else if ((y.start <= x.start) && (x.start < y.end) && (y.end <= x.end)) { // [y  (x  ]  )
+            y.end = x.end;
+            spliceOut(x, segments);
+          }
+        }
+      }
+    }
+    this.changedLabels();
   }
 }
 

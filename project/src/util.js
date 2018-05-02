@@ -101,21 +101,25 @@ const timecodePretty = (frame, fps, showFrames = false) => {
 //
 // the callback is given (dx, dy) in pixels from the initial position.
 const $document = $(document);
-const draggable = ($target, callback) => {
-  $target.on('mousedown', (event) => {
-    if (event.isDefaultPrevented()) return; // someone already handled this.
-    if (event.button !== 0) return; // ignore right-click.
+const initiateDrag = (event, callback, finishCallback) => { // given a mousedown event, immediately starts a drag.
+  if (event.isDefaultPrevented()) return; // someone already handled this.
+  if (event.button !== 0) return; // ignore right-click.
 
-    event.preventDefault();
-    const initX = event.pageX;
-    const initY = event.pageY;
+  event.preventDefault();
+  const initX = event.pageX;
+  const initY = event.pageY;
 
-    let memo = undefined;
-    $document.on('mousemove.draggable', (event) => {
-      memo = callback(event.pageX - initX, event.pageY - initY, memo);
-    });
-    $document.one('mouseup', () => { $document.off('mousemove.draggable'); });
+  let memo = undefined;
+  $document.on('mousemove.draggable', (event) => {
+    memo = callback(event.pageX - initX, event.pageY - initY, memo);
   });
+  $document.one('mouseup', () => {
+    $document.off('mousemove.draggable');
+    if (typeof finishCallback === 'function') finishCallback(memo);
+  });
+};
+const draggable = ($target, callback) => { // given a $target, starts dragging when mousedown on it.
+  $target.on('mousedown', (event) => { initiateDrag(event, callback); });
 };
 // can be inserted around a callback to draggable to convert the reported dx, dy
 // from being relative to the origin to being relative to the previous report.
@@ -174,7 +178,7 @@ module.exports = {
   immediate,
   getTemplate, instantiateTemplates, instantiateElems, instantiateDivs, px, pct, datum,
   pad, timecode, timecodePretty,
-  draggable, byDelta, defer, queuer,
+  initiateDrag, draggable, byDelta, defer, queuer,
   pointsEqual, distance, midpoint, digestPoint,
   normalizeBox, withinBox,
   getQuerystringValue

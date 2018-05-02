@@ -41,6 +41,7 @@ $icon-sun: "\f185"
 $icon-cursor: "\f245"
 $icon-move: "\f047"
 $icon-upload: "\f0ee"
+$icon-label: "\f02b"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -699,6 +700,7 @@ $timeline-ranger-height: 16px
 .vannot-playhead
   border-right: 1px solid $action-alt
   height: $timeline-height - $timeline-ticks-height
+  pointer-events: none
   position: absolute
   top: 100%
   width: 0
@@ -713,6 +715,7 @@ $timeline-ranger-height: 16px
     bottom: calc(100% + #{$halfsize})
     height: $size
     left: -$halfsize
+    pointer-events: auto
     position: absolute
     width: $size
   &:after
@@ -722,6 +725,7 @@ $timeline-ranger-height: 16px
       top-color: $action-alt
     bottom: 100%
     left: -$halfsize
+    pointer-events: auto
     position: absolute
 
 .vannot-ticks
@@ -775,6 +779,14 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     background: #888
   &::-webkit-scrollbar-thumb:hover
     background: #999
+
+  h2
+    color: #ccc
+    font-size: 12px
+    font-weight: bold
+    padding: 2px
+      left: 40px
+      top: 8px
 
 .vannot-track
   height: $track-outerheight
@@ -876,7 +888,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     .vannot-track-remove
       display: none !important
 
-  .vannot-track-points
+  .vannot-track-timeline
     background: #111
     box-shadow: 0 -1px 0 #1b1b1b inset
     height: $track-outerheight
@@ -895,7 +907,47 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       &:hover
         border-color: #ccc
 
-.vannot-object-new
+    .vannot-track-segment
+      bottom: 0
+      box-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3) inset, 1px 1px 0 rgba(255, 255, 255, 0.2) inset
+      cursor: default
+      min-width: 2px
+      position: absolute
+      top: 0
+
+      .vannot-track-segment-handle
+        bottom: 0
+        cursor: ew-resize
+        position: absolute
+        top: 0
+        width: 7px
+
+        &:before
+          $vmargin: 6px
+          @include reify
+          bottom: $vmargin
+          border-right: 1px solid rgba(0, 0, 0, 0.35)
+          left: 3px
+          position: absolute
+          top: $vmargin
+
+        &.handle-right
+          right: 0
+
+    .vannot-track-selection
+      background: transparentize($action, 0.5)
+      border: 1px solid $action
+      display: none
+      bottom: 0
+      pointer-events: none
+      position: absolute
+      top: 0
+      z-index: 5
+
+      &.active
+        display: block
+
+.vannot-object-new, .vannot-label-new
   border: none
   border-radius: 2px
   background: none
@@ -915,6 +967,9 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
 
   &:hover
     background: #222
+
+.vannot-labels .vannot-track-timeline
+  cursor: col-resize
 
 ////////////////////////////////////////
 // > Ranger

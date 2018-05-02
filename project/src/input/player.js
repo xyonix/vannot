@@ -1,7 +1,7 @@
 const $ = require('jquery');
-const { round, trunc, random } = Math;
+const { round, trunc, abs, random, min, max } = Math;
 const tcolor = require('tinycolor2');
-const { clamp, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
+const { clamp, initiateDrag, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
 
 module.exports = ($app, player, canvas) => {
 
@@ -62,22 +62,36 @@ module.exports = ($app, player, canvas) => {
   });
 
   const colorChange = (event, color) => {
-    datum($(event.target).closest('.vannot-track')).color = color.toHexString();
-    player.changedObjects();
+    const $target = $(event.target);
+    datum($target.closest('.vannot-track')).color = color.toHexString();
+    if ($target.closest('.vannot-objects').length > 0)
+      player.changedObjects();
+    else
+      player.changedLabels();
   };
   $app.on('dragstop.spectrum', '.vannot-track-color-edit', colorChange);
   $app.on('change.spectrum', '.vannot-track-color-edit', colorChange);
+  $app.on('hide.spectrum', '.vannot-track-color-edit', colorChange);
 
   $app.on('click', '.vannot-track-remove', (event) => {
     const $button = $(event.target);
     if ($button.hasClass('confirm')) {
-      spliceOut(datum($button.closest('.vannot-track')), player.data.objects);
-      player.changedObjects();
+      const track = datum($button.closest('.vannot-track'));
+      if ($button.closest('.vannot-objects').length > 0) {
+        spliceOut(track, player.data.objects);
+        player.changedObjects();
+      } else {
+        spliceOut(track, player.data.labels);
+        player.changedLabels();
+      }
     } else {
       $button.addClass('confirm');
       defer(() => { $document.one('click', () => { $button.removeClass('confirm'); }) });
     }
   });
+
+  ////////////////////////////////////////
+  // Trackpoints
 
   $app.find('.vannot-object-new').on('click', () => {
     player.data.objects.push({
@@ -88,15 +102,87 @@ module.exports = ($app, player, canvas) => {
     player.changedObjects();
   });
 
-  ////////////////////////////////////////
-  // Trackpoints
-
   $objectWrapper.on('click', '.vannot-track-point', (event) => {
     const $point = $(event.target);
     const frameObj = datum($point);
     const object = datum($point.closest('.vannot-track'));
     player.seek(frameObj.frame);
     canvas.selectShapes(frameObj.shapes.filter((shape) => shape.objectId === object.id));
+  });
+
+  ////////////////////////////////////////
+  // Tracklabels
+
+  $app.find('.vannot-label-new').on('click', () => {
+    player.data.labels.push({
+      id: player.data._seqId++,
+      title: 'New label',
+      color: tcolor.fromRatio({ h: random(), s: 1, v: 0.8 }).toHexString(),
+      segments: []
+    });
+    player.changedLabels();
+  });
+
+  // DRAG HELPERS:
+  const snapThreshold = 4; // px, in either direction.
+  const snapToPlayhead = (frame) => {
+    const dPx = abs(player.scale(frame) - player.scale(player.frame)) * player.timelineWidth;
+    return (dPx < snapThreshold) ? player.frame : frame;
+  };
+
+  // TODO: this handler is pretty overloaded, but i couldn't figure out how to extricate it cleanly.
+  $app.find('.vannot-labels').on('mousedown', '.vannot-track-timeline', (event) => {
+    if (event.isDefaultPrevented()) return; // someone already handled this.
+    if (event.button !== 0) return; // ignore right-click.
+    player.selection = null;
+
+    const $target = $(event.target);
+    const $track = $target.closest('.vannot-track');
+    const initiateX = event.pageX - $track.find('.vannot-track-header').outerWidth();
+    const initiateFrame = snapToPlayhead(round(player.scale.invert(initiateX / player.timelineWidth)));
+
+    // TODO: not sure about this inline function syntax.
+    const label = datum($track);
+    let dragTarget, finalize, anchorFrame;
+    if ($target.is('.vannot-track-segment-handle')) {
+      // Segment drag handle:
+      dragTarget = datum($target.closest('.vannot-track-segment'));
+      anchorFrame = $target.is('.handle-left') ? dragTarget.end : dragTarget.start;
+      finalize = () => {
+        player.mergeSegments();
+      };
+    } else if ($target.is('.vannot-track-segment')) {
+      // Mid-segment section:
+      dragTarget = player.selection = { target: label, start: initiateFrame, end: initiateFrame };
+      finalize = () => {
+        if (player.selection.start === player.selection.end) {
+          const segment = datum($target);
+          player.selection = { target: label, start: segment.start, end: segment.end };
+        }
+      }
+    } else {
+      // Blank timeline:
+      dragTarget = { start: initiateFrame, end: initiateFrame };
+      label.segments.push(dragTarget);
+      finalize = () => {
+        if (dragTarget.start === dragTarget.end) {
+          spliceOut(dragTarget, label.segments);
+          player.changedLabels();
+        } else {
+          player.mergeSegments();
+        }
+      }
+    }
+
+    // start the drag; call finalize on done.
+    if (anchorFrame == null) anchorFrame = initiateFrame;
+    initiateDrag(event, (dx) => {
+      const dframes = round((dx / player.timelineWidth) * (player.range[1] - player.range[0])); // TODO: copypasta from below.
+      const currentFrame = snapToPlayhead(initiateFrame + dframes);
+      dragTarget.start = min(anchorFrame, currentFrame);
+      dragTarget.end = max(anchorFrame, currentFrame);
+      player.changedLabels();
+    }, finalize);
   });
 
   ////////////////////////////////////////
