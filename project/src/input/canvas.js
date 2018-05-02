@@ -372,7 +372,10 @@ module.exports = ($app, player, canvas) => {
     const $toolbar = $app.find('.vannot-toolbar');
 
     // Normal state:
-    $app.find('.vannot-copy-last').on('click', () => canvas.copyLast());
+    $app.find('.vannot-copy-last').on('click', () => {
+      player.pause();
+      canvas.copyLast();
+    });
     $app.find('.vannot-draw-shape').on('click', () => {
       canvas.startShape()
       canvas.tool = 'select';

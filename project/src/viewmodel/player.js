@@ -109,8 +109,11 @@ class Player {
   ////////////////////////////////////////
   // MANIPULATORS
 
+  pause() { this.videoObj.pause(); }
+  play() { this.videoObj.play(); }
+
   seek(frame) {
-    this.videoObj.pause();
+    this.pause();
     this.frame = clamp(this.video.start, frame, this.video.end);
     this.videoObj.currentTime = this.frame / this.video.fps;
   }
