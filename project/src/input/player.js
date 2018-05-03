@@ -1,7 +1,7 @@
 const $ = require('jquery');
 const { round, trunc, abs, random, min, max } = Math;
 const tcolor = require('tinycolor2');
-const { clamp, initiateDrag, draggable, byDelta, normalizeBox, datum, spliceOut, defer } = require('../util');
+const { clamp, initiateDrag, draggable, byDelta, normalizeBox, datum, spliceOut, defer, px } = require('../util');
 
 module.exports = ($app, player, canvas) => {
 
@@ -112,6 +112,7 @@ module.exports = ($app, player, canvas) => {
 
   ////////////////////////////////////////
   // Tracklabels
+  // TODO: this code is sort of a mess. needs some rethought.
 
   $app.find('.vannot-label-new').on('click', () => {
     player.data.labels.push({
@@ -122,6 +123,11 @@ module.exports = ($app, player, canvas) => {
     });
     player.changedLabels();
   });
+
+  // init thumbnail for the below dragging operations:
+  const $thumbnail = $app.find('#vannot-thumbnail');
+  const thumbnailVideo = $thumbnail.find('video')[0];
+  $thumbnail.attr('src', player.video.source);
 
   // DRAG HELPERS:
   const snapThreshold = 4; // px, in either direction.
@@ -174,6 +180,17 @@ module.exports = ($app, player, canvas) => {
       }
     }
 
+    // show and init thumbnail.
+    const updateThumbnail = (frame) => {
+      const targetX = (frame - player.video.start) / player.video.duration * player.timelineWidth;
+      const biasedX = (frame < anchorFrame) ? (targetX + $thumbnail.outerWidth()) : targetX;
+      $thumbnail.css('left', px(biasedX));
+      thumbnailVideo.currentTime = frame / player.video.fps;
+    };
+    $thumbnail.css('top', px($track.offset().top - $thumbnail.outerHeight()));
+    updateThumbnail(initiateFrame);
+    $thumbnail.show();
+
     // start the drag; call finalize on done.
     if (anchorFrame == null) anchorFrame = initiateFrame;
     initiateDrag(event, (dx) => {
@@ -181,8 +198,12 @@ module.exports = ($app, player, canvas) => {
       const currentFrame = player.video.clamp(snapToPlayhead(initiateFrame + dframes));
       dragTarget.start = min(anchorFrame, currentFrame);
       dragTarget.end = max(anchorFrame, currentFrame);
+      updateThumbnail(currentFrame);
       player.changedLabels();
-    }, finalize);
+    }, () => {
+      $thumbnail.hide();
+      finalize();
+    });
   });
 
   ////////////////////////////////////////

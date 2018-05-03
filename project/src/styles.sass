@@ -234,6 +234,13 @@ html, body
   &.dropped
     margin-top: $content-margin
 
+#vannot-thumbnail
+  display: none
+  position: absolute
+  z-index: 99
+  video
+    max-height: 200px
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Video
@@ -243,6 +250,7 @@ html, body
 
 .vannot-video
   @include fill(55px)
+  margin-left: $left-pane-width
 
   video
     @include center-vert
