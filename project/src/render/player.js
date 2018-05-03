@@ -146,6 +146,11 @@ const subdrawTracklabels = (player) => function(label) {
   return drawTracklabels(label, player, select(this));
 };
 
+const drawSegmentImplicits = (player, target) => {
+  target.selectAll('.vannot-track-segment').select('.vannot-track-segment-implicit')
+    .style('left', (segment) => pct((player.frame - segment.start) / (segment.end - segment.start)));
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // RENDER SCHEDULER
@@ -185,6 +190,9 @@ const drawer = (app, player) => {
     // label tracks are selectable.
     if (all || dirty.range || dirty.labels || dirty.selection)
       drawTracks(player, player.data.labels, subdrawTracklabels(player), labelWrapper);
+
+    if (all || dirty.labels || dirty.frame)
+      drawSegmentImplicits(player, labelWrapper);
   };
   draw.dirty = {};
   draw.all = () => draw(true);

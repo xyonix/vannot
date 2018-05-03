@@ -920,27 +920,40 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       box-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3) inset, 1px 1px 0 rgba(255, 255, 255, 0.2) inset
       cursor: default
       min-width: 2px
+      overflow: hidden
       position: absolute
       top: 0
 
+      $handle-width: 7px
+      $shadow-adjust: 1px
       .vannot-track-segment-handle
-        bottom: 0
+        background: inherit
+        bottom: $shadow-adjust
         cursor: ew-resize
         position: absolute
         top: 0
-        width: 7px
+        width: $handle-width
 
         &:before
           $vmargin: 6px
           @include reify
-          bottom: $vmargin
+          bottom: $vmargin - $shadow-adjust
           border-right: 1px solid rgba(0, 0, 0, 0.35)
-          left: 3px
+          left: floor($handle-width / 2)
           position: absolute
           top: $vmargin
 
         &.handle-right
           right: 0
+
+      .vannot-track-segment-implicit
+        bottom: 0
+        margin-left: -$handle-width
+        position: absolute
+        top: 0
+
+        .handle-implicit-right
+          left: $handle-width
 
     .vannot-track-selection
       background: transparentize($action, 0.5)

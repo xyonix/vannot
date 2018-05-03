@@ -151,12 +151,29 @@ module.exports = ($app, player, canvas) => {
     const label = datum($track);
     let dragTarget, finalize, anchorFrame;
     if ($target.is('.vannot-track-segment-handle')) {
-      // Segment drag handle:
+      // Segment drag handle of some kind:
       dragTarget = datum($target.closest('.vannot-track-segment'));
-      anchorFrame = $target.is('.handle-left') ? dragTarget.end : dragTarget.start;
-      finalize = () => {
-        player.mergeSegments();
-      };
+      finalize = () => { player.mergeSegments(); };
+
+      if ($target.closest('.vannot-track-segment-implicit').length > 0) {
+        // Segment implicit drag handle:
+        if ($target.is('.handle-implicit-left')) {
+          // Just-left-of-playhead implicit:
+          label.segments.push({ start: player.frame, end: dragTarget.end });
+          dragTarget.end = player.frame;
+          anchorFrame = dragTarget.start;
+          player.changedLabels();
+        } else {
+          // Just-right-of-playhead implicit:
+          label.segments.push({ start: dragTarget.start, end: player.frame });
+          dragTarget.start = player.frame;
+          anchorFrame = dragTarget.end;
+          player.changedLabels();
+        }
+      } else {
+        // Segment edge drag handle:
+        anchorFrame = $target.is('.handle-left') ? dragTarget.end : dragTarget.start;
+      }
     } else if ($target.is('.vannot-track-segment')) {
       // Mid-segment section:
       dragTarget = player.selection = { target: label, start: initiateFrame, end: initiateFrame };
@@ -204,6 +221,11 @@ module.exports = ($app, player, canvas) => {
       $thumbnail.hide();
       finalize();
     });
+  });
+
+  $app.on('mousedown', '.vannot-tracks', (event) => {
+    if (event.isDefaultPrevented()) return;
+    player.selection = null;
   });
 
   ////////////////////////////////////////

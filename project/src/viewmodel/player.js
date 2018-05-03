@@ -129,10 +129,10 @@ class Player {
             continue;
           } else if ((y.start <= x.start) && (x.end <= y.end)) { // [y  (x  )  ]
             spliceOut(x, segments);
-          } else if ((x.start <= y.start) && (y.start < x.end) && (x.end <= y.end)) { // (x  [y  )  ]
+          } else if ((x.start <= y.start) && (y.start <= x.end) && (x.end <= y.end)) { // (x  [y  )  ]
             y.start = x.start;
             spliceOut(x, segments);
-          } else if ((y.start <= x.start) && (x.start < y.end) && (y.end <= x.end)) { // [y  (x  ]  )
+          } else if ((y.start <= x.start) && (x.start <= y.end) && (y.end <= x.end)) { // [y  (x  ]  )
             y.end = x.end;
             spliceOut(x, segments);
           }
