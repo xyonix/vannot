@@ -377,6 +377,7 @@ module.exports = ($app, player, canvas) => {
       canvas.copyLast();
     });
     $app.find('.vannot-draw-shape').on('click', () => {
+      player.pause();
       canvas.startShape()
       canvas.tool = 'select';
     });
