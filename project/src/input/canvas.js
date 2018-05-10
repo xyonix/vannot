@@ -274,7 +274,7 @@ module.exports = ($app, player, canvas) => {
     $document.on('keyup', (event) => { if (event.which === 32) canvas.toolOverride = null; });
 
     // Update viewport size when window is resized (and set it immediately).
-    const $video = $app.find('video');
+    const $video = $app.find('.vannot-viewport video');
     const viewportPadding = $viewport.width() - $video.width();
     const updateViewportSize = () => {
       canvas.viewportSize = {

@@ -25,7 +25,7 @@ $(function() {
 
   const run = (data) => {
     const { Player } = require('./viewmodel/player');
-    const player = new Player($app.find('video'), data);
+    const player = new Player($app.find('.vannot-viewport video'), data);
     const { Canvas } = require('./viewmodel/canvas');
     const canvas = new Canvas(player, data);
 

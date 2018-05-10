@@ -5,7 +5,7 @@ const { clamp, initiateDrag, draggable, byDelta, normalizeBox, datum, spliceOut,
 
 module.exports = ($app, player, canvas) => {
 
-  const $video = $app.find('video');
+  const $video = $app.find('.vannot-viewport video');
   const videoObj = $video[0];
   const $document = $(document);
   const $objectWrapper = $app.find('.vannot-objects');
@@ -127,7 +127,7 @@ module.exports = ($app, player, canvas) => {
   // init thumbnail for the below dragging operations:
   const $thumbnail = $app.find('#vannot-thumbnail');
   const thumbnailVideo = $thumbnail.find('video')[0];
-  $thumbnail.attr('src', player.video.source);
+  thumbnailVideo.src = player.video.source;
 
   // DRAG HELPERS:
   const snapThreshold = 4; // px, in either direction.
