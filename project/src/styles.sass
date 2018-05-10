@@ -479,7 +479,8 @@ html, body
     margin-right: 10px
 
   .vannot-select-group
-    background: #222
+    $select-group-background: #222
+    background: $select-group-background
     border-radius: 2px
     display: inline-block
     margin-right: 14px
@@ -488,9 +489,10 @@ html, body
     label
       font-weight: normal
       margin-right: -8px
+      position: relative
 
     select
-      background: transparent
+      background: $select-group-background
       border: none
       color: #fff
       margin: 0
