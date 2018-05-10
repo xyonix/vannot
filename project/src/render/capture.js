@@ -8,6 +8,7 @@ const capture = (video, frames, callback) => {
   canvas.height = video.height;
   const context = canvas.getContext('2d');
   const videoElem = document.createElement('video');
+  videoElem.crossOrigin = "anonymous";
   videoElem.src = video.source;
 
   const queue = frames.slice();
