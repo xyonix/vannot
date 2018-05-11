@@ -30,7 +30,7 @@ $(function() {
     const canvas = new Canvas(player, data);
 
     const globalInteractions = require('./input/global');
-    globalInteractions($app, player, canvas);
+    globalInteractions($app, data, player, canvas);
 
     const playerInput = require('./input/player');
     playerInput($app, player, canvas);

@@ -1,6 +1,6 @@
 const $ = require('jquery');
 
-module.exports = ($app, player, canvas) => {
+module.exports = ($app, data, player, canvas) => {
   // Instant tooltips:
   const $tooltip = $app.find('#vannot-tooltip');
   $app.on('mouseenter', '[title]', (event) => {
@@ -36,14 +36,24 @@ module.exports = ($app, player, canvas) => {
     });
   });
 
+  // Set window properties:
+  if (data.app != null) {
+    if (data.app.title != null) document.title = data.app.title;
+    if (data.app.favicon != null) {
+      const $favicon = $('<link/>')
+        .attr('type', 'image/x-icon')
+        .attr('rel', 'shortcut icon')
+        .attr('href', data.app.favicon);
+      $('head').append($favicon);
+    }
+  }
+
   // Save data:
-  $app.find('.vannot-save').on('click', () => {
-    player.data.save();
-  });
+  $app.find('.vannot-save').on('click', () => { data.save(); });
 
   // Check for changes on unload:
   $(window).on('beforeunload', (event) => {
-    if (player.data.changed())
+    if (data.changed())
       return 'It looks like you have made changes since your last save. Are you sure you wish to leave?';
   });
 };
