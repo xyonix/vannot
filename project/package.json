@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "browserify": "~16",
+    "jsdom": "~11",
     "node-sass": "~4"
   }
 }

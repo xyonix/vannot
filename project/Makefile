@@ -17,7 +17,7 @@ lib/styles.css: src/styles.sass lib node_modules
 	node node_modules/node-sass/bin/node-sass --output-style compressed $< > $@
 
 lib/index.html: src/index.html lib
-	cp $< $@
+	node build/html.js $< > $@
 
 lib/assets: src/assets lib
 	mkdir -p lib/assets
