@@ -1,3 +1,4 @@
+const $ = require('jquery');
 
 module.exports = ($app, player, canvas) => {
   // Instant tooltips:
@@ -38,6 +39,12 @@ module.exports = ($app, player, canvas) => {
   // Save data:
   $app.find('.vannot-save').on('click', () => {
     player.data.save();
+  });
+
+  // Check for changes on unload:
+  $(window).on('beforeunload', (event) => {
+    if (player.data.changed())
+      return 'It looks like you have made changes since your last save. Are you sure you wish to leave?';
   });
 };
 

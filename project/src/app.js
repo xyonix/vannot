@@ -53,6 +53,5 @@ $(function() {
     getData(compose(exportAllFrames, normalizeData));
   else
     getData(compose(run, checkpoint, normalizeData));
-
 });
 

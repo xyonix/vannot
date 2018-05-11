@@ -2,6 +2,7 @@ const { merge, omit, difference, fromPairs } = require('ramda');
 const { capture } = require('../render/capture');
 const { notify, thenNotify } = require('../render/chrome');
 const { getQuerystringValue } = require('../util');
+const deepEqual = require('deep-equal');
 
 // eventually we will call this to actually perform the save operation. not public.
 const doSave = (data) => {
@@ -37,10 +38,14 @@ const checkpoint = (data) => {
   // looks goofy but apparently the most performant way: http://jsben.ch/#/bWfk9
   const snapshot = JSON.parse(JSON.stringify(data));
   data.save = () => {
-    const clean = omit([ 'save' ], data); // strip temp data.
+    const clean = omit([ 'save', 'changed' ], data); // strip temp data.
     const frames = difference(data.frames.map((x) => x.frame), snapshot.frames.map((x) => x.frame));
     save(clean, frames);
     checkpoint(data);
+  };
+  data.changed = () => {
+    const clean = omit([ 'save', 'changed' ], data); // strip temp data. TODO: copy/pasta
+    return !deepEqual(normalizeData(clean), normalizeData(snapshot));
   };
   return data;
 };
