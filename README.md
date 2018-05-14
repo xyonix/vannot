@@ -91,17 +91,18 @@ Now that we have some tactile sense of what's going on, here is a full specifica
 * `app: Object`: _(optional)_ Customization options for the browser application.
   * `title: String`: _(optional)_ Sets the window/tab title.
   * `favicon: String[URL]`: _(optional)_ Sets the favicon source URL.
-* `imageData: Object`: **Provided only on save**; this k/v bag may contain base64-encoded captures of annotated video frames. See **image data export** below. It is _highly recommended_ not to store and send this data back to the Vannot client for session resumption; it is likely very large and useless to Vannot.
-  * Each key in this bag is the frame-timecode, and each value is a [Data URI](https://tools.ietf.org/html/rfc2397) of an image capture of that frame. It is minorly lossy due to JPEG recompression.
-* `saveUrl: String[URL]`: The path that an updated version of this data structure will be `POST`ed back to when the user clicks on Save.
+* `saveUrl: String[URL]`: The path that an updated version of this data structure will be `POST`ed back to when the user clicks on Save. Please see the following section for details about this save request.
 
 Any data specified outside these reserved keys will be preserved by Vannot through save/load cycles without modification. However, as more features added and more keys will be used, we recommend the use of the `custom`, `user`, and `meta` top-level keys, which we will always reserve and avoid for this purpose.
 
-### image data export
+### saving data/image data export
 
-Due to concern around deterministically isolating the same frame across different toolchains, Vannot captures image data of annotated frames and sends them to the server for safekeeping.
+Due to concern around deterministically isolating the same frame across different toolchains, Vannot captures image data of annotated frames and sends them to the server for safekeeping. Because of this additional data, Vannot sends save requests as a `multipart/form-data` `POST`. There can be multiple fields/files:
 
-By default, it will only do this for any frames _newly annotated in that session_. Any frames that already had drawn shapes when Vannot loaded the data initially will not be included.
+* The `data.json` field will always exist and should always be sent first. It contains the actual application data. In addition to providing the various point geometries for the server's analysis, this payload is what the client will want returned to resume a working session.
+* Any number of `frames/42` files will also be a part of the `POST`. The number following the slash indicates the number of the frame in question, and the binary content of each part is the image data of that frame in jpeg format.
+
+By default, it will only export image data for any frames _newly annotated in that session_. Any frames that already had drawn shapes when Vannot loaded the data initially will not be included.
 
 To initiate an export of all framedata, add a querystring parameter of `mode=export`. This will not load the full editor UI, but instead initiate a process wherein every single annotated frame is captured and exported back to the server, via the normal save process.
 

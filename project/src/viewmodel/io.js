@@ -5,14 +5,26 @@ const { getQuerystringValue } = require('../util');
 const deepEqual = require('deep-equal');
 
 // eventually we will call this to actually perform the save operation. not public.
-const doSave = (data) => {
-  if (data.saveUrl != null)
-    $.ajax({ method: 'POST', data: JSON.stringify(data), contentType: 'application/json', url: data.saveUrl,
-      success: thenNotify('Data has been successfully saved!'),
-      error: thenNotify('Something went wrong trying to save data. Please check your connection and try again.', 'error')
-    });
-  else
+const doSave = (data, frames = {}) => {
+  if (data.saveUrl != null) {
+    // formulate request payload.
+    const formData = new FormData();
+    formData.set('data.json', JSON.stringify(data));
+    for (const frame of Object.keys(frames))
+      formData.set(`frames/${frame}`, frames[frame]);
+
+    // send request; return request Promise.
+    return $.ajax({
+      method: 'POST', url: data.saveUrl, data: formData,
+      cache: false, contentType: false, processData: false,
+    }).then(
+      thenNotify('Data has been successfully saved!'),
+      thenNotify('Something went wrong trying to save data. Please check your connection and try again.', 'error')
+    );
+  } else {
     localStorage.setItem('vannot', JSON.stringify(data));
+    return Promise.resolve(null);
+  }
 };
 
 // given a data blob and an array of frame ids to export, potentially does the frame
@@ -26,7 +38,7 @@ const save = (data, frames = []) => {
   if ((data.saveUrl == null) || (frames.length === 0))
     doSave(normalized);
   else
-    capture(data.video, frames, (imageData) => { doSave(merge(normalized, { imageData })); });
+    capture(data.video, frames, (imageData) => { doSave(normalized, imageData); });
 };
 
 // sets a checkpoint in the data so we know which frame images we need to export; that

@@ -8,7 +8,7 @@ const capture = (video, frames, callback) => {
   canvas.height = video.height;
   const context = canvas.getContext('2d');
   const videoElem = document.createElement('video');
-  videoElem.crossOrigin = "anonymous";
+  videoElem.crossOrigin = 'anonymous';
   videoElem.src = video.source;
 
   const queue = frames.slice();
@@ -22,13 +22,11 @@ const capture = (video, frames, callback) => {
     const frame = queue.pop();
     wait(() => {
       context.drawImage(videoElem, 0, 0);
-      result[frame] = canvas.toDataURL('image/jpeg');
-      notify(`Exported frame ${frames.length - queue.length} of ${frames.length}.`);
-
-      if (queue.length === 0)
-        callback(result);
-      else
-        process();
+      canvas.toBlob((blob) => {
+        result[frame] = blob;
+        notify(`Exported frame ${frames.length - queue.length} of ${frames.length}.`);
+        if (queue.length === 0) callback(result); else process();
+      }, 'image/jpeg', 0.6);
     });
     videoElem.currentTime = frame / video.fps;
   });
