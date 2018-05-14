@@ -1,6 +1,6 @@
 const { merge, omit, difference, fromPairs } = require('ramda');
 const { capture } = require('../render/capture');
-const { notify, thenNotify } = require('../render/chrome');
+const { notify } = require('../render/chrome');
 const { getQuerystringValue } = require('../util');
 const deepEqual = require('deep-equal');
 
@@ -17,10 +17,7 @@ const doSave = (data, frames = {}) => {
     return $.ajax({
       method: 'POST', url: data.saveUrl, data: formData,
       cache: false, contentType: false, processData: false,
-    }).then(
-      thenNotify('Data has been successfully saved!'),
-      thenNotify('Something went wrong trying to save data. Please check your connection and try again.', 'error')
-    );
+    });
   } else {
     localStorage.setItem('vannot', JSON.stringify(data));
     return Promise.resolve(null);
@@ -36,9 +33,9 @@ const save = (data, frames = []) => {
   // if we have provisioned new frames and are server-based, we need to export those
   // frame images first. otherwise we immediately kick off the actual save operation.
   if ((data.saveUrl == null) || (frames.length === 0))
-    doSave(normalized);
+    return doSave(normalized);
   else
-    capture(data.video, frames, (imageData) => { doSave(normalized, imageData); });
+    return capture(data.video, frames).then((imageData) => doSave(normalized, imageData));
 };
 
 // sets a checkpoint in the data so we know which frame images we need to export; that
@@ -52,8 +49,7 @@ const checkpoint = (data) => {
   data.save = () => {
     const clean = omit([ 'save', 'changed' ], data); // strip temp data.
     const frames = difference(data.frames.map((x) => x.frame), snapshot.frames.map((x) => x.frame));
-    save(clean, frames);
-    checkpoint(data);
+    return save(clean, frames).then(() => { checkpoint(data); });
   };
   data.changed = () => {
     const clean = omit([ 'save', 'changed' ], data); // strip temp data. TODO: copy/pasta

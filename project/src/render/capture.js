@@ -2,7 +2,7 @@ const $ = require('jquery');
 const { immediate } = require('../util');
 const { notify } = require('./chrome');
 
-const capture = (video, frames, callback) => {
+const capture = (video, frames) => new Promise((resolve) => {
   const canvas = document.createElement('canvas');
   canvas.width = video.width;
   canvas.height = video.height;
@@ -25,12 +25,12 @@ const capture = (video, frames, callback) => {
       canvas.toBlob((blob) => {
         result[frame] = blob;
         notify(`Exported frame ${frames.length - queue.length} of ${frames.length}.`);
-        if (queue.length === 0) callback(result); else process();
+        if (queue.length === 0) resolve(result); else process();
       }, 'image/jpeg', 0.6);
     });
     videoElem.currentTime = frame / video.fps;
   });
-};
+});
 
 module.exports = { capture };
 

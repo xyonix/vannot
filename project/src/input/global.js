@@ -1,4 +1,5 @@
 const $ = require('jquery');
+const { thenNotify } = require('../render/chrome');
 
 module.exports = ($app, data, player, canvas) => {
   // Instant tooltips:
@@ -49,7 +50,12 @@ module.exports = ($app, data, player, canvas) => {
   }
 
   // Save data:
-  $app.find('.vannot-save').on('click', () => { data.save(); });
+  $app.find('.vannot-save').on('click', () => {
+    data.save().then(
+      thenNotify('Data has been successfully saved!'),
+      thenNotify('Something went wrong trying to save data. Please check your connection and try again.', 'error')
+    );
+  });
 
   // Check for changes on unload:
   $(window).on('beforeunload', (event) => {
