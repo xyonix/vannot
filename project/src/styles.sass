@@ -962,15 +962,37 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     .vannot-track-selection
       background: transparentize($action, 0.5)
       border: 1px solid $action
-      display: none
       bottom: 0
-      pointer-events: none
+      cursor: default
+      display: none
+      overflow: hidden
       position: absolute
       top: 0
       z-index: 5
 
       &.active
         display: block
+
+      .vannot-track-selection-delete
+        $size: 20px
+        background: $action
+        border: none
+        height: $size
+        margin: 0
+        outline: none
+        padding: 0
+        position: absolute
+        right: 0
+        text-align: center
+        top: 0
+        width: $size
+        &:before
+          @include icon
+          color: #fff
+          content: $icon-trash
+          font-size: 13px
+        &:hover
+          background: $action-highlight
 
 .vannot-object-new, .vannot-label-new
   border: none
