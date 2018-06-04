@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTANTS
 
-$icon-cache: '2qcz1p' // change this when the iconset is updated
+$icon-cache: '8mf2ss' // change this when the iconset is updated
 
 $background: #333
 $background-panel: #4a4a4a
@@ -44,6 +44,10 @@ $icon-cursor: "\f245"
 $icon-move: "\f047"
 $icon-upload: "\f0ee"
 $icon-label: "\f02b"
+$icon-folder: "\f07b"
+$icon-cube: "\f1b2"
+$icon-cubes: "\f1b3"
+$icon-rects: "\f248"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -501,7 +505,14 @@ html, body
       margin: 0
       outline: none
 
-.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural
+  .vannot-vertical-rule
+    border-left: 1px solid #999
+    display: inline-block
+    height: 30px
+    padding: 0 6px
+    vertical-align: middle // i'm not sure why this works; it shouldn't.
+
+.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural, .vannot-toolbar-partial-plural
   display: none
   &.visible
     display: inline
@@ -596,6 +607,9 @@ html, body
   text-indent: -1px
 .vannot-delete-shape:before, .vannot-delete-points:before
   content: $icon-trash
+.vannot-expand-selection:before
+  content: $icon-rects
+  font-size: 16px
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls

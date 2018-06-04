@@ -404,6 +404,7 @@ module.exports = ($app, player, canvas) => {
 
     // Points state:
     $app.find('.vannot-delete-points').on('click', () => canvas.removePoints(canvas.selected.points));
+    $app.find('.vannot-expand-selection').on('click', () => canvas.expandSelection());
   }
 };
 

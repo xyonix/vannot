@@ -142,6 +142,10 @@ const updateToolbarCounts = (canvas, toolbar) => {
     toolbar.select('.vannot-toolbar-points-count').text(canvas.selected.points.length);
     toolbar.select('.vannot-toolbar-points-plural')
       .classed('visible', canvas.selected.points.length > 1);
+
+    const shapeCount = canvas.selected.wholeShapes.length + canvas.selected.partialShapes.length;
+    toolbar.select('.vannot-toolbar-partial-count').text(shapeCount);
+    toolbar.select('.vannot-toolbar-partial-plural').classed('visible', shapeCount > 1);
   }
 };
 

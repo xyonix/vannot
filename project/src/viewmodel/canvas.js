@@ -262,6 +262,12 @@ class Canvas {
   selectShapes(shapes) {
     this.selectedPoints = shapes.map((shape) => shape.points).reduce(concat);
   }
+  expandSelection() {
+    const result = [];
+    this.selected.partialShapes.forEach((shape) => result.push(...shape.points));
+    this.selected.wholeShapes.forEach((shape) => result.push(...shape.points));
+    this.selectedPoints = result;
+  }
 
   setLasso(box) {
     if (box == null) {
