@@ -1,5 +1,5 @@
 const { select, line } = require('d3');
-const { identity } = require('ramda');
+const { identity, uniq } = require('ramda');
 const { round } = Math;
 const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer, px } = require('../util');
 
@@ -150,6 +150,31 @@ const updateToolbarCounts = (canvas, toolbar) => {
   }
 };
 
+// TODO: should the visibility toggles below be done via a parent class+css instead?
+//       that's more how we do it elsewhere.
+const updateInstanceToolbar = (canvas, toolbar) => {
+  if (canvas.state !== 'shapes') return;
+  const instanceIds = uniq(canvas.selected.wholeShapes.map((shape) => shape.instanceId || null));
+
+  // update label visibility/text.
+  toolbar.selectAll('.vannot-toolbar-instance-status').classed('visible', false);
+  if (instanceIds.length === 1) {
+    if (instanceIds[0] === null) {
+      toolbar.select('.vannot-toolbar-instance-none').classed('visible', true);
+    } else {
+      toolbar.select('.vannot-toolbar-instance-assigned').classed('visible', true);
+      toolbar.select('.vannot-toolbar-instance-count').text(
+        canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceIds[0]).length);
+    }
+  } else {
+    toolbar.select('.vannot-toolbar-instance-mixed').classed('visible', true);
+  }
+
+  // update button visibility.
+  toolbar.select('.vannot-instance-form').classed('visible', (instanceIds.length > 1) || (instanceIds[0] === null));
+  toolbar.select('.vannot-instance-break').classed('visible', (instanceIds.length === 1) && (instanceIds[0] !== null));
+};
+
 const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];
 const updateZoomSelect = (canvas, zoomSelect) => {
   const options = zoomStops.includes(canvas.scale)
@@ -196,6 +221,9 @@ const drawer = (app, player, canvas) => {
     if (dirty.selected)
       updateToolbarCounts(canvas, toolbar);
 
+    if (dirty.selected || dirty.instances)
+      updateInstanceToolbar(canvas, toolbar);
+
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
 
@@ -235,6 +263,7 @@ const reactor = (app, player, canvas) => {
   canvas.events.on('change.mouse', mark('mouse'));
   canvas.events.on('change.points', mark('points'));
   canvas.events.on('change.shapes', mark('shapes'));
+  canvas.events.on('change.instances', mark('instances'));
   canvas.events.on('change.tool', mark('tool'));
 
   player.events.on('change.objects', mark('objects'));

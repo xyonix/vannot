@@ -79,6 +79,11 @@ $icon-rects: "\f248"
   top: 50%
   transform: translateY(-50%)
 
+@mixin visibility-toggle
+  display: none
+  &.visible
+    display: inline
+
 ////////////////////////////////////////////////////////////////////////////////
 // RESET
 
@@ -513,9 +518,7 @@ html, body
     vertical-align: middle // i'm not sure why this works; it shouldn't.
 
 .vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural, .vannot-toolbar-partial-plural
-  display: none
-  &.visible
-    display: inline
+  @include visibility-toggle
 
 .vannot-toolbutton
   $icon-size: 18px
@@ -587,6 +590,9 @@ html, body
     opacity: 0
     transform: translateY(#{-$toolbar-height})
 
+.vannot-toolbar-instance-status, .vannot-instance-form, .vannot-instance-break
+  @include visibility-toggle
+
 
 ////////////////////////////////////////
 // > Toolbar icons
@@ -610,6 +616,10 @@ html, body
 .vannot-expand-selection:before
   content: $icon-rects
   font-size: 16px
+.vannot-instance-form:before
+  content: $icon-cube
+.vannot-instance-break:before
+  content: $icon-cubes
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls

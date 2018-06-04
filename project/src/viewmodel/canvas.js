@@ -179,6 +179,7 @@ class Canvas {
   // and if anybody changes points or shapes they need to tell us manually.
   changedPoints() { this.events.emit('change.points'); }
   changedShapes() { this.events.emit('change.shapes'); }
+  changedInstances() { this.events.emit('change.instances'); }
 
 
   ////////////////////////////////////////
@@ -328,6 +329,28 @@ class Canvas {
       this.selectShape(reselect);
     else
       this.deselect();
+  }
+
+  // Instance group assignment:
+  formInstance(shapes) {
+    const instanceId = this.data._seqId++;
+    shapes.forEach((shape) => shape.instanceId = instanceId);
+    this.changedInstances();
+  }
+
+  // also reselects the whole instance:
+  breakInstance(shapes) {
+    const instanceId = shapes[0].instanceId;
+    const instanceShapes = this.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
+    const reselection = [];
+
+    instanceShapes.forEach((shape) => {
+      shape.instanceId = null;
+      reselection.push(...shape.points);
+    });
+    this.changedInstances();
+
+    this.selectedPoints = reselection;
   }
 }
 
