@@ -68,6 +68,20 @@ const drawImplicitPoints = (canvas, target) => {
   }
 };
 
+const drawInstances = (canvas, target) => {
+  const shapesData = ((canvas.frameObj == null) ? [] : (canvas.frameObj.shapes))
+    .filter((shape) => shape.instanceId != null);
+  const outlineSelection = target.selectAll('.instanceOutline').data(shapesData);
+  const outlines = instantiateElems(outlineSelection, 'path', 'instanceOutline');
+  const selected = canvas.selected;
+  const selectedInstanceIds = uniq(canvas.selected.wholeShapes.map((shape) => shape.instanceId));
+
+  outlines
+    .classed('directSelected', (shape) => selected.wholeShapes.includes(shape))
+    .classed('instanceSelected', (shape) => selectedInstanceIds.includes(shape.instanceId))
+    .attr('d', (shape) => lineCalc(shape.points) + 'z');
+};
+
 const drawWipSegment = (canvas, wipPoint, wipPath) => {
   wipPoint.attr('cx', canvas.mouse.x).attr('cy', canvas.mouse.y);
   const lastPoint = last(canvas.wip.points);
@@ -195,6 +209,7 @@ const updateZoomSelect = (canvas, zoomSelect) => {
 const drawer = (app, player, canvas) => {
   const videoWrapper = app.select('.vannot-video');
   const svg = app.select('svg');
+  const instanceWrapper = svg.select('.instances');
   const shapeWrapper = svg.select('.shapes');
   const implicitWrapper = svg.select('.implicitPoints');
   const lasso = svg.select('.selectionBox');
@@ -226,6 +241,9 @@ const drawer = (app, player, canvas) => {
 
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
+
+    if (dirty.frame || dirty.selected || dirty.points || dirty.instances)
+      drawInstances(canvas, instanceWrapper);
 
     if (dirty.selected || dirty.objects || dirty.shapes)
       updateObjectSelect(canvas, objectSelect);

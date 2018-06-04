@@ -418,6 +418,17 @@ html, body
         &:hover
           stroke-width: 8px
 
+    .instanceOutline
+      fill: none
+      opacity: 0.4
+      stroke: #fff
+      stroke-width: 8px
+      transition: 0.2s stroke-width, 0.2s opacity
+      &.directSelected
+        stroke-width: 14px
+      &.instanceSelected
+        opacity: 1
+
     .shapePath, .shapePoint
       fill: #aaa
       stroke: #aaa
