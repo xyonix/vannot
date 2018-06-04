@@ -135,10 +135,11 @@ const updateObjectSelect = (canvas, objectSelect) => {
 };
 
 const updateToolbarCounts = (canvas, toolbar) => {
-  if (canvas.state === 'shapes')
+  if (canvas.state === 'shapes') {
+    toolbar.select('.vannot-toolbar-shapes-count').text(canvas.selected.wholeShapes.length);
     toolbar.select('.vannot-toolbar-shapes-plural')
       .classed('visible', canvas.selected.wholeShapes.length > 1);
-  if (canvas.state === 'points') {
+  } else if (canvas.state === 'points') {
     toolbar.select('.vannot-toolbar-points-count').text(canvas.selected.points.length);
     toolbar.select('.vannot-toolbar-points-plural')
       .classed('visible', canvas.selected.points.length > 1);
