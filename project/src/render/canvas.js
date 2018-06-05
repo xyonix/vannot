@@ -186,7 +186,11 @@ const updateInstanceToolbar = (canvas, toolbar) => {
 
   // update button visibility.
   toolbar.select('.vannot-instance-form').classed('visible', (instanceIds.length > 1) || (instanceIds[0] === null));
-  toolbar.select('.vannot-instance-break').classed('visible', (instanceIds.length === 1) && (instanceIds[0] !== null));
+  const singleInstanceSelected = (instanceIds.length === 1) && (instanceIds[0] !== null);
+  toolbar.select('.vannot-instance-break').classed('visible', singleInstanceSelected);
+  const instanceShapeCount = canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceIds[0]).length;
+  toolbar.select('.vannot-instance-select').classed('visible', singleInstanceSelected &&
+    (instanceShapeCount !== canvas.selected.wholeShapes.length));
 };
 
 const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];

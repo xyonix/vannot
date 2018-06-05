@@ -601,7 +601,7 @@ html, body
     opacity: 0
     transform: translateY(#{-$toolbar-height})
 
-.vannot-toolbar-instance-status, .vannot-instance-form, .vannot-instance-break
+.vannot-toolbar-instance-status, .vannot-instance-form, .vannot-instance-break, .vannot-instance-select
   @include visibility-toggle
 
 
@@ -624,7 +624,7 @@ html, body
   text-indent: -1px
 .vannot-delete-shape:before, .vannot-delete-points:before
   content: $icon-trash
-.vannot-expand-selection:before
+.vannot-expand-selection:before, .vannot-instance-select:before
   content: $icon-rects
   font-size: 16px
 .vannot-instance-form:before

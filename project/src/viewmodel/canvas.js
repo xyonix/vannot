@@ -278,6 +278,13 @@ class Canvas {
     this.selected.wholeShapes.forEach((shape) => result.push(...shape.points));
     this.selectedPoints = result;
   }
+  selectInstance(instanceId) {
+    const result = [];
+    this.frameObj.shapes.forEach((shape) => {
+      if (shape.instanceId === instanceId) result.push(...shape.points);
+    });
+    this.selectedPoints = result;
+  }
 
   setLasso(box) {
     if (box == null) {

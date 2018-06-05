@@ -404,6 +404,8 @@ module.exports = ($app, player, canvas) => {
 
     $app.find('.vannot-instance-form').on('click', () => canvas.formInstance(canvas.selected.wholeShapes));
     $app.find('.vannot-instance-break').on('click', () => canvas.breakInstance(canvas.selected.wholeShapes));
+    $app.find('.vannot-instance-select').on('click', () =>
+      canvas.selectInstance(canvas.selected.wholeShapes[0].instanceId));
 
     // Points state:
     $app.find('.vannot-delete-points').on('click', () => canvas.removePoints(canvas.selected.points));
