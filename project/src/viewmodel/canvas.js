@@ -259,6 +259,7 @@ class Canvas {
     for (const shape of this.selected.wholeShapes) {
       const points = shape.points.map(({ x, y }) => ({ x: x + delta, y: y + delta }));
       const duplicate = Object.assign({}, shape, { points });
+      delete duplicate.instanceId;
       this.frameObj.shapes.push(duplicate);
       duplicates.push(duplicate);
     }
