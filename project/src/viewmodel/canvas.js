@@ -233,11 +233,19 @@ class Canvas {
 
     // do our data cloning; keep track of which points to select.
     const pointsToSelect = [];
+    const instanceIdMap = {};
     prevFrame.shapes.forEach((shape) => {
       // do this a bit manually since we want to copy data, not refs.
       const clone = { id: this.data._seqId++, objectId: shape.objectId, points: [] };
+
+      if (shape.instanceId != null) {
+        clone.instanceId = instanceIdMap[shape.instanceId] ||
+          (instanceIdMap[shape.instanceId] = this.data._seqId++);
+      }
+
       shape.points.forEach((point) => clone.points.push({ x: point.x, y: point.y }));
       pointsToSelect.push(...clone.points);
+
       this.frameObj.shapes.push(clone);
     });
     this.selectedPoints = pointsToSelect;
