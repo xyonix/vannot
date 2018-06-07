@@ -34,7 +34,7 @@ const drawShapes = (canvas, target) => {
     const color = (object != null) ? object.color : null;
 
     // populate our line first for stacking order.
-    const pathSelection = select(this).selectAll('.shapePath').data([ shape ], (shape) => shape.id);
+    const pathSelection = select(this).selectAll('.shapePath').data([ shape ], prop('id'));
     const polyline = instantiateElems(pathSelection, 'path', 'shapePath');
     polyline
       .style('fill', color)
@@ -148,7 +148,7 @@ const updateObjectSelect = (canvas, objectSelect) => {
 
   // update object select dropdown options.
   instantiateElems(objectSelect.selectAll('option').data(options), 'option')
-    .attr('value', (object) => object.id)
+    .attr('value', prop('id'))
     .text((object) => object.title);
 
   // update dropdown selected value.
