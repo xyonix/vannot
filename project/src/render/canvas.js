@@ -1,7 +1,7 @@
 const { select, line } = require('d3');
-const { identity, uniq } = require('ramda');
+const { identity, uniq, merge, prop, flatten } = require('ramda');
 const { round } = Math;
-const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer, px } = require('../util');
+const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, expand, unionAll, queuer, px } = require('../util');
 
 const lineCalc = line()
   .x((point) => point.x)
@@ -69,17 +69,27 @@ const drawImplicitPoints = (canvas, target) => {
 };
 
 const drawInstances = (canvas, target) => {
-  const shapesData = ((canvas.frameObj == null) ? [] : (canvas.frameObj.shapes))
-    .filter((shape) => shape.instanceId != null);
-  const outlineSelection = target.selectAll('.instanceOutline').data(shapesData);
-  const outlines = instantiateElems(outlineSelection, 'path', 'instanceOutline');
-  const selected = canvas.selected;
-  const selectedInstanceIds = uniq(canvas.selected.wholeShapes.map((shape) => shape.instanceId));
+  // TODO: almost certainly move this polygon math elsewhere.
+  const instanceIds = canvas.frameObj.shapes
+    .filter((shape) => shape.instanceId != null)
+    .map((shape) => shape.instanceId);
+  const instanceOutlines = flatten(instanceIds.map((instanceId) => {
+    const shapes = canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
+    const selected = shapes.some((shape) => canvas.selected.wholeShapes.includes(shape));
+    const outlines = unionAll(shapes.map((shape) => expand(shape.points, 20)));
+    return outlines.map((points, idx) => ({ id: `${instanceId}-${idx}`, points, selected }));
+  }));
 
+  _drawInstanceOutlines(instanceOutlines, target.select('.instanceBases'));
+  _drawInstanceOutlines(instanceOutlines, target.select('.instanceDashes'));
+};
+
+const _drawInstanceOutlines = (instanceOutlines, target) => {
+  const outlineSelection = target.selectAll('.instanceOutline').data(instanceOutlines, prop('id'))
+  const outlines = instantiateElems(outlineSelection, 'path', 'instanceOutline');
   outlines
-    .classed('directSelected', (shape) => selected.wholeShapes.includes(shape))
-    .classed('instanceSelected', (shape) => selectedInstanceIds.includes(shape.instanceId))
-    .attr('d', (shape) => lineCalc(shape.points) + 'z');
+    .classed('selected', prop('selected'))
+    .attr('d', (outline) => lineCalc(outline.points) + 'z');
 };
 
 const drawWipSegment = (canvas, wipPoint, wipPath) => {
@@ -213,7 +223,6 @@ const updateZoomSelect = (canvas, zoomSelect) => {
 const drawer = (app, player, canvas) => {
   const videoWrapper = app.select('.vannot-video');
   const svg = app.select('svg');
-  const instanceWrapper = svg.select('.instances');
   const shapeWrapper = svg.select('.shapes');
   const implicitWrapper = svg.select('.implicitPoints');
   const lasso = svg.select('.selectionBox');
@@ -247,7 +256,7 @@ const drawer = (app, player, canvas) => {
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
 
     if (dirty.frame || dirty.selected || dirty.points || dirty.instances)
-      drawInstances(canvas, instanceWrapper);
+      drawInstances(canvas, svg);
 
     if (dirty.selected || dirty.objects || dirty.shapes)
       updateObjectSelect(canvas, objectSelect);

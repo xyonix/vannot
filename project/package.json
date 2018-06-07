@@ -6,6 +6,8 @@
     "d3": "~4",
     "deep-equal": "~1",
     "jquery": "~3",
+    "polygon": "~1",
+    "polygon-tools": "~0.4",
     "ramda": "~0.25",
     "tinycolor2": "~1"
   },

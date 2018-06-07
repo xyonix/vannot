@@ -422,12 +422,15 @@ html, body
       fill: none
       opacity: 0.4
       stroke: #fff
-      stroke-width: 8px
-      transition: 0.2s stroke-width, 0.2s opacity
-      &.directSelected
-        stroke-width: 14px
-      &.instanceSelected
+      stroke-width: 4px
+      transition: 0.2s stroke-width, 0.2 opacity
+      &.selected
         opacity: 1
+        stroke-width: 6px
+
+    .instanceDashes .instanceOutline
+      stroke: #aaa
+      stroke-dasharray: 10,10
 
     .shapePath, .shapePoint
       fill: #aaa
