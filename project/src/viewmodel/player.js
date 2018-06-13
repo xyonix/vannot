@@ -141,6 +141,32 @@ class Player {
     }
     this.changedLabels();
   }
+
+  // deletes all label segments within the selection. possibly if selection becomes multi-track
+  // and/or works on object tracks, we will delete those too.
+  removeSelection() {
+    const selection = this.selection;
+    if (selection == null) return;
+    const segments = selection.target.segments;
+
+    for (const segment of segments) {
+      // first, do the two oddball cases:
+      if ((selection.start <= segment.start) && (segment.end <= selection.end)) { // (sel [seg ] )
+        spliceOut(segment, segments);
+      } else if ((segment.start < selection.start) && (selection.end < segment.end)) { // [seg (sel ) ]
+        segments.push({ start: selection.end, end: segment.end });
+        segment.end = selection.start;
+      } else {
+        // now assess the truncation cases:
+        if ((segment.start < selection.start) && (selection.start < segment.end)) // [seg (sel ] )
+          segment.end = selection.start;
+        if ((segment.start < selection.end) && (selection.end < segment.end)) // (sel [seg ) ]
+          segment.start = selection.end;
+      }
+    }
+    this.selection = null;
+    this.changedLabels();
+  }
 }
 
 module.exports = { Player };

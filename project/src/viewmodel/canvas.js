@@ -179,6 +179,7 @@ class Canvas {
   // and if anybody changes points or shapes they need to tell us manually.
   changedPoints() { this.events.emit('change.points'); }
   changedShapes() { this.events.emit('change.shapes'); }
+  changedInstances() { this.events.emit('change.instances'); }
 
 
   ////////////////////////////////////////
@@ -232,11 +233,19 @@ class Canvas {
 
     // do our data cloning; keep track of which points to select.
     const pointsToSelect = [];
+    const instanceIdMap = {};
     prevFrame.shapes.forEach((shape) => {
       // do this a bit manually since we want to copy data, not refs.
       const clone = { id: this.data._seqId++, objectId: shape.objectId, points: [] };
+
+      if (shape.instanceId != null) {
+        clone.instanceId = instanceIdMap[shape.instanceId] ||
+          (instanceIdMap[shape.instanceId] = this.data._seqId++);
+      }
+
       shape.points.forEach((point) => clone.points.push({ x: point.x, y: point.y }));
       pointsToSelect.push(...clone.points);
+
       this.frameObj.shapes.push(clone);
     });
     this.selectedPoints = pointsToSelect;
@@ -250,6 +259,7 @@ class Canvas {
     for (const shape of this.selected.wholeShapes) {
       const points = shape.points.map(({ x, y }) => ({ x: x + delta, y: y + delta }));
       const duplicate = Object.assign({}, shape, { points });
+      delete duplicate.instanceId;
       this.frameObj.shapes.push(duplicate);
       duplicates.push(duplicate);
     }
@@ -261,6 +271,19 @@ class Canvas {
   selectShape(shape) { this.selectedPoints = shape.points.slice(); }
   selectShapes(shapes) {
     this.selectedPoints = shapes.map((shape) => shape.points).reduce(concat);
+  }
+  expandSelection() {
+    const result = [];
+    this.selected.partialShapes.forEach((shape) => result.push(...shape.points));
+    this.selected.wholeShapes.forEach((shape) => result.push(...shape.points));
+    this.selectedPoints = result;
+  }
+  selectInstance(instanceId) {
+    const result = [];
+    this.frameObj.shapes.forEach((shape) => {
+      if (shape.instanceId === instanceId) result.push(...shape.points);
+    });
+    this.selectedPoints = result;
   }
 
   setLasso(box) {
@@ -322,6 +345,28 @@ class Canvas {
       this.selectShape(reselect);
     else
       this.deselect();
+  }
+
+  // Instance group assignment:
+  formInstance(shapes) {
+    const instanceId = this.data._seqId++;
+    shapes.forEach((shape) => shape.instanceId = instanceId);
+    this.changedInstances();
+  }
+
+  // also reselects the whole instance:
+  breakInstance(shapes) {
+    const instanceId = shapes[0].instanceId;
+    const instanceShapes = this.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
+    const reselection = [];
+
+    instanceShapes.forEach((shape) => {
+      shape.instanceId = null;
+      reselection.push(...shape.points);
+    });
+    this.changedInstances();
+
+    this.selectedPoints = reselection;
   }
 }
 

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTANTS
 
-$icon-cache: '2qcz1p' // change this when the iconset is updated
+$icon-cache: '8mf2ss' // change this when the iconset is updated
 
 $background: #333
 $background-panel: #4a4a4a
@@ -44,6 +44,10 @@ $icon-cursor: "\f245"
 $icon-move: "\f047"
 $icon-upload: "\f0ee"
 $icon-label: "\f02b"
+$icon-folder: "\f07b"
+$icon-cube: "\f1b2"
+$icon-cubes: "\f1b3"
+$icon-rects: "\f248"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -74,6 +78,11 @@ $icon-label: "\f02b"
   position: relative
   top: 50%
   transform: translateY(-50%)
+
+@mixin visibility-toggle
+  display: none
+  &.visible
+    display: inline
 
 ////////////////////////////////////////////////////////////////////////////////
 // RESET
@@ -409,6 +418,20 @@ html, body
         &:hover
           stroke-width: 8px
 
+    .instanceOutline
+      fill: none
+      opacity: 0.4
+      stroke: #fff
+      stroke-width: 4px
+      transition: 0.2s stroke-width, 0.2 opacity
+      &.selected
+        opacity: 1
+        stroke-width: 6px
+
+    .instanceDashes .instanceOutline
+      stroke: #aaa
+      stroke-dasharray: 10,10
+
     .shapePath, .shapePoint
       fill: #aaa
       stroke: #aaa
@@ -501,10 +524,15 @@ html, body
       margin: 0
       outline: none
 
-.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural
-  display: none
-  &.visible
-    display: inline
+  .vannot-vertical-rule
+    border-left: 1px solid #999
+    display: inline-block
+    height: 30px
+    padding: 0 6px
+    vertical-align: middle // i'm not sure why this works; it shouldn't.
+
+.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural, .vannot-toolbar-partial-plural
+  @include visibility-toggle
 
 .vannot-toolbutton
   $icon-size: 18px
@@ -576,6 +604,9 @@ html, body
     opacity: 0
     transform: translateY(#{-$toolbar-height})
 
+.vannot-toolbar-instance-status, .vannot-instance-form, .vannot-instance-break, .vannot-instance-select
+  @include visibility-toggle
+
 
 ////////////////////////////////////////
 // > Toolbar icons
@@ -596,6 +627,13 @@ html, body
   text-indent: -1px
 .vannot-delete-shape:before, .vannot-delete-points:before
   content: $icon-trash
+.vannot-expand-selection:before, .vannot-instance-select:before
+  content: $icon-rects
+  font-size: 16px
+.vannot-instance-form:before
+  content: $icon-cube
+.vannot-instance-break:before
+  content: $icon-cubes
 
 ////////////////////////////////////////////////////////////////////////////////
 // SECTION: Controls
@@ -962,15 +1000,37 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     .vannot-track-selection
       background: transparentize($action, 0.5)
       border: 1px solid $action
-      display: none
       bottom: 0
-      pointer-events: none
+      cursor: default
+      display: none
+      overflow: hidden
       position: absolute
       top: 0
       z-index: 5
 
       &.active
         display: block
+
+      .vannot-track-selection-delete
+        $size: 20px
+        background: $action
+        border: none
+        height: $size
+        margin: 0
+        outline: none
+        padding: 0
+        position: absolute
+        right: 0
+        text-align: center
+        top: 0
+        width: $size
+        &:before
+          @include icon
+          color: #fff
+          content: $icon-trash
+          font-size: 13px
+        &:hover
+          background: $action-highlight
 
 .vannot-object-new, .vannot-label-new
   border: none

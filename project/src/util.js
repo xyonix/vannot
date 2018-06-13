@@ -1,6 +1,8 @@
 const { select } = require('d3');
 const { floor, min, max, sqrt, pow } = Math;
 const $ = require('jquery');
+const Polygon = require('polygon');
+const PolygonTools = require('polygon-tools');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +168,18 @@ const withinBox = (box, point) => {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// POLYGON MATH
+// Note that all these operations lose the original point references, so they
+// can really only be used for downstream rendering operations.
+
+const pointsToArrays = (points) => points.map(({ x, y }) => [ x, y ]);
+const arraysToPoints = (arrays) => arrays.map(([ x, y ]) => ({ x, y }));
+
+const expand = (points, amount) => (new Polygon(points).offset(20)).points;
+const unionAll = (points) => PolygonTools.polygon.union(...points.map(pointsToArrays)).map(arraysToPoints);
+
+
+////////////////////////////////////////////////////////////////////////////////
 // MISC
 
 const getQuerystringValue = (key) =>
@@ -181,6 +195,7 @@ module.exports = {
   initiateDrag, draggable, byDelta, defer, queuer,
   pointsEqual, distance, midpoint, digestPoint,
   normalizeBox, withinBox,
+  pointsToArrays, arraysToPoints, expand, unionAll,
   getQuerystringValue
 };
 

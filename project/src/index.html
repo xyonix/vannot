@@ -13,6 +13,8 @@
           <div class="vannot-video"><video/></div>
           <div class="vannot-canvas">
             <svg preserveAspectRatio="none">
+              <g class="instanceBases"/>
+              <g class="instanceDashes"/>
               <g class="shapes"/>
               <g class="implicitPoints"/>
               <path class="wipPath"/>
@@ -64,15 +66,41 @@
             <button class="vannot-toolbutton vannot-copy-last">Carry over</button>
           </div>
           <div class="vannot-toolbar-shapes">
-            <label>Selected shape<span class="vannot-toolbar-shapes-plural">s</span></label>
+            <label>
+              <span class="vannot-toolbar-shapes-count"></span>
+              selected shape<span class="vannot-toolbar-shapes-plural">s</span>
+            </label>
             <div class="vannot-select-group">
               <label>Part of</label>
               <select class="vannot-object-select"></select>
             </div>
             <button class="vannot-toolbutton vannot-duplicate-shape">Duplicate</button>
             <button class="vannot-toolbutton vannot-toolbutton-warn vannot-delete-shape">Delete</button>
+            <span class="vannot-vertical-rule"></span>
+            <label>
+              <span class="vannot-toolbar-instance-status vannot-toolbar-instance-none">
+                No instance group assigned
+              </span>
+              <span class="vannot-toolbar-instance-status vannot-toolbar-instance-assigned">
+                Part of a <span class="vannot-toolbar-instance-count"></span> shape instance group
+              </span>
+              <span class="vannot-toolbar-instance-status vannot-toolbar-instance-mixed">
+                (Mixed instance groups)
+              </span>
+            </label>
+            <button class="vannot-toolbutton vannot-instance-form">Form new group</button>
+            <button class="vannot-toolbutton vannot-instance-break">Break group</button>
+            <button class="vannot-toolbutton vannot-instance-select">Select whole group</button>
           </div>
           <div class="vannot-toolbar-points">
+            <label>
+              <span class="vannot-toolbar-partial-count"></span>
+              partially selected shape<span class="vannot-toolbar-partial-plural">s</span>
+            </label>
+            <button class="vannot-toolbutton vannot-expand-selection">
+              Select whole shape<span class="vannot-toolbar-partial-plural">s</span>
+            </button>
+            <span class="vannot-vertical-rule"></span>
             <label>
               <span class="vannot-toolbar-points-count"></span>
               selected point<span class="vannot-toolbar-points-plural">s</span>
@@ -138,7 +166,9 @@
           </button>
         </div>
         <div class="vannot-track-timeline">
-          <div class="vannot-track-selection"></div>
+          <div class="vannot-track-selection">
+            <button class="vannot-track-selection-delete"></button>
+          </div>
         </div>
       </div>
       <div class="vannot-track-segment">

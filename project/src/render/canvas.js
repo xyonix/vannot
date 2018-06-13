@@ -1,7 +1,7 @@
 const { select, line } = require('d3');
-const { identity } = require('ramda');
+const { identity, uniq, merge, prop, flatten } = require('ramda');
 const { round } = Math;
-const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, queuer, px } = require('../util');
+const { getTemplate, instantiateElems, last, pointsEqual, digestPoint, normalizeBox, expand, unionAll, queuer, px } = require('../util');
 
 const lineCalc = line()
   .x((point) => point.x)
@@ -34,7 +34,7 @@ const drawShapes = (canvas, target) => {
     const color = (object != null) ? object.color : null;
 
     // populate our line first for stacking order.
-    const pathSelection = select(this).selectAll('.shapePath').data([ shape ], (shape) => shape.id);
+    const pathSelection = select(this).selectAll('.shapePath').data([ shape ], prop('id'));
     const polyline = instantiateElems(pathSelection, 'path', 'shapePath');
     polyline
       .style('fill', color)
@@ -66,6 +66,30 @@ const drawImplicitPoints = (canvas, target) => {
       .attr('cx', (implied) => implied.coords.x)
       .attr('cy', (implied) => implied.coords.y);
   }
+};
+
+const drawInstances = (canvas, target) => {
+  // TODO: almost certainly move this polygon math elsewhere.
+  const instanceIds = canvas.frameObj.shapes
+    .filter((shape) => shape.instanceId != null)
+    .map((shape) => shape.instanceId);
+  const instanceOutlines = flatten(instanceIds.map((instanceId) => {
+    const shapes = canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
+    const selected = shapes.some((shape) => canvas.selected.wholeShapes.includes(shape));
+    const outlines = unionAll(shapes.map((shape) => expand(shape.points, 20)));
+    return outlines.map((points, idx) => ({ id: `${instanceId}-${idx}`, points, selected }));
+  }));
+
+  _drawInstanceOutlines(instanceOutlines, target.select('.instanceBases'));
+  _drawInstanceOutlines(instanceOutlines, target.select('.instanceDashes'));
+};
+
+const _drawInstanceOutlines = (instanceOutlines, target) => {
+  const outlineSelection = target.selectAll('.instanceOutline').data(instanceOutlines, prop('id'))
+  const outlines = instantiateElems(outlineSelection, 'path', 'instanceOutline');
+  outlines
+    .classed('selected', prop('selected'))
+    .attr('d', (outline) => lineCalc(outline.points) + 'z');
 };
 
 const drawWipSegment = (canvas, wipPoint, wipPath) => {
@@ -124,7 +148,7 @@ const updateObjectSelect = (canvas, objectSelect) => {
 
   // update object select dropdown options.
   instantiateElems(objectSelect.selectAll('option').data(options), 'option')
-    .attr('value', (object) => object.id)
+    .attr('value', prop('id'))
     .text((object) => object.title);
 
   // update dropdown selected value.
@@ -135,14 +159,48 @@ const updateObjectSelect = (canvas, objectSelect) => {
 };
 
 const updateToolbarCounts = (canvas, toolbar) => {
-  if (canvas.state === 'shapes')
+  if (canvas.state === 'shapes') {
+    toolbar.select('.vannot-toolbar-shapes-count').text(canvas.selected.wholeShapes.length);
     toolbar.select('.vannot-toolbar-shapes-plural')
       .classed('visible', canvas.selected.wholeShapes.length > 1);
-  if (canvas.state === 'points') {
+  } else if (canvas.state === 'points') {
     toolbar.select('.vannot-toolbar-points-count').text(canvas.selected.points.length);
     toolbar.select('.vannot-toolbar-points-plural')
       .classed('visible', canvas.selected.points.length > 1);
+
+    const shapeCount = canvas.selected.wholeShapes.length + canvas.selected.partialShapes.length;
+    toolbar.select('.vannot-toolbar-partial-count').text(shapeCount);
+    toolbar.selectAll('.vannot-toolbar-partial-plural').classed('visible', shapeCount > 1);
   }
+};
+
+// TODO: should the visibility toggles below be done via a parent class+css instead?
+//       that's more how we do it elsewhere.
+const updateInstanceToolbar = (canvas, toolbar) => {
+  if (canvas.state !== 'shapes') return;
+  const instanceIds = uniq(canvas.selected.wholeShapes.map((shape) => shape.instanceId || null));
+
+  // update label visibility/text.
+  toolbar.selectAll('.vannot-toolbar-instance-status').classed('visible', false);
+  if (instanceIds.length === 1) {
+    if (instanceIds[0] === null) {
+      toolbar.select('.vannot-toolbar-instance-none').classed('visible', true);
+    } else {
+      toolbar.select('.vannot-toolbar-instance-assigned').classed('visible', true);
+      toolbar.select('.vannot-toolbar-instance-count').text(
+        canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceIds[0]).length);
+    }
+  } else {
+    toolbar.select('.vannot-toolbar-instance-mixed').classed('visible', true);
+  }
+
+  // update button visibility.
+  toolbar.select('.vannot-instance-form').classed('visible', (instanceIds.length > 1) || (instanceIds[0] === null));
+  const singleInstanceSelected = (instanceIds.length === 1) && (instanceIds[0] !== null);
+  toolbar.select('.vannot-instance-break').classed('visible', singleInstanceSelected);
+  const instanceShapeCount = canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceIds[0]).length;
+  toolbar.select('.vannot-instance-select').classed('visible', singleInstanceSelected &&
+    (instanceShapeCount !== canvas.selected.wholeShapes.length));
 };
 
 const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];
@@ -191,8 +249,14 @@ const drawer = (app, player, canvas) => {
     if (dirty.selected)
       updateToolbarCounts(canvas, toolbar);
 
+    if (dirty.selected || dirty.instances)
+      updateInstanceToolbar(canvas, toolbar);
+
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
+
+    if (dirty.frame || dirty.selected || dirty.points || dirty.instances)
+      drawInstances(canvas, svg);
 
     if (dirty.selected || dirty.objects || dirty.shapes)
       updateObjectSelect(canvas, objectSelect);
@@ -230,6 +294,7 @@ const reactor = (app, player, canvas) => {
   canvas.events.on('change.mouse', mark('mouse'));
   canvas.events.on('change.points', mark('points'));
   canvas.events.on('change.shapes', mark('shapes'));
+  canvas.events.on('change.instances', mark('instances'));
   canvas.events.on('change.tool', mark('tool'));
 
   player.events.on('change.objects', mark('objects'));

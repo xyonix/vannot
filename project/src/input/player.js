@@ -114,6 +114,7 @@ module.exports = ($app, player, canvas) => {
   // Tracklabels
   // TODO: this code is sort of a mess. needs some rethought.
 
+  const $labels = $app.find('.vannot-labels');
   $app.find('.vannot-label-new').on('click', () => {
     player.data.labels.push({
       id: player.data._seqId++,
@@ -123,6 +124,10 @@ module.exports = ($app, player, canvas) => {
     });
     player.changedLabels();
   });
+
+  // handle trashcan actions on selection:
+  $labels.on('mousedown', '.vannot-track-selection-delete', (event) => { event.preventDefault(); });
+  $labels.on('click', '.vannot-track-selection-delete', (event) => { player.removeSelection(); });
 
   // init thumbnail for the below dragging operations:
   const $thumbnail = $app.find('#vannot-thumbnail');
@@ -137,7 +142,7 @@ module.exports = ($app, player, canvas) => {
   };
 
   // TODO: this handler is pretty overloaded, but i couldn't figure out how to extricate it cleanly.
-  $app.find('.vannot-labels').on('mousedown', '.vannot-track-timeline', (event) => {
+  $labels.on('mousedown', '.vannot-track-timeline', (event) => {
     if (event.isDefaultPrevented()) return; // someone already handled this.
     if (event.button !== 0) return; // ignore right-click.
     player.selection = null;
