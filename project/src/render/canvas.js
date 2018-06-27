@@ -74,7 +74,7 @@ const drawInstances = (canvas, target) => {
     .filter((shape) => shape.instanceId != null)
     .map((shape) => shape.instanceId);
   const instanceOutlines = flatten(instanceIds.map((instanceId) => {
-    const shapes = canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
+    const shapes = canvas.shapesInInstance(instanceId);
     const selected = shapes.some((shape) => canvas.selected.wholeShapes.includes(shape));
     const outlines = unionAll(shapes.map((shape) => expand(shape.points, 20)));
     return outlines.map((points, idx) => ({ id: `${instanceId}-${idx}`, points, selected }));

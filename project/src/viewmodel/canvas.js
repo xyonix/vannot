@@ -396,7 +396,7 @@ class Canvas {
           reselection.push(...shape.points);
         }
       }
-      spliceOut(this.data.instances.find((instance) => instance.id === instanceId), this.data.instances);
+      spliceOut(this.instance(instanceId), this.data.instances);
     }
 
     this.changedInstances();
@@ -412,6 +412,9 @@ class Canvas {
   shapesInInstance(instanceId) {
     return this.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
   }
+
+  instance(instanceId) { return this.data.instances.find((instance) => instance.id === instanceId); }
+  instanceClass(classId) { return this.data.instanceClasses.find((klass) => klass.id === classId); }
 }
 
 const implicitPoints = (canvas) => {
