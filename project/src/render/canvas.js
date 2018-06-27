@@ -77,19 +77,26 @@ const drawInstances = (canvas, target) => {
     const shapes = canvas.shapesInInstance(instanceId);
     const selected = shapes.some((shape) => canvas.selected.wholeShapes.includes(shape));
     const outlines = unionAll(shapes.map((shape) => expand(shape.points, 20)));
-    return outlines.map((points, idx) => ({ id: `${instanceId}-${idx}`, points, selected }));
+    const instanceClass = canvas.instanceClass(canvas.instance(instanceId).class);
+    return outlines.map((points, idx) => ({ id: `${instanceId}-${idx}`, points, selected, instanceClass }));
   }));
 
   _drawInstanceOutlines(instanceOutlines, target.select('.instanceBases'));
-  _drawInstanceOutlines(instanceOutlines, target.select('.instanceDashes'));
+  _drawInstanceOutlines(instanceOutlines, target.select('.instanceDashes'), true);
 };
 
-const _drawInstanceOutlines = (instanceOutlines, target) => {
+const _drawInstanceOutlines = (instanceOutlines, target, colorize = false) => {
   const outlineSelection = target.selectAll('.instanceOutline').data(instanceOutlines, prop('id'))
   const outlines = instantiateElems(outlineSelection, 'path', 'instanceOutline');
   outlines
     .classed('selected', prop('selected'))
     .attr('d', (outline) => lineCalc(outline.points) + 'z');
+  if (colorize === true) {
+    outlines.style('stroke', (outline) => {
+      if ((outline.instanceClass == null) || (outline.instanceClass.color == null)) return '#aaa';
+      else return outline.instanceClass.color;
+    });
+  }
 };
 
 const drawWipSegment = (canvas, wipPoint, wipPath) => {

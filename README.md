@@ -87,6 +87,7 @@ Now that we have some tactile sense of what's going on, here is a full specifica
   * `class: String`: The instance class this instance belongs to. Can be any string value.
 * `instanceClasses: Array`: _(optional)_ Each instance class preset is defined here. Ad-hoc (freeform) instance classes are not represented here.
   * `id: String`: The id of this instance class. The interface will present this id as the selection/autocomplete option.
+  * `color: String[Color]`: A valid CSS color designation of any kind, to be applied to the outline of instances of this class.
 * `labels: Array`: The time-segment labelling information is saved here.
   * `title: String`: The user-assigned title of this annotation label.
   * `color: String[HexColor]`: _Internal_. A `#`-prepended hex color string. Meaningful only in the editor.
