@@ -65,6 +65,11 @@ const exportAllFrames = (data) => save(data, data.frames.map((x) => x.frame));
 const normalizeData = (data) => {
   if (data._seqId == null) data._seqId = 0;
   if (data.objects == null) data.objects = [];
+  if (!data.objects.some((object) => object.id === -1))
+    data.objects.unshift({ id: -1, title: 'Unassigned', color: '#aaa', system: true });
+  if (data.frames == null) data.frames = [];
+  if (data.labels == null) data.labels = [];
+  data.frames = data.frames.filter((frame) => frame.shapes.length > 0);
   if (data.instances == null) {
     data.instances = [];
     for (const frame of data.frames)
@@ -73,11 +78,6 @@ const normalizeData = (data) => {
           data.instances.push({ id: shape.instanceId });
   }
   if (data.instanceClasses == null) data.instanceClasses = [];
-  if (!data.objects.some((object) => object.id === -1))
-    data.objects.unshift({ id: -1, title: 'Unassigned', color: '#aaa', system: true });
-  if (data.frames == null) data.frames = [];
-  if (data.labels == null) data.labels = [];
-  data.frames = data.frames.filter((frame) => frame.shapes.length > 0);
   return data;
 };
 
