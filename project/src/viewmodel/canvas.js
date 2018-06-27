@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { without, concat } = require('ramda');
+const { without, concat, uniq } = require('ramda');
 const { spliceOut, last, pointsEqual, withinBox, distance, midpoint } = require('../util');
 
 class Canvas {
@@ -63,11 +63,18 @@ class Canvas {
   // of points that ought to be selected. the retrieval API does some additional calculation
   // to determine which shapes are partially or completely selected. any implications this
   // information has on drawing state is handled downstream in the drawing layer.
+  // points: all selected points.
+  // wholeShapes: all shapes which are entirely selected (all points).
+  // partialShapes: all shapes which have some but not all points selected.
+  // instance: populated iff there is exactly one instance seleceted AND it is wholly selected.
+  // instances: any instances attached to any wholly selected shape. (we only deal with wholly
+  //   selected shapes since we don't expose UI unless the whole shape is selected.)
+  // instanceless: true iff some selected whole shape has no instance assigned.
   get selected() {
     // return cached if available; otherwise compute.
     if (this._selected != null) return this._selected;
     const points = this._selectedPoints || [];
-    this._selected = { points, wholeShapes: [], partialShapes: [] };
+    this._selected = { points, wholeShapes: [], partialShapes: [], instance: null, instances: [], instanceless: false };
 
     if (points.length > 0) {
       for (const shape of this.frameObj.shapes) {
@@ -85,6 +92,19 @@ class Canvas {
     // cache this bit of logic for convenience/perf (we will need it):
     if ((this._selected.wholeShapes.length === 1) && (this._selected.partialShapes.length === 0))
       this._selected.shape = this._selected.wholeShapes[0];
+
+    // now deal with instance selection.
+    const instanceIds = uniq(this._selected.wholeShapes.map((shape) => shape.instanceId || null));
+    if (instanceIds.some((id) => id == null)) {
+      this._selected.instanceless = true;
+      spliceOut(null, instanceIds);
+    }
+    this._selected.instances = instanceIds.map((id) => this.data.instances.find((instance) => instance.id === id));
+    if (this._selected.instances.length === 1) {
+      const instance = this._selected.instances[0];
+      if (this.shapesInInstance(instance.id).length === this._selected.wholeShapes.length)
+        this._selected.instance = instance;
+    }
 
     return this._selected;
   }
@@ -179,7 +199,10 @@ class Canvas {
   // and if anybody changes points or shapes they need to tell us manually.
   changedPoints() { this.events.emit('change.points'); }
   changedShapes() { this.events.emit('change.shapes'); }
-  changedInstances() { this.events.emit('change.instances'); }
+  changedInstances() {
+    this._selected = null; // because we need to recompute selected instances.
+    this.events.emit('change.instances');
+  }
 
 
   ////////////////////////////////////////
@@ -351,22 +374,38 @@ class Canvas {
   formInstance(shapes) {
     const instanceId = this.data._seqId++;
     shapes.forEach((shape) => shape.instanceId = instanceId);
+    this.data.instances.push({ id: instanceId });
     this.changedInstances();
   }
 
-  // also reselects the whole instance:
+  // also reselects the whole instances:
   breakInstance(shapes) {
-    const instanceId = shapes[0].instanceId;
-    const instanceShapes = this.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
+    const instanceIds = uniq(shapes.map((shape) => shape.instanceId));
     const reselection = [];
 
-    instanceShapes.forEach((shape) => {
-      shape.instanceId = null;
-      reselection.push(...shape.points);
-    });
-    this.changedInstances();
+    for (const instanceId of instanceIds) {
+      if (instanceId == null) continue;
+      for (const shape of this.frameObj.shapes) {
+        if (shape.instanceId === instanceId) {
+          shape.instanceId = null;
+          reselection.push(...shape.points);
+        }
+      }
+      spliceOut(this.data.instances.find((instance) => instance.id === instanceId), this.data.instances);
+    }
 
+    this.changedInstances();
     this.selectedPoints = reselection;
+  }
+
+  setInstanceClass(instance, className) {
+    if (instance == null) return;
+    instance.class = className;
+    this.changedInstances();
+  }
+
+  shapesInInstance(instanceId) {
+    return this.frameObj.shapes.filter((shape) => shape.instanceId === instanceId);
   }
 }
 

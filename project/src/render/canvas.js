@@ -178,29 +178,39 @@ const updateToolbarCounts = (canvas, toolbar) => {
 //       that's more how we do it elsewhere.
 const updateInstanceToolbar = (canvas, toolbar) => {
   if (canvas.state !== 'shapes') return;
-  const instanceIds = uniq(canvas.selected.wholeShapes.map((shape) => shape.instanceId || null));
 
   // update label visibility/text.
   toolbar.selectAll('.vannot-toolbar-instance-status').classed('visible', false);
-  if (instanceIds.length === 1) {
-    if (instanceIds[0] === null) {
+  if (canvas.selected.instances.length === 0) {
       toolbar.select('.vannot-toolbar-instance-none').classed('visible', true);
+  } else if (canvas.selected.instances.length === 1) {
+    if (canvas.selected.instance != null) {
+      toolbar.select('.vannot-toolbar-instance-class').classed('visible', true);
+      toolbar.select('.vannot-instance-class').node().value = canvas.selected.instance.class || '';
     } else {
       toolbar.select('.vannot-toolbar-instance-assigned').classed('visible', true);
       toolbar.select('.vannot-toolbar-instance-count').text(
-        canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceIds[0]).length);
+        canvas.shapesInInstance(canvas.selected.instances[0].id).length);
     }
   } else {
     toolbar.select('.vannot-toolbar-instance-mixed').classed('visible', true);
   }
 
   // update button visibility.
-  toolbar.select('.vannot-instance-form').classed('visible', (instanceIds.length > 1) || (instanceIds[0] === null));
-  const singleInstanceSelected = (instanceIds.length === 1) && (instanceIds[0] !== null);
+  const singleInstanceSelected = (canvas.selected.instances.length === 1) && !canvas.selected.instanceless;
+  toolbar.select('.vannot-instance-form').classed('visible', (canvas.selected.instance == null));
   toolbar.select('.vannot-instance-break').classed('visible', singleInstanceSelected);
-  const instanceShapeCount = canvas.frameObj.shapes.filter((shape) => shape.instanceId === instanceIds[0]).length;
   toolbar.select('.vannot-instance-select').classed('visible', singleInstanceSelected &&
-    (instanceShapeCount !== canvas.selected.wholeShapes.length));
+    (canvas.shapesInInstance(canvas.selected.instances[0].id).length !== canvas.selected.wholeShapes.length));
+};
+
+const updateInstanceList = (canvas, list) => {
+  const fromInstances = canvas.data.instances.map((instance) => instance.class);
+  const fromClasses = canvas.data.instanceClasses.map((ic) => ic.id);
+  const instanceClasses = uniq(fromInstances.concat(fromClasses)).filter((id) => id != null);
+  instanceClasses.sort();
+  instantiateElems(list.selectAll('option').data(instanceClasses), 'option')
+    .attr('value', identity);
 };
 
 const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];
@@ -231,6 +241,7 @@ const drawer = (app, player, canvas) => {
   const wipCloser = svg.select('.wipCloser');
   const toolbar = app.select('.vannot-toolbar');
   const objectSelect = toolbar.select('.vannot-object-select');
+  const instanceDatalist = toolbar.select('#vannot-instance-list');
   const zoomSelect = app.select('.vannot-video-zoom-edit');
 
   const draw = () => {
@@ -251,6 +262,9 @@ const drawer = (app, player, canvas) => {
 
     if (dirty.selected || dirty.instances)
       updateInstanceToolbar(canvas, toolbar);
+
+    if (dirty.instances)
+      updateInstanceList(canvas, instanceDatalist);
 
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.

@@ -79,10 +79,10 @@ $icon-rects: "\f248"
   top: 50%
   transform: translateY(-50%)
 
-@mixin visibility-toggle
+@mixin visibility-toggle($visible-type: inline)
   display: none
   &.visible
-    display: inline
+    display: $visible-type
 
 ////////////////////////////////////////////////////////////////////////////////
 // RESET
@@ -524,15 +524,20 @@ html, body
       margin: 0
       outline: none
 
+    input[type=text]
+      background: $select-group-background
+      border: none
+      color: #fff
+      margin: 0
+      outline: none
+      padding: 4px 0 2px
+
   .vannot-vertical-rule
     border-left: 1px solid #999
     display: inline-block
     height: 30px
     padding: 0 6px
     vertical-align: middle // i'm not sure why this works; it shouldn't.
-
-.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural, .vannot-toolbar-partial-plural
-  @include visibility-toggle
 
 .vannot-toolbutton
   $icon-size: 18px
@@ -604,8 +609,12 @@ html, body
     opacity: 0
     transform: translateY(#{-$toolbar-height})
 
+.vannot-toolbar-shapes-plural, .vannot-toolbar-points-plural, .vannot-toolbar-partial-plural,
 .vannot-toolbar-instance-status, .vannot-instance-form, .vannot-instance-break, .vannot-instance-select
   @include visibility-toggle
+
+.vannot-toolbar .vannot-toolbar-instance-class
+  @include visibility-toggle(inline-block)
 
 
 ////////////////////////////////////////
