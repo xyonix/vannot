@@ -208,9 +208,9 @@ const updateInstanceList = (canvas, list) => {
   const fromInstances = canvas.data.instances.map((instance) => instance.class);
   const fromClasses = canvas.data.instanceClasses.map((ic) => ic.id);
   const instanceClasses = uniq(fromInstances.concat(fromClasses)).filter((id) => id != null);
-  instanceClasses.sort();
   instantiateElems(list.selectAll('option').data(instanceClasses), 'option')
-    .attr('value', identity);
+    .attr('value', identity)
+    .sort();
 };
 
 const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];
