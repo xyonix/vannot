@@ -228,6 +228,11 @@ class Canvas {
     return [ last(this.wip.points), this.mouse ];
   }
 
+  get instanceMode() {
+    if ((this.data.app == null) || (this.data.app.instance == null) || (this.data.app.instance.classMode == null)) return 'freeform';
+    return this.data.app.instance.classMode;
+  }
+
 
   ////////////////////////////////////////
   // CONVENIENCE METHODS

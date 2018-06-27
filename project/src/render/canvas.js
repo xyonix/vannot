@@ -179,12 +179,15 @@ const updateToolbarCounts = (canvas, toolbar) => {
 const updateInstanceToolbar = (canvas, toolbar) => {
   if (canvas.state !== 'shapes') return;
 
+  // set instance toolbar mode.
+  toolbar.classed(`vannot-instance-mode-${canvas.instanceMode}`, true);
+
   // update label visibility/text.
   toolbar.selectAll('.vannot-toolbar-instance-status').classed('visible', false);
   if (canvas.selected.instances.length === 0) {
       toolbar.select('.vannot-toolbar-instance-none').classed('visible', true);
   } else if (canvas.selected.instances.length === 1) {
-    if (canvas.selected.instance != null) {
+    if ((canvas.selected.instance != null) && (canvas.instanceMode !== 'none')) {
       toolbar.select('.vannot-toolbar-instance-class').classed('visible', true);
       toolbar.select('.vannot-instance-class').node().value = canvas.selected.instance.class || '';
     } else {
@@ -211,6 +214,14 @@ const updateInstanceList = (canvas, list) => {
   instantiateElems(list.selectAll('option').data(instanceClasses), 'option')
     .attr('value', identity)
     .sort();
+};
+
+const updateInstanceSelect = (canvas, select) => {
+  const instanceClasses = canvas.data.instanceClasses.map((ic) => ({ id: ic.id, label: ic.id }));
+  instanceClasses.unshift({ id: '', label: '(unassigned)' });
+  instantiateElems(select.selectAll('option').data(instanceClasses), 'option')
+    .attr('value', (x) => x.id)
+    .text((x) => x.label);
 };
 
 const zoomStops = [ 0.5, 0.75, 1, 1.5, 2, 3, 4 ];
@@ -242,6 +253,7 @@ const drawer = (app, player, canvas) => {
   const toolbar = app.select('.vannot-toolbar');
   const objectSelect = toolbar.select('.vannot-object-select');
   const instanceDatalist = toolbar.select('#vannot-instance-list');
+  const instanceSelect = toolbar.select('select.vannot-instance-class');
   const zoomSelect = app.select('.vannot-video-zoom-edit');
 
   const draw = () => {
@@ -263,8 +275,12 @@ const drawer = (app, player, canvas) => {
     if (dirty.selected || dirty.instances)
       updateInstanceToolbar(canvas, toolbar);
 
-    if (dirty.instances)
-      updateInstanceList(canvas, instanceDatalist);
+    if (dirty.instances) {
+      if (canvas.instanceMode === 'freeform')
+        updateInstanceList(canvas, instanceDatalist);
+      else if (canvas.instanceMode === 'preset')
+        updateInstanceSelect(canvas, instanceSelect);
+    }
 
     if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.

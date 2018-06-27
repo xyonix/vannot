@@ -616,6 +616,18 @@ html, body
 .vannot-toolbar .vannot-toolbar-instance-class
   @include visibility-toggle(inline-block)
 
+.vannot-instance-class
+  display: none
+.vannot-instance-mode-freeform input[type=text].vannot-instance-class
+  display: inline-block
+.vannot-instance-mode-preset select.vannot-instance-class
+  display: inline-block
+.vannot-instance-mode-none
+  .vannot-toolbar-instance-class
+    display: none
+    &.visible ~ .vannot-toolbar-instance-assigned
+      display: block
+
 
 ////////////////////////////////////////
 // > Toolbar icons

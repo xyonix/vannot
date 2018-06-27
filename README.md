@@ -82,6 +82,11 @@ Now that we have some tactile sense of what's going on, here is a full specifica
   * `title: String`: The user-assigned title of this classification object.
   * `color: String[HexColor]`: _Internal_. A `#`-prepended hex color string. Meaningful only in the editor.
   * `system: Boolean`: Only true for the `Unassigned` system object (see the note on the `objects` array above). If true, do not modify or omit the data.
+* `instances: Array`: Each individual identified instance is tracked here.
+  * `id: Integer`: The id of the instance. It is meaningless other than as a reference to join shapes by.
+  * `class: String`: The instance class this instance belongs to. Can be any string value.
+* `instanceClasses: Array`: _(optional)_ Each instance class preset is defined here. Ad-hoc (freeform) instance classes are not represented here.
+  * `id: String`: The id of this instance class. The interface will present this id as the selection/autocomplete option.
 * `labels: Array`: The time-segment labelling information is saved here.
   * `title: String`: The user-assigned title of this annotation label.
   * `color: String[HexColor]`: _Internal_. A `#`-prepended hex color string. Meaningful only in the editor.
@@ -91,6 +96,11 @@ Now that we have some tactile sense of what's going on, here is a full specifica
 * `app: Object`: _(optional)_ Customization options for the browser application.
   * `title: String`: _(optional)_ Sets the window/tab title.
   * `favicon: String[URL]`: _(optional)_ Sets the favicon source URL.
+  * `instance: Object`: _(optional)_ Customization options for instance grouping
+    * `classMode: String = (freeform|preset|none)`: Sets the instance class mode:
+      * `freeform`: A combobox is given to set the instance class. Will suggest autocomplete from the corpus of extant instanceClasses, both user-generated and predefined in the data (see `instanceClasses` above).
+      * `preset`: A dropdown is given to set the instance class. Only the options preset in `instanceClasses` are available.
+      * `none`: Instance class selection is entirely disabled. Instance grouping is still available.
 * `saveUrl: String[URL]`: The path that an updated version of this data structure will be `POST`ed back to when the user clicks on Save. Please see the following section for details about this save request.
 
 Any data specified outside these reserved keys will be preserved by Vannot through save/load cycles without modification. However, as more features added and more keys will be used, we recommend the use of the `custom`, `user`, and `meta` top-level keys, which we will always reserve and avoid for this purpose.
