@@ -259,7 +259,8 @@ class Canvas {
     const prevFrame = this.player.prevFrame;
     if (prevFrame == null) return; // TODO: show message (or disable in the first place).
 
-    // do our data cloning; keep track of which points to select.
+    // do our data cloning; keep track of which points to select and which
+    // instances should stay together.
     const pointsToSelect = [];
     const instanceIdMap = {};
     prevFrame.shapes.forEach((shape) => {
@@ -267,8 +268,22 @@ class Canvas {
       const clone = { id: this.data._seqId++, objectId: shape.objectId, points: [] };
 
       if (shape.instanceId != null) {
-        clone.instanceId = instanceIdMap[shape.instanceId] ||
-          (instanceIdMap[shape.instanceId] = this.data._seqId++);
+        // TODO: we have too many places individually pushing instanceId data.
+        // should be a little more controlled.
+        if (instanceIdMap[shape.instanceId] == null) {
+          const instanceId = this.data._seqId++;
+          clone.instanceId = instanceId;
+          instanceIdMap[shape.instanceId] = instanceId;
+
+          const oldInstance = this.instance(shape.instanceId);
+          const newInstance = { id: instanceId };
+          if (oldInstance.class != null)
+            newInstance.class = oldInstance.class;
+
+          this.data.instances.push(newInstance);
+        } else {
+          clone.instanceId = instanceIdMap[shape.instanceId];
+        }
       }
 
       shape.points.forEach((point) => clone.points.push({ x: point.x, y: point.y }));
