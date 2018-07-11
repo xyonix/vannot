@@ -58,6 +58,10 @@ class Player {
     if (value === this._frame) return;
     this._frame = value;
     this.events.emit('change.frame', this._frame);
+
+    // if we are playing an excerpt, the video won't automatically stop, so
+    // we have to manually stop it at the end timecode.
+    if (value > this.video.end) this.seek(this.video.end);
   }
 
   get range() { return this._range; }
