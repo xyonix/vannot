@@ -300,23 +300,24 @@ html, body
     margin-right: 6px
 
 .vannot-video-adjust
+  $background: #242424
   overflow: hidden
   position: absolute
   right: 15px
   top: 15px
 
   .vannot-video-parameter
-    background: rgba(36, 36, 36, 0.8)
+    background: $background
     border-radius: 2px
     float: left
     margin-right: 8px
+    opacity: 0.9
     padding: 3px 7px 6px
     &:last-child
       margin-right: 0
 
   select
-    background: #242424
-    background: transparent
+    background: $background
     border: none
     color: #fff
     outline: none
@@ -334,7 +335,6 @@ html, body
   border-radius: 999px
   float: left
   height: $size
-  overflow: hidden
   position: relative
   top: 4px
   width: $size
