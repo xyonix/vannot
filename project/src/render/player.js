@@ -26,16 +26,16 @@ const drawTimecode = (player, target) => {
 // frame datapoints { frame: #, major: bool } to presented as ticks. 
 const minorThreshold = 4; // smallest pixel distance between minor ticks.
 const majorThreshold = 80; // smallest pixel distance between major ticks.
-const tickScales = [
+const tickScales = (fps) => [
   1, 5, // framescale
-  60, 2 * 60, 5 * 60, 15 * 60, 30 * 60, // second scales
-  60 * 60, 2 * 60 * 60, 5 * 60 * 60, 15 * 60 * 60, 30 * 60 * 60 // minute scales
+  1 * fps, 2 * fps, 5 * fps, 15 * fps, 30 * fps, // second scales
+  60 * fps, 2 * 60 * fps, 5 * 60 * fps, 15 * 60 * fps, 30 * 60 * fps // minute scales
 ];
 const generateTicks = ([ start, end ], fps, width) => {
   const duration = (end - start);
 
   // fallback to progressively larger scales. determine our first tick.
-  const minorInterval = tickScales.find((scale) => (width / duration * scale) > minorThreshold);
+  const minorInterval = tickScales(fps).find((scale) => (width / duration * scale) > minorThreshold);
   const first = ceil(start / minorInterval) * minorInterval;
 
   // determine major tick spacing.
