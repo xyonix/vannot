@@ -275,8 +275,10 @@ module.exports = ($app, player, canvas) => {
 
     // Trap spacebar double-tap and reset viewport if caught:
     let lastSpacebar = 0;
-    $document.on('keydown', (event) => {
+    $document.on('keyup', (event) => {
       if ($(event.target).is('input')) return; // if they are typing ignore it.
+      if (event.which !== 32) return; // only spacebar.
+
       const now = (new Date()).getTime();
       if ((now - lastSpacebar) < 300) canvas.resetViewport();
       lastSpacebar = now;
