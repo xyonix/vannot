@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTANTS
 
-$icon-cache: '8mf2ss' // change this when the iconset is updated
+$icon-cache: '42zk6r' // change this when the iconset is updated
 
 $background: #333
 $background-panel: #4a4a4a
@@ -48,6 +48,7 @@ $icon-folder: "\f07b"
 $icon-cube: "\f1b2"
 $icon-cubes: "\f1b3"
 $icon-rects: "\f248"
+$icon-target: "\f140"
 
 ////////////////////////////////////////////////////////////////////////////////
 // UTIL
@@ -352,6 +353,12 @@ html, body
     content: $icon-zoomplus
     position: relative
     top: 3px
+
+.vannot-reset-zoom
+  margin-left: 2px
+  padding-left: 0
+  &:before
+    content: $icon-target
 
 .vannot-select-mode:before
   content: $icon-cursor

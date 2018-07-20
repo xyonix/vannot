@@ -238,6 +238,12 @@ class Canvas {
   // CONVENIENCE METHODS
   // State manipulators which purely manipulate foundation state or frame data.
 
+  // Zoom/pan controls:
+  resetViewport() {
+    this.scale = 1.0;
+    this.pan = { x: 0, y: 0 };
+  }
+
   // Shape creation:
   startShape() {
     this.frameObj.shapes.push({ id: this.data._seqId++, objectId: -1, points: [], wip: true });

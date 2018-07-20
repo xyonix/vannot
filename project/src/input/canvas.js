@@ -273,6 +273,15 @@ module.exports = ($app, player, canvas) => {
     $document.on('keydown', (event) => { if (event.which === 32) canvas.toolOverride = 'pan'; });
     $document.on('keyup', (event) => { if (event.which === 32) canvas.toolOverride = null; });
 
+    // Trap spacebar double-tap and reset viewport if caught:
+    let lastSpacebar = 0;
+    $document.on('keydown', (event) => {
+      if ($(event.target).is('input')) return; // if they are typing ignore it.
+      const now = (new Date()).getTime();
+      if ((now - lastSpacebar) < 300) canvas.resetViewport();
+      lastSpacebar = now;
+    });
+
     // Update viewport size when window is resized (and set it immediately).
     const $video = $app.find('.vannot-viewport video');
     const viewportPadding = $viewport.width() - $video.width();
@@ -361,6 +370,7 @@ module.exports = ($app, player, canvas) => {
       canvas.scale = parseFloat($zoomSelect.val());
       $zoomSelect.blur(); // otherwise if you then try to spacebar to pan it reselects the dropdown.
     });
+    $app.find('.vannot-reset-zoom').on('click', () => { canvas.resetViewport(); });
     // And the select/pan toolbuttons:
     $app.find('.vannot-select-mode').on('click', () => { canvas.tool = 'select'; });
     $app.find('.vannot-pan-mode').on('click', () => { canvas.tool = 'pan'; });
