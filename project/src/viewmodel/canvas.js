@@ -450,8 +450,10 @@ const implicitPoints = (canvas) => {
     for (let i = 0; i < shapePoints.length; i++) {
       const it = shapePoints[i];
       const next = shapePoints[((i + 1) === shapePoints.length) ? 0 : (i + 1)];
+      if (distance(it, next) * canvas.scale < 40) continue;
+
       const candidate = midpoint(it, next);
-      if (distance(candidate, canvas.mouse) < 40)
+      if ((distance(candidate, canvas.mouse) * canvas.scale) < 40)
         implicit.points.push({ coords: candidate, after: it });
     }
   };
