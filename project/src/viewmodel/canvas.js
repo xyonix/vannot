@@ -152,6 +152,8 @@ class Canvas {
   // * origin: is an { x, y } coördinate in screen-space indicating where we compute the present
   //   top-left of the rendered video image is. we must compute this ourselves due to the way the
   //   browser represents the scaling of the element; its internal and external dimensions mismatch.
+  // * project: is a function that takes { x, y } coördinates in canvas-space and translates them to
+  //   screen-space.
   get projection() {
     // return cached value if we have it:
     if (this._projection != null) return this._projection;
@@ -160,8 +162,9 @@ class Canvas {
     // first determine which the constraint side is, then calculate rendered video size.
     const video = this.data.video;
     const videoRatio = video.width / video.height;
-    const paddedWidth = this.viewportSize.width - this.viewportSize.padding;
-    const paddedHeight = this.viewportSize.height - this.viewportSize.padding;
+    const padding = this.viewportSize.padding;
+    const paddedWidth = this.viewportSize.width - padding;
+    const paddedHeight = this.viewportSize.height - padding;
     const heightConstrained = (paddedWidth / paddedHeight) > videoRatio;
     const factor = heightConstrained
       ? (video.height / paddedHeight) / this.scale
@@ -169,7 +172,15 @@ class Canvas {
     const originX = (paddedWidth / 2) - (video.width / 2 / factor) + this.pan.x;
     const originY = (paddedHeight / 2) - (video.height / 2 / factor) + this.pan.y;
 
-    this._projection = { factor, origin: { x: originX, y: originY } };
+    // based on these factors, generate a project({ x, y }) function.
+    const halfPadding = padding / 2;
+    const projectX = (x) => (x / factor) + halfPadding + originX;
+    const projectY = (y) => (y / factor) + halfPadding + originY;
+    const project = ({ x, y }) => ({ x: projectX(x), y: projectY(y) });
+    project.x = projectX;
+    project.y = projectY;
+
+    this._projection = { factor, origin: { x: originX, y: originY }, project };
     return this._projection;
   }
 

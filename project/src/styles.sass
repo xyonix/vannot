@@ -405,6 +405,8 @@ html, body
       cursor: -webkit-grab
       cursor: grab
 
+    ////////////////////////////////////////
+    // WIP PATH/SEGMENT STYLES
 
     .wipPath
       stroke-width: 4px
@@ -427,21 +429,27 @@ html, body
         &:hover
           stroke-width: 8px
 
+    ////////////////////////////////////////
+    // INSTANCE OUTLINE STYLES
+
     .instanceOutline
       fill: none
       opacity: 0.4
       stroke: #fff
-      stroke-width: 4px
-      transition: 0.2s stroke-width, 0.2 opacity
+      stroke-width: 2px
+      transition: 0.2s stroke-width, 0.2s opacity
       &.selected
         opacity: 1
-        stroke-width: 6px
+        stroke-width: 4px
 
       .drawing &
         opacity: $barely-opaque
 
     .instanceDashes .instanceOutline
-      stroke-dasharray: 10,10
+      stroke-dasharray: 6,6
+
+    ////////////////////////////////////////
+    // SHAPE POINT/PATH STYLES
 
     .shapePath, .shapePoint
       fill: #aaa
@@ -455,11 +463,13 @@ html, body
     .shapePath
       fill-opacity: 0.4
       stroke-width: 2px
-
     .selected
       .shapePath
         fill-opacity: 0.7
-        stroke-width: 6px
+        stroke-width: 4px
+        .mousedown &
+          fill-opacity: 0.4
+          stroke-width: 2px
 
     .shapePoint
       stroke: #fff
@@ -483,8 +493,12 @@ html, body
       .shapePath
         fill-opacity: 0
 
-      //.shapePath, .shapePoint
+      .shapePath, .shapePoint
+        opacity: 1
         //@include flash
+
+    ////////////////////////////////////////
+    // OTHER STYLES
 
     .implicitPoint
       fill-opacity: 0.6

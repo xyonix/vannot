@@ -8,18 +8,8 @@ const lineCalc = line()
   .y((point) => point.y);
 
 const setProjection = (canvas, videoWrapper, svg) => {
-  // first set transform on the video.
+  // set transform on the video.
   videoWrapper.style('transform', `translate(${px(canvas.pan.x)}, ${px(canvas.pan.y)}) scale(${canvas.scale})`);
-
-  // then set the viewbox on the svg to match the viewport canvas-space coordinates.
-  // we first compute the bounds in screenspace, then project into canvas-space at the end.
-  const video = canvas.data.video;
-  const padding = canvas.viewportSize.padding;
-  const x = (-padding / 2) - canvas.projection.origin.x;
-  const y = (-padding / 2) - canvas.projection.origin.y;
-  const w = canvas.viewportSize.width;
-  const h = canvas.viewportSize.height;
-  svg.attr('viewBox', [ x, y, w, h ].map((k) => k * canvas.projection.factor).join(' '));
 };
 
 const drawShapes = (canvas, target) => {
@@ -44,7 +34,7 @@ const drawShapes = (canvas, target) => {
       .style('fill', color)
       .style('stroke', color)
       .attr('d', (shape) => {
-        const path = lineCalc(shape.points);
+        const path = lineCalc(shape.points.map(canvas.projection.project));
         return (shape.wip === true) ? path : (path + 'z');
       });
 
@@ -52,10 +42,10 @@ const drawShapes = (canvas, target) => {
     const points = instantiateElems(select(this).selectAll('.shapePoint').data(shape.points, digestPoint), 'circle', 'shapePoint');
     points
       .classed('selected', (point) => selected.points.includes(point))
-      .attr('r', (point) => (selected.points.includes(point) ? 8 : 2))
+      .attr('r', (point) => (selected.points.includes(point) ? 5 : 2))
       .style('fill', color)
-      .attr('cx', (point) => point.x)
-      .attr('cy', (point) => point.y);
+      .attr('cx', (point) => canvas.projection.project.x(point.x))
+      .attr('cy', (point) => canvas.projection.project.y(point.y));
   });
 };
 
@@ -66,9 +56,9 @@ const drawImplicitPoints = (canvas, target) => {
   if (canvas.implicitPoints.object != null) {
     points
       .style('fill', canvas.implicitPoints.object.color)
-      .attr('r', 8)
-      .attr('cx', (implied) => implied.coords.x)
-      .attr('cy', (implied) => implied.coords.y);
+      .attr('r', 5)
+      .attr('cx', (implied) => canvas.projection.project.x(implied.coords.x))
+      .attr('cy', (implied) => canvas.projection.project.y(implied.coords.y));
   }
 };
 
@@ -80,21 +70,21 @@ const drawInstances = (canvas, target) => {
   const instanceOutlines = flatten(instanceIds.map((instanceId) => {
     const shapes = canvas.shapesInInstance(instanceId);
     const selected = shapes.some((shape) => canvas.selected.wholeShapes.includes(shape));
-    const outlines = unionAll(shapes.map((shape) => expand(shape.points, 20)));
+    const outlines = unionAll(shapes.map((shape) => expand(shape.points, 25)));
     const instanceClass = canvas.instanceClass(canvas.instance(instanceId).class);
     return outlines.map((points, idx) => ({ id: `${instanceId}-${idx}`, points, selected, instanceClass }));
   }));
 
-  _drawInstanceOutlines(instanceOutlines, target.select('.instanceBases'));
-  _drawInstanceOutlines(instanceOutlines, target.select('.instanceDashes'), true);
+  _drawInstanceOutlines(canvas, instanceOutlines, target.select('.instanceBases'));
+  _drawInstanceOutlines(canvas, instanceOutlines, target.select('.instanceDashes'), true);
 };
 
-const _drawInstanceOutlines = (instanceOutlines, target, colorize = false) => {
+const _drawInstanceOutlines = (canvas, instanceOutlines, target, colorize = false) => {
   const outlineSelection = target.selectAll('.instanceOutline').data(instanceOutlines, prop('id'))
   const outlines = instantiateElems(outlineSelection, 'path', 'instanceOutline');
   outlines
     .classed('selected', prop('selected'))
-    .attr('d', (outline) => lineCalc(outline.points) + 'z');
+    .attr('d', (outline) => lineCalc(outline.points.map(canvas.projection.project)) + 'z');
   if (colorize === true) {
     outlines.style('stroke', (outline) => {
       if ((outline.instanceClass == null) || (outline.instanceClass.color == null)) return '#aaa';
@@ -104,12 +94,15 @@ const _drawInstanceOutlines = (instanceOutlines, target, colorize = false) => {
 };
 
 const drawWipSegment = (canvas, wipPoint, wipPath) => {
-  wipPoint.attr('cx', canvas.mouse.x).attr('cy', canvas.mouse.y);
+  wipPoint
+    .attr('cx', canvas.projection.project.x(canvas.mouse.x))
+    .attr('cy', canvas.projection.project.y(canvas.mouse.y));
+
   const lastPoint = last(canvas.wip.points);
   if (lastPoint == null)
     wipPath.attr('d', null);
   else
-    wipPath.attr('d', lineCalc([ lastPoint, canvas.mouse ]));
+    wipPath.attr('d', lineCalc([ lastPoint, canvas.mouse ].map(canvas.projection.project)));
 };
 
 const drawWipCloser = (canvas, wipCloser) => {
@@ -117,7 +110,9 @@ const drawWipCloser = (canvas, wipCloser) => {
     wipCloser.classed('visible', false);
   } else {
     wipCloser.classed('visible', true);
-    wipCloser.attr('cx', canvas.wip.points[0].x).attr('cy', canvas.wip.points[0].y);
+    wipCloser
+      .attr('cx', canvas.projection.project.x(canvas.wip.points[0].x))
+      .attr('cy', canvas.projection.project.y(canvas.wip.points[0].y));
   }
 };
 
@@ -293,10 +288,10 @@ const drawer = (app, player, canvas) => {
         updateInstanceSelect(canvas, instanceSelect);
     }
 
-    if (dirty.frame || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
+    if (dirty.frame || dirty.projection || dirty.selected || dirty.objects || dirty.shapes || dirty.points)
       drawShapes(canvas, shapeWrapper); // TODO: more granular for more perf.
 
-    if (dirty.frame || dirty.selected || dirty.points || dirty.instances)
+    if (dirty.frame || dirty.projection || dirty.selected || dirty.points || dirty.instances)
       drawInstances(canvas, svg);
 
     if (dirty.selected || dirty.objects || dirty.shapes)
