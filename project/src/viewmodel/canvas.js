@@ -441,21 +441,41 @@ class Canvas {
 const implicitPoints = (canvas) => {
   const implicit = {};
 
+  // we show implicit points that meet this condition:
+  // 0. the segment is at least 40 screenspace px long
+  // AND either of two conditions:
+  // 1. the mouse is within 10 screenspace px of the center
+  // 2. it is the closest point to the mouse and it is within 40 screenpx
   const compute = () => {
     if (canvas.selected.shape == null)
       return;
 
     implicit.points = [];
     const shapePoints = canvas.selected.shape.points;
+    let closestImplicit, closestDist;
     for (let i = 0; i < shapePoints.length; i++) {
       const it = shapePoints[i];
       const next = shapePoints[((i + 1) === shapePoints.length) ? 0 : (i + 1)];
       if (distance(it, next) * canvas.scale < 40) continue;
 
       const candidate = midpoint(it, next);
-      if ((distance(candidate, canvas.mouse) * canvas.scale) < 40)
+      const candidateDist = distance(candidate, canvas.mouse) * canvas.scale;
+      if (candidateDist < 10) {
+        // within 10px, always show. set closest-dist if applicable but clear -implicit.
         implicit.points.push({ coords: candidate, after: it });
+
+        if ((closestDist == null) || (candidateDist <= closestDist)) {
+          closestDist = candidateDist;
+          closestImplicit = null;
+        }
+      } else if ((candidateDist < 40) && ((closestDist == null) || (candidateDist < closestDist))) {
+        // within 40px and closer than the previous implicit candidate; set.
+        closestDist = candidateDist;
+        closestImplicit = { coords: candidate, after: it };
+      }
     }
+
+    if (closestImplicit != null) implicit.points.push(closestImplicit);
   };
 
   canvas.events.on('change.selected', () => {
