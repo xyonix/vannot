@@ -29,6 +29,10 @@ const drawShapes = (canvas, target) => {
 
   shapes.classed('wip', (shape) => (shape.wip === true));
   shapes.classed('selected', (shape) => selected.wholeShapes.includes(shape));
+
+  const sortScore = (shape) => selected.wholeShapes.includes(shape) ? shape.id : (-1 * shape.id);
+  shapes.sort((a, b) => sortScore(a) - sortScore(b));
+
   shapes.each(function(shape) {
     const object = canvas.data.objects.find((object) => object.id === shape.objectId);
     const color = (object != null) ? object.color : null;
