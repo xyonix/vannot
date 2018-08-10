@@ -221,6 +221,8 @@ module.exports = ($app, player, canvas) => {
 
     const $viewport = $app.find('.vannot-viewport');
     $viewport.on('mousedown', (event) => {
+      $viewport.addClass('mousedown'); // TODO: ideally not here (somehow in render).
+
       downState = canvas.state;
       const [ $target, shape, point, keys ] = eventData(event);
       const dataArg = { mouse, keys, shape, point };
@@ -246,6 +248,8 @@ module.exports = ($app, player, canvas) => {
       }
     });
     $viewport.on('mouseup', (event) => {
+      $viewport.removeClass('mousedown');
+
       const state = canvas.state;
       // only process mouseup actions if the state has not changed since mousedown, AND
       // if the user has not executed any dragging operations.
