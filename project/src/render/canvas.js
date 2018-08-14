@@ -42,7 +42,7 @@ const drawShapes = (canvas, target) => {
     const points = instantiateElems(select(this).selectAll('.shapePoint').data(shape.points, digestPoint), 'circle', 'shapePoint');
     points
       .classed('selected', (point) => selected.points.includes(point))
-      .attr('r', (point) => (selected.points.includes(point) ? 5 : 2))
+      .attr('r', (point) => (selected.points.includes(point) ? 4 : 2))
       .style('fill', color)
       .attr('cx', (point) => canvas.projection.project.x(point.x))
       .attr('cy', (point) => canvas.projection.project.y(point.y));
@@ -56,7 +56,7 @@ const drawImplicitPoints = (canvas, target) => {
   if (canvas.implicitPoints.object != null) {
     points
       .style('fill', canvas.implicitPoints.object.color)
-      .attr('r', 5)
+      .attr('r', 4)
       .attr('cx', (implied) => canvas.projection.project.x(implied.coords.x))
       .attr('cy', (implied) => canvas.projection.project.y(implied.coords.y));
   }
