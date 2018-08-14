@@ -122,11 +122,13 @@ const drawLasso = (canvas, target) => {
 
   if (active) {
     const box = normalizeBox(canvas.lasso);
+    const topleft = canvas.projection.project(box[0]);
+    const bottomright = canvas.projection.project(box[1]);
     target
-      .attr('x', box[0].x)
-      .attr('y', box[0].y)
-      .attr('width', box[1].x - box[0].x)
-      .attr('height', box[1].y - box[0].y);
+      .attr('x', topleft.x)
+      .attr('y', topleft.y)
+      .attr('width', bottomright.x - topleft.x)
+      .attr('height', bottomright.y - topleft.y);
   }
 };
 
