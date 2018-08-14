@@ -196,6 +196,11 @@ class Canvas {
     this._mouse = mouse;
     this.events.emit('change.mouse');
   }
+  get dragState() { return this._dragState; }
+  set dragState(state) {
+    this._dragState = state;
+    this.events.emit('change.mouse');
+  }
 
   get tool() { return this._toolOverride || this._tool; }
   set tool(tool) {

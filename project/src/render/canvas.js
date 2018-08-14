@@ -243,6 +243,13 @@ const updateZoomSelect = (canvas, zoomSelect) => {
   zoomSelect.node().value = canvas.scale;
 };
 
+const updateDragState = (canvas, app) => {
+  const classes = app.attr('class').split(/ +/g);
+  const newClass = (canvas.dragState == null) ? '' : ` dragstate-${canvas.dragState}`;
+  app.attr('class', classes.filter((klass) =>
+    !klass.startsWith('dragstate')).join(' ') + newClass);
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // RENDER SCHEDULER
@@ -314,6 +321,9 @@ const drawer = (app, player, canvas) => {
 
     if (dirty.selected || ((canvas.selected.shape != null) && dirty.mouse))
       drawImplicitPoints(canvas, implicitWrapper);
+
+    if (dirty.mouse)
+      updateDragState(canvas, app);
   };
   draw.dirty = {};
   return draw;

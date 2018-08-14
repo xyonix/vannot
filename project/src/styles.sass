@@ -467,7 +467,7 @@ html, body
       .shapePath
         fill-opacity: 0.7
         stroke-width: 4px
-        .mousedown &
+        .dragstate-dragging &
           fill-opacity: 0.4
           stroke-width: 2px
 
@@ -482,7 +482,7 @@ html, body
           stroke-opacity: 1
           stroke-width: 4px
 
-      .mousedown &
+      .dragstate-dragging &
         opacity: $barely-opaque
         &.selected
           fill-opacity: 0
@@ -511,7 +511,7 @@ html, body
         stroke-opacity: 0.8
         stroke-width: 4px
 
-      .mousedown &
+      .dragstate-dragging &
         opacity: $barely-opaque
 
     .selectionBox

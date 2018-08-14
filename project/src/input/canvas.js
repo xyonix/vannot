@@ -35,6 +35,7 @@ module.exports = ($app, player, canvas) => {
   });
 
   const dragLasso = drag({
+    name: 'lassoing',
     test: ($target) => $target.is('svg'),
     init: (_, { mouse }) => mouse,
     drag: (init, mouse) => { canvas.setLasso(normalizeBox([ init, mouse ])); },
@@ -42,6 +43,7 @@ module.exports = ($app, player, canvas) => {
   });
 
   const dragPoints = drag(byDelta({
+    name: 'dragging',
     test: ($target, { shape, point }) =>
       ((point != null) && canvas.selected.points.includes(point)) ||
       ((shape != null) && canvas.selected.wholeShapes.includes(shape)),
@@ -60,6 +62,7 @@ module.exports = ($app, player, canvas) => {
   }));
 
   const dragPoint = drag(byDelta({
+    name: 'dragging',
     test: ($target, { point }) => (canvas.selected.shape != null) && (point != null) &&
       canvas.selected.shape.points.includes(point),
     init: ($target) => datum($target),
@@ -71,6 +74,7 @@ module.exports = ($app, player, canvas) => {
   }));
 
   const dragImplicitPoint = drag(byDelta({
+    name: 'dragging',
     test: ($target) => $target.is('.implicitPoint'),
     init: ($target) => {
       const implied = datum($target);
@@ -221,8 +225,6 @@ module.exports = ($app, player, canvas) => {
 
     const $viewport = $app.find('.vannot-viewport');
     $viewport.on('mousedown', (event) => {
-      $viewport.addClass('mousedown'); // TODO: ideally not here (somehow in render).
-
       downState = canvas.state;
       const [ $target, shape, point, keys ] = eventData(event);
       const dataArg = { mouse, keys, shape, point };
@@ -236,9 +238,13 @@ module.exports = ($app, player, canvas) => {
             let memo;
             dragging = () => {
               if (dragging.dragged !== true) {
+                canvas.dragState = action.name;
                 dragging.dragged = true;
                 memo = action.init($target, dataArg);
-                $viewport.one('mouseup', () => action.end(memo, mouse));
+                $viewport.one('mouseup', () => {
+                  canvas.dragState = null;
+                  action.end(memo, mouse);
+                });
               }
               memo = action.drag(memo, mouse) || memo;
             };
@@ -248,8 +254,6 @@ module.exports = ($app, player, canvas) => {
       }
     });
     $viewport.on('mouseup', (event) => {
-      $viewport.removeClass('mousedown');
-
       const state = canvas.state;
       // only process mouseup actions if the state has not changed since mousedown, AND
       // if the user has not executed any dragging operations.
