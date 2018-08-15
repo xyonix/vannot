@@ -425,8 +425,16 @@ module.exports = ($app, player, canvas) => {
     $app.find('.vannot-instance-form').on('click', () => canvas.formInstance(canvas.selected.wholeShapes));
     $app.find('.vannot-instance-break').on('click', () => canvas.breakInstance(canvas.selected.wholeShapes));
     $app.find('.vannot-instance-select').on('click', () => canvas.selectInstance(canvas.selected.instances[0].id));
-    $app.find('.vannot-instance-class').on('input change', (event) =>
-      canvas.setInstanceClass(canvas.selected.instance, event.target.value));
+    $app.find('.vannot-instance-class').on('input change', (event) => {
+      // this is sort of an unfortunate guard. ideally, we'd catch changes due to blur
+      // and apply the current value, in case that's the only time the browser will report.
+      // but firefox applies click/change events backwards, so by the time this handler fires
+      // we're already selecting some other object, and then the value gets applied to the
+      // wrong thing. thankfully, input is broadly supported at this point so it should never
+      // be an actual issue. hopefully.
+      if (document.activeElement !== event.target) return;
+      canvas.setInstanceClass(canvas.selected.instance, event.target.value)
+    });
 
     // Points state:
     $app.find('.vannot-delete-points').on('click', () => canvas.removePoints(canvas.selected.points));
