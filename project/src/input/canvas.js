@@ -425,7 +425,7 @@ module.exports = ($app, player, canvas) => {
     $app.find('.vannot-instance-form').on('click', () => canvas.formInstance(canvas.selected.wholeShapes));
     $app.find('.vannot-instance-break').on('click', () => canvas.breakInstance(canvas.selected.wholeShapes));
     $app.find('.vannot-instance-select').on('click', () => canvas.selectInstance(canvas.selected.instances[0].id));
-    $app.find('.vannot-instance-class').on('input change', (event) => {
+    $app.find('.vannot-instance-class').on('input', (event) => {
       // this is sort of an unfortunate guard. ideally, we'd catch changes due to blur
       // and apply the current value, in case that's the only time the browser will report.
       // but firefox applies click/change events backwards, so by the time this handler fires
