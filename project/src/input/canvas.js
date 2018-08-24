@@ -1,5 +1,5 @@
 const $ = require('jquery');
-const { round, min, abs, sign } = Math;
+const { round, min, abs, sign, pow } = Math;
 const { without, last, mean } = require('ramda');
 const { normalizeBox, datum, clamp } = require('../util');
 
@@ -343,12 +343,12 @@ module.exports = ($app, player, canvas) => {
       lastSample = { at: now, deltaY: event.deltaY };
 
       // compute the desired scale change:
+      const currentScale = canvas.scale;
       const effectiveDelta = (wheelSamples.length < 2)
         ? (factorTickCap * sign(event.deltaY))
-        : event.deltaY * factorRateCap / mean(wheelSamples.map((x) => x.rate * 1000)); // msec => sec
+        : event.deltaY * factorRateCap / mean(wheelSamples.map((x) => x.rate * 1000)) * pow(currentScale, 0.7); // msec => sec
 
       // apply the scale change, with clamping and signlocking considerations:
-      const currentScale = canvas.scale;
       const targetScale = clamp(0.5, currentScale + effectiveDelta, 3.5);
       const currentSign = scaleSign(currentScale);
       const targetSign = scaleSign(targetScale);
