@@ -197,7 +197,8 @@ const updateInstanceToolbar = (canvas, toolbar) => {
   } else if (canvas.selected.instances.length === 1) {
     if ((canvas.selected.instance != null) && (canvas.instanceMode !== 'none')) {
       toolbar.select('.vannot-toolbar-instance-class').classed('visible', true);
-      toolbar.select('.vannot-instance-class').node().value = canvas.selected.instance.class || '';
+      for (const node of toolbar.selectAll('.vannot-instance-class').nodes())
+        node.value = canvas.selected.instance.class || '';
     } else {
       toolbar.select('.vannot-toolbar-instance-assigned').classed('visible', true);
       toolbar.select('.vannot-toolbar-instance-count').text(
