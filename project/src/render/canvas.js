@@ -350,6 +350,7 @@ const reactor = (app, player, canvas) => {
 
   mark('frame')();
   mark('projection')();
+  mark('instances')();
 };
 
 module.exports = { reactor };
