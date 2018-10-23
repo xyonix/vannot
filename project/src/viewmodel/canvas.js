@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const { max } = Math;
 const { without, concat, uniq } = require('ramda');
 const { spliceOut, last, pointsEqual, withinBox, distance, midpoint } = require('../util');
 
@@ -19,6 +20,7 @@ class Canvas {
     this._scale = 1;
     this._pan = { x: 0, y: 0 };
     this._tool = 'select';
+    this._lowerHeight = 410; // matches $lower-default-height initial definiton in sass.
 
     this.implicitPoints = implicitPoints(this);
   };
@@ -140,6 +142,14 @@ class Canvas {
   set viewportSize(size) {
     this._viewportSize = size;
     this._projection = null;
+    this.events.emit('change.projection');
+  }
+
+  get lowerHeight() { return this._lowerHeight; }
+  set lowerHeight(height) {
+    this._lowerHeight = max(180, height);
+    this._projection = null;
+    this.events.emit('change.layout');
     this.events.emit('change.projection');
   }
 

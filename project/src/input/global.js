@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const { thenNotify } = require('../render/chrome');
+const { draggable, byDelta } = require('../util');
 
 module.exports = ($app, data, player, canvas) => {
   // Instant tooltips:
@@ -48,6 +49,12 @@ module.exports = ($app, data, player, canvas) => {
       $('head').append($favicon);
     }
   }
+
+  // Hook timeline resize:
+  draggable($app.find('.vannot-controls-resizer'), byDelta((_, dy) => {
+    canvas.lowerHeight -= dy;
+    $(window).trigger('resize'); // TODO: hackish.. to get the new viewport size to get picked up.
+  }));
 
   // Save data:
   $app.find('.vannot-save').on('click', () => {

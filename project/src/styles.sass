@@ -23,6 +23,7 @@ $font-mono: consolas, monaco, courier new, monospace
 $toolbar-height: 50px
 $controls-height: 60px
 $timeline-height: 300px // TODO: eventually drag-resizable
+$default-lower-height: $toolbar-height + $controls-height + $timeline-height
 $left-pane-width: 350px // TODO: eventually drag-resizable
 
 $icon-zoomplus: "\f00e"
@@ -170,25 +171,49 @@ html, body
 
 .vannot-viewport
   @include fill
-  bottom: $toolbar-height + $controls-height + $timeline-height
+  bottom: $default-lower-height
+
+.vannot-lower
+  @include fill
+  height: $default-lower-height
+  top: auto
 
 .vannot-toolbar
   @include fill
-  bottom: $controls-height + $timeline-height
+  bottom: auto
   height: $toolbar-height
-  top: auto
+  top: 0
 
 .vannot-controls
   @include fill
   background: $background-panel
-  bottom: $timeline-height
+  bottom: auto
   height: $controls-height
-  top: auto
+  top: $toolbar-height
+
+  .vannot-controls-resizer
+    $resize-border: 1px solid #222
+    border-bottom: $resize-border
+    border-top: $resize-border
+    cursor: ns-resize
+    height: 5px
+    left: 20px
+    position: absolute
+    top: 28px
+    width: 25px
+
+    &:before
+      border-top: $resize-border
+      content: ''
+      display: block
+      left: 0
+      position: absolute
+      right: 0
+      top: 2px
 
 .vannot-timeline
   @include fill
-  height: $timeline-height
-  top: auto
+  top: $controls-height + $toolbar-height
 
 
 ////////////////////////////////////////////////////////////////////////////////

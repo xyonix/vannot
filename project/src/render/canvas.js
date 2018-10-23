@@ -12,6 +12,11 @@ const setProjection = (canvas, videoWrapper, svg) => {
   videoWrapper.style('transform', `translate(${px(canvas.pan.x)}, ${px(canvas.pan.y)}) scale(${canvas.scale})`);
 };
 
+const setLayout = (canvas, viewport, lower) => {
+  viewport.style('bottom', px(canvas.lowerHeight));
+  lower.style('height', px(canvas.lowerHeight));
+};
+
 const drawShapes = (canvas, target) => {
   const shapesData = (canvas.frameObj == null) ? [] : (canvas.frameObj.shapes);
   const shapes = instantiateElems(target.selectAll('.trackingShape').data(shapesData), 'g', 'trackingShape');
@@ -258,6 +263,8 @@ const updateDragState = (canvas, app) => {
 // operations. Queues them up so rapid changes don't cause drawchurn.
 
 const drawer = (app, player, canvas) => {
+  const viewport = app.select('.vannot-viewport');
+  const lower = app.select('.vannot-lower');
   const videoWrapper = app.select('.vannot-video');
   const svg = app.select('svg');
   const shapeWrapper = svg.select('.shapes');
@@ -281,6 +288,9 @@ const drawer = (app, player, canvas) => {
       setProjection(canvas, videoWrapper, svg);
       updateZoomSelect(canvas, zoomSelect);
     }
+
+    if (dirty.layout)
+      setLayout(canvas, viewport, lower);
 
     if (dirty.tool || dirty.selected)
       updateCanvasChrome(canvas, state, app);
@@ -339,6 +349,7 @@ const reactor = (app, player, canvas) => {
   canvas.events.on('change.frame', mark('frame'));
   canvas.events.on('change.selected', mark('selected'));
   canvas.events.on('change.lasso', mark('lasso'));
+  canvas.events.on('change.layout', mark('layout'));
   canvas.events.on('change.projection', mark('projection'));
   canvas.events.on('change.mouse', mark('mouse'));
   canvas.events.on('change.points', mark('points'));
