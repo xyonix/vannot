@@ -6,6 +6,8 @@ const { px, getQuerystringValue } = require('./util');
 
 // docready.
 $(function() {
+  //stop browser caching
+  $.ajaxSetup({ cache: false });
 
   const $app = $('#vannot .vannot-app');
   const app = select($app[0]);
