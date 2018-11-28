@@ -292,6 +292,14 @@ module.exports = ($app, player, canvas) => {
       lastSpacebar = now;
     });
 
+    // Detect shortcut triggers:
+    $document.on('keydown', (event) => {
+      if ((event.which === 68) && (event.ctrlKey || event.metaKey)) {
+        canvas.copyLast();
+        event.preventDefault();
+      }
+    });
+
     // Update viewport size when window is resized (and set it immediately).
     const $video = $app.find('.vannot-viewport video');
     const viewportPadding = $viewport.width() - $video.width();
