@@ -11,6 +11,17 @@ You can build natively or via Docker.
 
 **For Docker build**, you'll need to first build the builder container. Navigate to `project/` and run: `docker build -t vannot-build .`. In the rare cases that the project dependencies change, you'll have to do this again to rebuild the container, as the npm packages are cached for speed. Then, do actually perform a build, navigate to the project root directory, and run: `docker run --volume=$(pwd)/project/src:/usr/vannot/project/src --volume=$(pwd)/build:/usr/vannot/build vannot-build`. This mounts your source tree and the `build/` directory from the local project root into the image and runs the build against them.
 
+## use
+
+There are a lot of tooltips in the application to help learn its usage. Generally, you use the timeline below to navigate the video, and then the Draw button on the main toolbar to create new shapes. Closing the shape will complete it. Shapes may be grouped into Instance Groups, but only when they are wholly selected. Instance Groups just indicate that multiple shapes are somehow a single entity; each group may then be assigned particular classes, to indicate what _kind_ of entity it is.
+
+The keyboard and mouse shortcuts are as follows:
+
+* Zoom in/out: **scrollwheel**
+* Reset zoom and center canvas: **double-tap spacebar**
+* Quick-toggle to pan tool: **hold spacebar** (letting go of spacebar returns to selection tool)
+* Copy Last: **Ctrl+D** (Windows) / **Cmd+D** (Mac)
+
 ## integrate
 
 Vannot provides a simple read/write API for data loading and extraction. It uses a single JSON data structure to communicate everything (video information, annotated objects and shapes, etc) in either direction. At load time, a querystring parameter of `?data=VALUE` tells Vannot how to **read** everything it needs to know, including where to then **write** the data when the user clicks Save.
