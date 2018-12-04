@@ -1,5 +1,6 @@
 const $ = require('jquery');
 const { ceil } = Math;
+const { sum } = require('ramda');
 const { select, scaleLinear } = require('d3');
 const { getTemplate, instantiateTemplates, instantiateDivs, pct, pad, timecode, timecodePretty, queuer } = require('../util');
 
@@ -109,6 +110,10 @@ const drawTracks = (player, data, inner, target) => {
     const $input = $(this);
     if ($input.next().length === 0) $input.spectrum({ color: x.color });
   });
+  // mux between object/shapes and label/segments:
+  tracks.select('.vannot-track-item-count').text((x) => (x.segments == null)
+    ? sum(player.data.frames.map((frame) => frame.shapes.filter((shape) => shape.objectId === x.id).length))
+    : x.segments.length);
   tracks.select('.vannot-track-timeline').each(inner);
 };
 

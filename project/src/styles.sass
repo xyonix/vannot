@@ -974,6 +974,35 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
       padding: 0
       width: 18px
 
+  .vannot-track-item-count
+    border-radius: 2px
+    color: #ccc
+    font-size: 11px
+    padding: 3px 5px 2px
+    position: absolute
+    right: 5px
+    top: 8px
+
+    .vannot-objects &:before
+      @include reify
+      border: 6px solid transparent
+        right: 7px solid #999
+      position: absolute
+      right: calc(100% + 2px)
+      top: 7px
+      transform: rotate(-25deg)
+
+    .vannot-labels &:before
+      @include reify
+      background: #666
+      border-left: 1px solid #aaa
+      border-right: 1px solid #aaa
+      height: 9px
+      position: absolute
+      right: calc(100% + 1px)
+      top: 5px
+      width: 7px
+
   .vannot-track-remove
     background: none
     border: none
@@ -1011,14 +1040,19 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
         background: $warning-highlight
         color: #fff
 
-  .vannot-track-header:hover .vannot-track-remove
-    display: block
+  .vannot-track-header:hover
+    .vannot-track-item-count
+      display: none
+    .vannot-track-remove
+      display: block
 
   &.system
     .vannot-track-title-edit
       pointer-events: none
     .vannot-track-title-ghost
       display: none
+    &:hover .vannot-track-item-count
+      display: block
     .vannot-track-remove
       display: none !important
 
