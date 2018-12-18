@@ -77,8 +77,8 @@ Now that we have some tactile sense of what's going on, here is a full specifica
   * `fps: Number`: The framerate of the video.
   * `start: Integer = 0`: _(optional)_ The start of the video segment you wish to expose, in frames. Defaults to `0`.
   * `duration: Integer`: The duration of the video segment you wish to expose, in frames.
-  * `width: Integer`: The width of the video, in pixels.
-  * `height: Integer`: The height of the video, in pixels.
+  * `width: Integer`: The width of the video, in _square_ pixels. (See anamorphic note below.)
+  * `height: Integer`: The height of the video, in _square_ pixels.
   * `source: String[URL]`: The absolute or relative path to the video itself.
 * `frames: Array`: Each frame that has any shapes drawn on it will have an entry in this array.
   * `frame: Integer`: The frame-timecode of the frame in question.
@@ -116,6 +116,14 @@ Now that we have some tactile sense of what's going on, here is a full specifica
 * `saveUrl: String[URL]`: The path that an updated version of this data structure will be `POST`ed back to when the user clicks on Save. Please see the following section for details about this save request.
 
 Any data specified outside these reserved keys will be preserved by Vannot through save/load cycles without modification. However, as more features added and more keys will be used, we recommend the use of the `custom`, `user`, and `meta` top-level keys, which we will always reserve and avoid for this purpose.
+
+### anamorphic video formats
+
+Be careful when specifying a video resolution. The browser does not give Vannot enough data to determine any information about the resolution itself, which is why you are required to specify it at all, and an incorrect resolution will result in misalignment when comparing annotation data with static video frames.
+
+In particular, some videos are recorded with non-square pixels, in an anamorphic format. The relevant specification detail is the PAR, or Pixel Aspect Ratio. When a video is encoded with a non-1:1 PAR, a naive check of the resolution will yield the incorrect number, because the physical number of recorded rows and columns does not match the presentation number of rows and columns.
+
+Ultimately, no matter how the video is encoded, it is the equivalent resolution in _square pixels_ that you need to provide. However many pixels the video actually takes up on screen when played, that is the number of interest.
 
 ### saving data/image data export
 
