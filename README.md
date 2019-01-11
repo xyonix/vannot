@@ -80,6 +80,7 @@ Now that we have some tactile sense of what's going on, here is a full specifica
   * `width: Integer`: The width of the video, in _square_ pixels. (See anamorphic note below.)
   * `height: Integer`: The height of the video, in _square_ pixels.
   * `source: String[URL]`: The absolute or relative path to the video itself.
+  * `pixelAspectRatio: Float`: _(optional)_ The PAR/SAR of the video. Only provide this if the video pixels are nonsquare (see anamorphic note below).
 * `frames: Array`: Each frame that has any shapes drawn on it will have an entry in this array.
   * `frame: Integer`: The frame-timecode of the frame in question.
   * `shapes: Array`: Each individual shape, regardless of object assignment, has an entry here.
@@ -124,6 +125,10 @@ Be careful when specifying a video resolution. The browser does not give Vannot 
 In particular, some videos are recorded with non-square pixels, in an anamorphic format. The relevant specification detail is the PAR, or Pixel Aspect Ratio. When a video is encoded with a non-1:1 PAR, a naive check of the resolution will yield the incorrect number, because the physical number of recorded rows and columns does not match the presentation number of rows and columns.
 
 Ultimately, no matter how the video is encoded, it is the equivalent resolution in _square pixels_ that you need to provide. However many pixels the video actually takes up on screen when played, that is the number of interest.
+
+If you are unable to perform this calculation yourself, you may extract the PAR from the video and provide it to Vannot under the `video.pixelAspectRatio` parameter as a float. It will attempt to recompute the resolution for you.
+
+Vannot draws a grey bounding box around the area it believes to be the canvas. If this box mismatches with the actual video area, it is a sign that the incorrect effective resolution has been provided. In this case, it is highly advisable to resolve these issues before attempting to perform any annotation.
 
 ### saving data/image data export
 

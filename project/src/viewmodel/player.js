@@ -5,6 +5,18 @@ const { defer, clamp, spliceOut } = require('../util');
 
 class VideoData {
   constructor(data) {
+    // adjust video resolution based on the pixel aspect ratio.
+    if (data.pixelAspectRatio != null) {
+      if (data.pixelAspectRatio > 1) {
+        data.width *= data.pixelAspectRatio;
+      } else {
+        data.height *= data.pixelAspectRatio;
+      }
+
+      // unset the PAR so it doesn't reapply in the future.
+      delete data.pixelAspectRatio;
+    }
+
     Object.assign(this, data, {
       start: data.start || 0,
       end: (data.start || 0) + data.duration
