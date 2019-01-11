@@ -137,6 +137,17 @@ const drawLasso = (canvas, target) => {
   }
 };
 
+const drawBounding = (canvas, target) => {
+  const topleft = canvas.projection.project({ x: 0, y: 0 });
+  const bottomright = canvas.projection.project({ x: canvas.data.video.width, y: canvas.data.video.height });
+
+  target
+    .attr('x', topleft.x)
+    .attr('y', topleft.y)
+    .attr('width', bottomright.x - topleft.x)
+    .attr('height', bottomright.y - topleft.y);
+};
+
 const updateCanvasChrome = (canvas, state, app) => {
   app.classed('normal', state === 'normal');
   app.classed('drawing', state === 'drawing');
@@ -270,6 +281,7 @@ const drawer = (app, player, canvas) => {
   const shapeWrapper = svg.select('.shapes');
   const implicitWrapper = svg.select('.implicitPoints');
   const lasso = svg.select('.selectionBox');
+  const boundingBox = svg.select('.boundingBox');
   const wipPath = svg.select('.wipPath');
   const wipPoint = svg.select('.wipPoint');
   const wipCloser = svg.select('.wipCloser');
@@ -287,6 +299,7 @@ const drawer = (app, player, canvas) => {
     if (dirty.projection) {
       setProjection(canvas, videoWrapper, svg);
       updateZoomSelect(canvas, zoomSelect);
+      drawBounding(canvas, boundingBox);
     }
 
     if (dirty.layout)
