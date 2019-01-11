@@ -10,7 +10,7 @@ class VideoData {
       if (data.pixelAspectRatio > 1) {
         data.width *= data.pixelAspectRatio;
       } else {
-        data.height *= data.pixelAspectRatio;
+        data.height /= data.pixelAspectRatio;
       }
 
       // unset the PAR so it doesn't reapply in the future.
