@@ -1,4 +1,4 @@
-const { ceil } = Math;
+const { floor, ceil } = Math;
 const EventEmitter = require('events');
 const { scaleLinear } = require('d3');
 const { defer, clamp, spliceOut } = require('../util');
@@ -8,9 +8,9 @@ class VideoData {
     // adjust video resolution based on the pixel aspect ratio.
     if (data.pixelAspectRatio != null) {
       if (data.pixelAspectRatio > 1) {
-        data.width *= data.pixelAspectRatio;
+        data.width = floor(data.width * data.pixelAspectRatio);
       } else {
-        data.height /= data.pixelAspectRatio;
+        data.height = floor(data.height / data.pixelAspectRatio);
       }
 
       // unset the PAR so it doesn't reapply in the future.
