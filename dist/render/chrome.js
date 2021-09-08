@@ -1,0 +1,1 @@
+const $=require("jquery");let $app;const attach=t=>{$app=t},notify=(t,n="info")=>{const e=$("<div/>").addClass("vannot-notify-message").addClass(`vannot-notify-message-${n}`);e.text(t),$app.find(".vannot-notify").prepend(e),setTimeout((()=>{e.remove()}),6e3)},thenNotify=(t,n)=>()=>notify(t,n);module.exports={attach,notify,thenNotify};

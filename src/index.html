@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+  <head>
+    <title>vannot</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <link rel="stylesheet" href="assets/spectrum.css"/>
+  </head>
+  <body>
+    <div id="vannot">
+      <div class="vannot-app tool-select">
+        <div class="vannot-notify"></div>
+        <div class="vannot-viewport">
+          <div class="vannot-video"><video/></div>
+          <div class="vannot-canvas">
+            <svg preserveAspectRatio="none">
+              <g class="instanceBases"/>
+              <g class="instanceDashes"/>
+              <g class="shapes"/>
+              <g class="implicitPoints"/>
+              <path class="wipPath"/>
+              <circle class="wipPoint" r="5"/>
+              <circle class="wipCloser" r="8"/>
+              <rect class="selectionBox"/>
+              <rect class="boundingBox"/>
+            </svg>
+          </div>
+          <div class="vannot-main-menu">
+            <div class="vannot-menu-item">
+              <button class="vannot-icon-toolbutton vannot-save" title="Save changes">Save</button>
+            </div>
+          </div>
+          <div class="vannot-video-adjust">
+            <div class="vannot-video-parameter vannot-video-brightness">
+              <select class="vannot-video-brightness-edit" title="Video brightness">
+                <option value="1" selected>--</option>
+                <option value="0.8">Dark</option>
+                <option value="0.5">Darker</option>
+                <option value="0.3">Darkest</option>
+              </select>
+            </div>
+            <div class="vannot-video-parameter vannot-video-chromatic">
+              <div class="vannot-video-chromatic-icon"></div>
+              <select class="vannot-video-chromatic-edit" title="Video color">
+                <option value="0" selected>--</option>
+                <option value="0.3">Grey</option>
+                <option value="0.6">Greyer</option>
+                <option value="1">Greyest</option>
+              </select>
+            </div>
+            <div class="vannot-video-parameter vannot-video-zoom">
+              <select class="vannot-video-zoom-edit" title="Zoom (use mousewheel for quick-zoom)"></select>
+              <button class="vannot-icon-toolbutton vannot-reset-zoom" title="Reset zoom and pan to fit the work area (double-tap spacebar)"/>
+            </div>
+            <div class="vannot-video-parameter vannot-canvas-tool">
+              <button class="vannot-icon-toolbutton vannot-select-mode" title="Select tool: select and edit shapes and points"/>
+              <button class="vannot-icon-toolbutton vannot-pan-mode" title="Pan tool: drag to pan (hold spacebar for quick-pan)"/>
+            </div>
+          </div>
+        </div>
+        <div class="vannot-lower">
+          <div class="vannot-toolbar">
+            <div class="vannot-toolbar-drawing">
+              <label>Click in the video image to add points to your shape.</label>
+              <button class="vannot-toolbutton vannot-undo-draw">Undo</button>
+              <button class="vannot-toolbutton vannot-complete">Complete</button>
+            </div>
+            <div class="vannot-toolbar-default">
+              <button class="vannot-toolbutton vannot-draw-shape" title="Draw a new shape on this frame">Draw</button>
+              <button class="vannot-toolbutton vannot-copy-last" title="Duplicate all shapes from the most recent frame with shapes (Ctrl+D/Cmd+D)">Carry over</button>
+            </div>
+            <div class="vannot-toolbar-shapes">
+              <label>
+                <span class="vannot-toolbar-shapes-count"></span>
+                selected shape<span class="vannot-toolbar-shapes-plural">s</span>
+              </label>
+              <div class="vannot-select-group">
+                <label>Part of</label>
+                <select class="vannot-object-select"></select>
+              </div>
+              <button class="vannot-toolbutton vannot-duplicate-shape">Duplicate</button>
+              <button class="vannot-toolbutton vannot-toolbutton-warn vannot-delete-shape">Delete</button>
+              <span class="vannot-vertical-rule"></span>
+              <label>
+                <span class="vannot-toolbar-instance-status vannot-toolbar-instance-none">
+                  No instance group assigned
+                </span>
+                <div class="vannot-toolbar-instance-status vannot-toolbar-instance-class vannot-select-group">
+                  <label>Instance of</label>
+                  <input type="text" class="vannot-instance-class" list="vannot-instance-list" placeholder="(unassigned)"/>
+                  <select class="vannot-instance-class"></select>
+                  <datalist id="vannot-instance-list"></datalist>
+                </div>
+                <span class="vannot-toolbar-instance-status vannot-toolbar-instance-assigned">
+                  Part of a <span class="vannot-toolbar-instance-count"></span> shape instance group
+                </span>
+                <span class="vannot-toolbar-instance-status vannot-toolbar-instance-mixed">
+                  (Mixed instance groups)
+                </span>
+              </label>
+              <button class="vannot-toolbutton vannot-instance-form">Form new group</button>
+              <button class="vannot-toolbutton vannot-instance-break">Break group</button>
+              <button class="vannot-toolbutton vannot-instance-select">Select whole group</button>
+            </div>
+            <div class="vannot-toolbar-points">
+              <label>
+                <span class="vannot-toolbar-partial-count"></span>
+                partially selected shape<span class="vannot-toolbar-partial-plural">s</span>
+              </label>
+              <button class="vannot-toolbutton vannot-expand-selection">
+                Select whole shape<span class="vannot-toolbar-partial-plural">s</span>
+              </button>
+              <span class="vannot-vertical-rule"></span>
+              <label>
+                <span class="vannot-toolbar-points-count"></span>
+                selected point<span class="vannot-toolbar-points-plural">s</span>
+              </label>
+              <button class="vannot-toolbutton vannot-toolbutton-warn vannot-delete-points">Delete</button>
+            </div>
+          </div>
+          <div class="vannot-controls">
+            <div class="vannot-controls-resizer"></div>
+            <div class="vannot-controls-buttons">
+              <button class="vannot-keyback" title="Jump to previous keyframe"></button>
+              <button class="vannot-leapback" title="Rewind 5 frames"></button>
+              <button class="vannot-skipback" title="Rewind 1 frame"></button>
+              <button class="vannot-playpause" title="Play/Pause"></button>
+              <button class="vannot-skipforward" title="Advance 1 frame"></button>
+              <button class="vannot-leapforward" title="Advance 5 frames"></button>
+              <button class="vannot-keyforward" title="Jump to next keyframe"></button>
+            </div>
+            <div class="vannot-timecode">
+              <span class="vannot-timecode-hh">00</span>
+              :
+              <span class="vannot-timecode-mm">00</span>
+              :
+              <span class="vannot-timecode-ss">00</span>
+              .
+              <span class="vannot-timecode-fr">00</span>
+            </div>
+          </div>
+          <div class="vannot-timeline">
+            <div class="vannot-scale">
+              <div class="vannot-ticks"></div>
+              <div class="vannot-playhead"></div>
+            </div>
+            <div class="vannot-tracks">
+              <h2>Objects</h2>
+              <div class="vannot-objects"></div>
+              <button class="vannot-object-new" title="Draw shapes to identify objects in the video.">New object</button>
+              <h2>Labels</h2>
+              <div class="vannot-labels"></div>
+              <button class="vannot-label-new" title="Label time segments of the video that meet some criteria.">New label</button>
+            </div>
+            <div class="vannot-ranger">
+              <div class="vannot-ranger-fill"></div>
+              <div class="vannot-ranger-start"></div>
+              <div class="vannot-ranger-end"></div>
+            </div>
+          </div>
+        </div>
+        <div id="vannot-thumbnail"><video/></div>
+        <div id="vannot-tooltip"></div>
+      </div>
+    </div>
+    <div id="vannot-templates">
+      <div class="vannot-track">
+        <div class="vannot-track-header">
+          <div class="vannot-track-color">
+            <input class="vannot-track-color-edit" type="text"/>
+          </div>
+          <div class="vannot-track-title">
+            <input class="vannot-track-title-edit" type="text"/>
+            <div class="vannot-track-title-ghost"></div>
+          </div>
+          <div class="vannot-track-item-count"></div>
+          <button class="vannot-track-remove" title="Delete this item">
+            Are you sure? Click again to delete.
+          </button>
+        </div>
+        <div class="vannot-track-timeline">
+          <div class="vannot-track-selection">
+            <button class="vannot-track-selection-delete"></button>
+          </div>
+        </div>
+      </div>
+      <div class="vannot-track-segment">
+        <div class="vannot-track-segment-implicit">
+          <div class="vannot-track-segment-handle handle-implicit-left"></div>
+          <div class="vannot-track-segment-handle handle-implicit-right"></div>
+        </div>
+        <div class="vannot-track-segment-handle handle-left"></div>
+        <div class="vannot-track-segment-handle handle-right"></div>
+      </div>
+      <div class="vannot-tick"><span></span></div>
+    </div>
+    <script src="browserify.js"></script>
+    <script src="assets/spectrum.js"></script>
+    <script src="assets/jquery.mousewheel.min.js"></script>
+  </body>
+</html>
+
