@@ -21,7 +21,7 @@ Execute the following commands in the (new, empty) directory where you want to s
 There are multiple ways to work with this repository:
 
 - You can run `npm run build` to build a minified production-ready version of the application.
-- You can run `npm run serve` to start a development environment that will automatically rebuild changes.
+- You can run `npm run serve` to start a development environment on [localhost:8080](http://localhost:8080) that will automatically rebuild changes.
 
 Alternatively you can serve the application using docker. An example `Docker-compose.yml` file is given as `Docker-compose.yml.dist`. 
 - Using Docker-compose.yml run `docker-compose up -d` to start a production ready version of the application.
