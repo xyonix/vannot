@@ -3,5 +3,7 @@
 .DS_Store
 node_modules/
 /dist/*
-docker-compose.yml
+!/dist/.gitkeep
 /data/*
+!/data/.gitkeep
+docker-compose.yml
