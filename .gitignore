@@ -2,6 +2,6 @@
 *.swo
 .DS_Store
 node_modules/
-dist/*
+/dist/*
 docker-compose.yml
-data/*
+/data/*
