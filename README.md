@@ -26,6 +26,12 @@ There are multiple ways to work with this repository:
 Alternatively you can serve the application using docker. An example `Docker-compose.yml` file is given as `Docker-compose.yml.dist`. 
 - Using Docker-compose.yml run `docker-compose up -d` to start a production ready version of the application.
 
+## Directory layout
+
+- `/data/` contains the data files used by the application.
+- `/src/` contains the main application source code.
+- `/dist/` contains builds of the application
+
 ## use
 
 There are a lot of tooltips in the application to help learn its usage. Generally, you use the timeline below to navigate the video, and then the Draw button on the main toolbar to create new shapes. Closing the shape will complete it. Shapes may be grouped into Instance Groups, but only when they are wholly selected. Instance Groups just indicate that multiple shapes are somehow a single entity; each group may then be assigned particular classes, to indicate what _kind_ of entity it is.
