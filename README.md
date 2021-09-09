@@ -3,13 +3,28 @@ Video Annotation Tool
 
 Web-based tool for labeling and annotation of video frames. The tool allows for the definition of one or more labels and vector or raster based annotation of single video frames. The tool relies on image processing techniques such as grab-cut to assist in obtaining the initial annotation which can then be further refined using manual editing tools. Fully annotated frames can be downloaded or persisted server-side. Capabilities can be accessed via external applications as a Javascript library.
 
-## build
+## Requirements
 
-You can build natively or via Docker.
+- Download and install the latest version of [Git](https://git-scm.com/downloads/).
+- Download and install the latest (not the LTS) version of [NodeJS](https://nodejs.org/en/download/current/).
+- Run `npm -g i npm` to get yourself the latest version of the npm package manager.
 
-**For native build**, navigate to `project/` and run `make`. If you encounter trouble, manually running `npm install` should resolve most issues. The built files can be found in `build/` in the project root, or in `project/lib/`.
+To check the tools have been set up properly, check that you can run `git version`, `node -v` and `npm -v` from a command terminal.
 
-**For Docker build**, you'll need to first build the builder container. Navigate to `project/` and run: `docker build -t vannot-build .`. In the rare cases that the project dependencies change, you'll have to do this again to rebuild the container, as the npm packages are cached for speed. Then, do actually perform a build, navigate to the project root directory, and run: `docker run --volume=$(pwd)/project/src:/usr/vannot/project/src --volume=$(pwd)/build:/usr/vannot/build vannot-build`. This mounts your source tree and the `build/` directory from the local project root into the image and runs the build against them.
+Execute the following commands in the (new, empty) directory where you want to set up the project:
+
+- Checkout the code: `git clone git@github.com:xyonix/vannot.git .`
+- Install project dependencies: `npm install`
+
+## Building and running
+
+There are multiple ways to work with this repository:
+
+- You can run `npm run build` to build a minified production-ready version of the application.
+- You can run `npm run serve` to start a development environment that will automatically rebuild changes.
+
+Alternatively you can serve the application using docker. An example `Docker-compose.yml` file is given as `Docker-compose.yml.dist`. 
+- Using Docker-compose.yml run `docker-compose up -d` to start a production ready version of the application.
 
 ## use
 

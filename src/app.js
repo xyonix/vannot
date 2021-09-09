@@ -57,3 +57,4 @@ $(function() {
     getData(compose(run, checkpoint, normalizeData));
 });
 
+import "./styles.sass";

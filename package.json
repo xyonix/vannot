@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "browserify": "browserify -e src/app.js -o src/browserify.js",
-    "sass": "node-sass src/styles.sass src/styles.css",
-    "build": "webpack"
+    "build": "webpack",
+    "serve": "webpack serve --config webpack.dev.js"
   },
   "dependencies": {
     "d3": "~4",
@@ -17,15 +16,16 @@
     "tinycolor2": "~1"
   },
   "devDependencies": {
-    "browserify": "~16",
     "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.2.0",
     "install": "^0.13.0",
     "jsdom": "~11",
-    "node-sass": "^4.14.1",
     "npm": "^7.22.0",
     "sass": "^1.39.0",
     "sass-loader": "^12.1.0",
+    "style-loader": "^3.2.1",
     "webpack": "^5.52.0",
-    "webpack-cli": "^4.8.0"
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.1.1"
   }
 }
