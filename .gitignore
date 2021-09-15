@@ -2,4 +2,8 @@
 *.swo
 .DS_Store
 node_modules/
-/lib/
+/dist/*
+!/dist/.gitkeep
+/data/*
+!/data/.gitkeep
+docker-compose.yml

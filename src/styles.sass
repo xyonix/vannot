@@ -1,3 +1,5 @@
+@use 'sass:math'
+
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTANTS
 
@@ -162,7 +164,7 @@ html, body
 
 .vannot-notify
   $width: 350px
-  left: calc(50% - #{$width / 2})
+  left: calc(50% - #{math.div($width, 2)})
   pointer-events: none
   position: absolute
   top: 20px
@@ -607,7 +609,7 @@ html, body
     display: inline-block
     height: 30px
     padding: 0 6px
-    vertical-align: middle // i'm not sure why this works; it shouldn't.
+    vertical-align: middle // i'm not sure why this works it shouldn't.
 
 .vannot-toolbutton
   $icon-size: 18px
@@ -784,11 +786,11 @@ $control-button-size: 60px
     @include reify
     background: #aaa
     border: 1px solid #fff
-    height: $size;
-    position: absolute;
-    top: ($control-button-size - $size) / 2
-    transform: rotate(45deg);
-    width: $size;
+    height: $size
+    position: absolute
+    top: math.div($control-button-size - $size, 2)
+    transform: rotate(45deg)
+    width: $size
 
 // TODO: calculate:
 .vannot-keyback:after
@@ -848,7 +850,8 @@ $timeline-ranger-height: 16px
   z-index: 2
 
   $size: 9px
-  $halfsize: $size / 2
+  $halfsize: math.div($size, 2)
+  
   &:before
     @include reify
     background: $action-alt
@@ -886,7 +889,7 @@ $timeline-ranger-height: 16px
       color: $color
       display: none
       font-size: 10px
-      left: $width / -2
+      left: math.div($width, -2)
       position: absolute
       text-align: center
       width: $width
@@ -1106,7 +1109,7 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
           @include reify
           bottom: $vmargin - $shadow-adjust
           border-right: 1px solid rgba(0, 0, 0, 0.35)
-          left: floor($handle-width / 2)
+          left: floor(math.div($handle-width, 2))
           position: absolute
           top: $vmargin
 
@@ -1227,4 +1230,3 @@ $track-outerheight: $track-height + (2 * $track-vpadding)
     left: $handle-distance
   .vannot-ranger-end:before
     right: $handle-distance
-
